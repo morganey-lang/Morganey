@@ -8,5 +8,5 @@ object Main {
       case _ => expression
     }
 
-  def main(args: Array[String]) = ???
+  def main(args: Array[String]): Unit = ???
 }
