@@ -1,0 +1,8 @@
+language: scala
+jdk: oraclejdk7
+sudo: false
+scala:
+  - 2.11.7
+notifications:
+  email:
+    - reximkut@gmail.com
