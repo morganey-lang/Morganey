@@ -1,3 +1,5 @@
+package me.rexim
+
 import org.scalatest._
 
 class Mixer {
