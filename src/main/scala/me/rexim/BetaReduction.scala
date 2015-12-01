@@ -4,13 +4,15 @@ object BetaReduction {
   def substitute(term: LambdaTerm, substitution: (LambdaVar, LambdaTerm)): LambdaTerm = {
     val (v, r) = substitution
     term match {
-      case LambdaVar(name) if name == v.name => r
-      case LambdaVar(name) if name != v.name => term
+      case x: LambdaVar if x == v => r
+      case x: LambdaVar if x != v => term
       case LambdaApp(leftTerm, rightTerm) =>
-        LambdaApp(substitute(leftTerm, v -> r), substitute(rightTerm, v -> r))
-      case LambdaFunc(LambdaVar(name), body) if name == v.name => term
-      case LambdaFunc(LambdaVar(name), body) if name != v.name =>
-        LambdaFunc(LambdaVar(name), substitute(body, v -> r))
+        LambdaApp(
+          substitute(leftTerm, v -> r),
+          substitute(rightTerm, v -> r))
+      case LambdaFunc(x, body) if x == v => term
+      case LambdaFunc(x, body) if x != v =>
+        LambdaFunc(x, substitute(body, v -> r))
     }
   }
 
