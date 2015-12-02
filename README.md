@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rexim/lambda-calculus.svg)](https://travis-ci.org/rexim/lambda-calculus)
+[![Build Status](https://travis-ci.org/rexim/lambda-calculus.svg?branch=master)](https://travis-ci.org/rexim/lambda-calculus)
 
 # Lambda Calculus Interpreter #
 
