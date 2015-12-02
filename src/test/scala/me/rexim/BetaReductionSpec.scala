@@ -7,6 +7,6 @@ class BetaReductionSpec extends FlatSpec with Matchers with TestTerms {
 
   "An application" should "be beta-reduced" in {
     val inputTerm = LambdaApp(I(x), I(y))
-    BetaReduction.reduction(inputTerm) should be (I(y))
+    inputTerm.reduce() should be (I(y))
   }
 }
