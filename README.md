@@ -11,9 +11,13 @@ It's unusable yet. But we are working on this. Right now you can run
 some unit tests. To do that you need to install [sbt][scala-sbt]
 first. And after that you can simply
 
-    $ sbt test
+    $ sbt clean coverage test
 
 in the source code directory.
+
+And after that you can take a look at the Unit Test coverage
+results. Just open `target/scala-2.11/scoverage-report/index.html`
+with your favorite browser.
 
 Enjoy!
 
