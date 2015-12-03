@@ -3,7 +3,11 @@ package me.rexim
 sealed trait LambdaTerm {
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
   def reduce(): LambdaTerm
-  def hasFreeVar(v: LambdaVar): Boolean
+
+  /**
+    * Tells whether this term contains v as a free variable
+    */
+  def containsFreeVar(v: LambdaVar): Boolean
 }
 
 case class LambdaVar(name: String) extends LambdaTerm {
@@ -14,19 +18,33 @@ case class LambdaVar(name: String) extends LambdaTerm {
 
   override def reduce(): LambdaTerm = this
 
-  override def hasFreeVar(v: LambdaVar): Boolean = v == this
+  override def containsFreeVar(v: LambdaVar): Boolean = v == this
 }
 
 case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm {
   override def substitute(substitution: (LambdaVar, LambdaTerm)): LambdaTerm = {
     val (v, r) = substitution
-    if (parameter == v) this
-    else LambdaFunc(parameter, body.substitute(v -> r))
+    if (parameter == v) {
+      this
+    } else if (r.containsFreeVar(parameter)) {
+      val newParameter =
+        Stream.from(0)
+          .map(number => LambdaVar(s"${parameter.name}##$number"))
+          .dropWhile(x => r.containsFreeVar(x) || body.containsFreeVar(x))
+          .head
+
+      val newBody = body.substitute(parameter -> newParameter)
+
+      LambdaFunc(newParameter, newBody.substitute(v -> r))
+    } else {
+      LambdaFunc(parameter, body.substitute(v -> r))
+    }
   }
 
   override def reduce(): LambdaTerm = this
 
-  override def hasFreeVar(v: LambdaVar): Boolean = parameter != v && body.hasFreeVar(v)
+  override def containsFreeVar(v: LambdaVar): Boolean =
+    parameter != v && body.containsFreeVar(v)
 }
 
 case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends LambdaTerm {
@@ -42,6 +60,6 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
     case other => LambdaApp(other, rightTerm)
   }
 
-  override def hasFreeVar(v: LambdaVar): Boolean =
-    leftTerm.hasFreeVar(v) || rightTerm.hasFreeVar(v)
+  override def containsFreeVar(v: LambdaVar): Boolean =
+    leftTerm.containsFreeVar(v) || rightTerm.containsFreeVar(v)
 }
