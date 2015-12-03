@@ -7,5 +7,8 @@ trait TestTerms {
   val y = LambdaVar("y")
   val z = LambdaVar("z")
 
+  def alphaVar(prefix: String, number: Int) =
+    LambdaVar(s"$prefix##$number")
+
   def I(v : LambdaVar) = LambdaFunc(v, v)
 }
