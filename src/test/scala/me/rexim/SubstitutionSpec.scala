@@ -34,4 +34,15 @@ class SubstitutionSpec extends FlatSpec with Matchers with TestTerms {
 
     inputTerm.substitute(x -> z) should be (expectedTerm)
   }
+
+  "A function's parameter" should "be alpha-renamed when the " +
+    "replacement contains the parameter as the free variable" in {
+    val x0 = alphaVar("x", 0)
+    val x1 = alphaVar("x", 1)
+    val f = LambdaFunc(x, y)
+    val g = LambdaFunc(x, LambdaApp(x0, y))
+
+    f.substitute(y -> x) should be (LambdaFunc(x0, x))
+    g.substitute(y -> x) should be (LambdaFunc(x1, LambdaApp(x0, x)))
+  }
 }
