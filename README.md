@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/rexim/lambda-calculus.svg?branch=master)](https://travis-ci.org/rexim/lambda-calculus)
 
-# Lambda Calculus Interpreter #
+# Lambda Calculus Interpreter # [![Status Umbra](https://img.shields.io/badge/status-umbra-red.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
 
 It's the [Lambda Calculus][wiki-lambda-calculus] Interpreter and it
 interprets lambda terms! \o/
