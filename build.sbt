@@ -1,4 +1,4 @@
-name := "lambda-calculus"
+name := "morganey"
 
 version := "1.0"
 
