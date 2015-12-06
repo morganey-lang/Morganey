@@ -19,6 +19,8 @@ case class LambdaVar(name: String) extends LambdaTerm {
   override def reduce(): LambdaTerm = this
 
   override def containsFreeVar(v: LambdaVar): Boolean = v == this
+
+  override def toString = name
 }
 
 case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm {
@@ -45,6 +47,8 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
 
   override def containsFreeVar(v: LambdaVar): Boolean =
     parameter != v && body.containsFreeVar(v)
+
+  override def toString = s"(λ ${parameter.name} . $body)"
 }
 
 case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends LambdaTerm {
@@ -62,4 +66,6 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
 
   override def containsFreeVar(v: LambdaVar): Boolean =
     leftTerm.containsFreeVar(v) || rightTerm.containsFreeVar(v)
+
+  override def toString = s"($leftTerm $rightTerm)"
 }
