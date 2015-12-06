@@ -13,8 +13,8 @@ object LambdaParser extends RegexParsers {
   }
 
   def func: Parser[LambdaFunc] = {
-    "(" ~ "λ" ~ variable ~ "." ~ term ~ ")" ^^ {
-      case "(" ~ "λ" ~ v ~ "." ~ t ~ ")" => LambdaFunc(v, t)
+    "(" ~ ("λ" | "\\") ~ variable ~ "." ~ term ~ ")" ^^ {
+      case "(" ~ _ ~ v ~ "." ~ t ~ ")" => LambdaFunc(v, t)
     }
   }
 
