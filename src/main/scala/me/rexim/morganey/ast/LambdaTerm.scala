@@ -1,4 +1,4 @@
-package me.rexim.morganey
+package me.rexim.morganey.ast
 
 sealed trait LambdaTerm {
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
