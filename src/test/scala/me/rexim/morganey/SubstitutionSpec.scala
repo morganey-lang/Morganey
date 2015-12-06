@@ -1,6 +1,6 @@
-package me.rexim
+package me.rexim.morganey
 
-import me.rexim.helpers.TestTerms
+import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._
 
 class SubstitutionSpec extends FlatSpec with Matchers with TestTerms {

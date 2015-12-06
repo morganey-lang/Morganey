@@ -1,6 +1,6 @@
-package me.rexim.helpers
+package me.rexim.morganey.helpers
 
-import me.rexim.{LambdaFunc, LambdaVar}
+import me.rexim.morganey.{LambdaFunc, LambdaVar}
 
 trait TestTerms {
   val x = LambdaVar("x")
