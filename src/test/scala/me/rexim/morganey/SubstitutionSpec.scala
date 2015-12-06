@@ -1,5 +1,6 @@
 package me.rexim.morganey
 
+import me.rexim.morganey.ast.{LambdaApp, LambdaFunc}
 import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._
 
