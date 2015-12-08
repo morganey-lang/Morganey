@@ -8,6 +8,12 @@ sealed trait LambdaTerm {
     * Tells whether this term contains v as a free variable
     */
   def containsFreeVar(v: LambdaVar): Boolean
+
+  def addContext(context: Map[LambdaVar, LambdaTerm]): LambdaTerm =
+    context.foldLeft(this) {
+      case (acc, (variable, value)) =>
+        LambdaApp(LambdaFunc(variable, acc), value)
+    }
 }
 
 case class LambdaVar(name: String) extends LambdaTerm {

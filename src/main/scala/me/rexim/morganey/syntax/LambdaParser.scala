@@ -7,7 +7,7 @@ import scala.util.parsing.combinator._
 object LambdaParser extends RegexParsers {
 
   def variable: Parser[LambdaVar] = {
-    regex("[a-z]+".r) ^^ {
+    regex("[a-zA-Z]+".r) ^^ {
       name => LambdaVar(name)
     }
   }
