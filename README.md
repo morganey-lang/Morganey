@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rexim/morganey.svg?branch=master)](https://travis-ci.org/rexim/morganey)
+[![Build Status](https://travis-ci.org/rexim/Morganey.svg?branch=master)](https://travis-ci.org/rexim/Morganey)
 
 # Morganey [![Status Umbra](https://img.shields.io/badge/status-umbra-red.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
 
