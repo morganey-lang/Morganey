@@ -18,7 +18,7 @@ object MainRepl {
       val termParseResult = LambdaParser.parse(LambdaParser.term, line)
 
       if (termParseResult.successful) {
-        con.println(termParseResult.get.addContext(globalVars).callByName().toString)
+        con.println(termParseResult.get.addContext(globalVars).normalOrder().toString)
       } else {
         con.println(termParseResult.toString)
       }

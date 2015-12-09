@@ -3,6 +3,7 @@ package me.rexim.morganey.ast
 sealed trait LambdaTerm {
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
   def callByName(): LambdaTerm
+  def normalOrder(): LambdaTerm
 
   /**
     * Tells whether this term contains v as a free variable
@@ -27,6 +28,8 @@ case class LambdaVar(name: String) extends LambdaTerm {
   override def containsFreeVar(v: LambdaVar): Boolean = v == this
 
   override def toString = name
+
+  override def normalOrder(): LambdaTerm = this
 }
 
 case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm {
@@ -54,6 +57,8 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
     parameter != v && body.containsFreeVar(v)
 
   override def toString = s"(λ ${parameter.name} . $body)"
+
+  override def normalOrder(): LambdaTerm = LambdaFunc(parameter, body.normalOrder())
 }
 
 case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends LambdaTerm {
@@ -73,4 +78,9 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
     leftTerm.containsFreeVar(v) || rightTerm.containsFreeVar(v)
 
   override def toString = s"($leftTerm $rightTerm)"
+
+  override def normalOrder(): LambdaTerm = leftTerm.callByName() match {
+    case LambdaFunc(x, t) => t.substitute(x -> rightTerm).normalOrder()
+    case other => LambdaApp(other.normalOrder(), rightTerm.normalOrder())
+  }
 }
