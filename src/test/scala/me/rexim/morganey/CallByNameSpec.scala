@@ -17,4 +17,9 @@ class CallByNameSpec extends FlatSpec with Matchers with TestTerms {
     val inputTerm = LambdaApp(x, I(y))
     inputTerm.callByName() should be (inputTerm)
   }
+
+  "A sequence of I's" should "always be reduced to the argument" in {
+    val input = LambdaApp(I(x), LambdaApp(I(x), LambdaApp(I(x), y)))
+    input.callByName() should be (y)
+  }
 }

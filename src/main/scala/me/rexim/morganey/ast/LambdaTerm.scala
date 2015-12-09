@@ -65,7 +65,7 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
   }
 
   override def callByName(): LambdaTerm = leftTerm.callByName() match {
-    case LambdaFunc(x, t) => t.substitute(x -> rightTerm)
+    case LambdaFunc(x, t) => t.substitute(x -> rightTerm).callByName()
     case other => LambdaApp(other, rightTerm)
   }
 
