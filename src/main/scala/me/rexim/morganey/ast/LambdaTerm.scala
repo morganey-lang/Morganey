@@ -2,7 +2,7 @@ package me.rexim.morganey.ast
 
 sealed trait LambdaTerm {
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
-  def reduce(): LambdaTerm
+  def callByName(): LambdaTerm
 
   /**
     * Tells whether this term contains v as a free variable
@@ -22,7 +22,7 @@ case class LambdaVar(name: String) extends LambdaTerm {
     if (name == v.name) r else this
   }
 
-  override def reduce(): LambdaTerm = this
+  override def callByName(): LambdaTerm = this
 
   override def containsFreeVar(v: LambdaVar): Boolean = v == this
 
@@ -42,14 +42,13 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
           .head
 
       val newBody = body.substitute(parameter -> newParameter)
-
       LambdaFunc(newParameter, newBody.substitute(v -> r))
     } else {
       LambdaFunc(parameter, body.substitute(v -> r))
     }
   }
 
-  override def reduce(): LambdaTerm = this
+  override def callByName(): LambdaTerm = this
 
   override def containsFreeVar(v: LambdaVar): Boolean =
     parameter != v && body.containsFreeVar(v)
@@ -65,7 +64,7 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
       rightTerm.substitute(v -> r))
   }
 
-  override def reduce(): LambdaTerm = leftTerm.reduce() match {
+  override def callByName(): LambdaTerm = leftTerm.callByName() match {
     case LambdaFunc(x, t) => t.substitute(x -> rightTerm)
     case other => LambdaApp(other, rightTerm)
   }
