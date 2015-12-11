@@ -51,9 +51,21 @@ object MainRepl {
     lvar("omega") -> lfunc("x", lapp(lvar("x"), lvar("x"))),
 
     // Ω := ω ω
-    lvar("Omega") -> lapp(lvar("omega"), lvar("omega"))
+    lvar("Omega") -> lapp(lvar("omega"), lvar("omega")),
 
     // Y := λg.(λx.g (x x)) (λx.g (x x))
+    lvar("Y") -> lfunc("g",
+      lapp(
+        lfunc("x", lapp(
+          lvar("g"),
+          lapp(lvar("x"), lvar("x"))
+        )),
+        lfunc("x", lapp(
+          lvar("g"),
+          lapp(lvar("x"), lvar("x"))
+        ))
+      )
+    )
   )
 
   def main(args: Array[String]) = {
