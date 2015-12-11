@@ -5,8 +5,25 @@ import me.rexim.morganey.ast.{LambdaFunc, LambdaVar}
 import me.rexim.morganey.syntax.LambdaParser
 
 object MainRepl {
-  val globalVars = Map(
-    LambdaVar("I") -> LambdaFunc(LambdaVar("x"), LambdaVar("x"))
+
+  val globalContext = Map(
+    // I := λx.x
+    LambdaVar("I") -> LambdaFunc(LambdaVar("x"),
+      LambdaVar("x")
+    ),
+
+    // K := λx.λy.x
+    LambdaVar("K") -> LambdaFunc(LambdaVar("x"),
+      LambdaFunc(LambdaVar("y"),
+        LambdaVar("x")
+      )
+    )
+
+    // S := λx.λy.λz.x z (y z)
+    // B := λx.λy.λz.x (y z)
+    // C := λx.λy.λz.x z y
+    // W := λx.λy.x y y
+    // U := λx.λy.y (x x y)
   )
 
   def main(args: Array[String]) = {
@@ -18,7 +35,7 @@ object MainRepl {
       val termParseResult = LambdaParser.parse(LambdaParser.term, line)
 
       if (termParseResult.successful) {
-        con.println(termParseResult.get.addContext(globalVars).normalOrder().toString)
+        con.println(termParseResult.get.addContext(globalContext).normalOrder().toString)
       } else {
         con.println(termParseResult.toString)
       }
