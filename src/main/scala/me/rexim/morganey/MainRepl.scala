@@ -1,7 +1,6 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.ast.LambdaApp
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.syntax.LambdaParser
 
@@ -16,17 +15,15 @@ object MainRepl {
 
     // S := λx.λy.λz.x z (y z)
     lvar("S") -> lnested(List("x", "y", "z"),
-      LambdaApp(
-        LambdaApp(lvar("x"), lvar("z")),
-        LambdaApp(lvar("y"), lvar("z"))
+      lapp(
+        lapp(lvar("x"), lvar("z")),
+        lapp(lvar("y"), lvar("z"))
       )
     ),
 
     // B := λx.λy.λz.x (y z)
     lvar("B") -> lnested(List("x", "y", "z"),
-      LambdaApp(lvar("x"),
-        LambdaApp(lvar("y"),
-          lvar("z")))
+      lapp(lvar("x"), lapp(lvar("y"), lvar("z")))
     )
 
     // C := λx.λy.λz.x z y
