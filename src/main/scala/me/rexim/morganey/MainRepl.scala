@@ -2,6 +2,7 @@ package me.rexim.morganey
 
 import jline.console.ConsoleReader
 import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar}
+import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.syntax.LambdaParser
 
 object MainRepl {
@@ -13,11 +14,7 @@ object MainRepl {
     ),
 
     // K := λx.λy.x
-    LambdaVar("K") -> LambdaFunc(LambdaVar("x"),
-      LambdaFunc(LambdaVar("y"),
-        LambdaVar("x")
-      )
-    ),
+    LambdaVar("K") -> func(List("x", "y"), LambdaVar("x")),
 
     // S := λx.λy.λz.x z (y z)
     LambdaVar("S") -> LambdaFunc(LambdaVar("x"),
