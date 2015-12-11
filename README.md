@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/rexim/Morganey.svg?branch=master)](https://travis-ci.org/rexim/Morganey)
 
-# Morganey [![Status Umbra](https://img.shields.io/badge/status-umbra-red.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
+# Morganey [![Status Ventis](https://img.shields.io/badge/status-ventis-yellow.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
 
 It's the [Lambda Calculus][wiki-lambda-calculus] Interpreter and it
 interprets lambda terms! \o/
