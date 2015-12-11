@@ -12,12 +12,11 @@ Before doing anything useful with Morganey you need to install
 
 ### REPL ###
 
-To run the REPL just enter
+To run the REPL just enter the following in the source code directory
 
     $ sbt run
 
-in the source code directory and start typing lambda terms there. The
-syntax of the lambda terms is
+and start typing lambda terms there. The syntax of the lambda terms is
 
     <term> ::= <variable> | <function> | <application>
     <variable> ::= [a-zA-Z]+
@@ -37,11 +36,9 @@ To quit the REPL just `^C` it.
 
 ### Unit Tests ###
 
-To run the Unit Tests enter
+To run the Unit Tests enter the following in the source code directory
 
     $ sbt clean coverage test
-
-in the source code directory.
 
 And after that you can take a look at the Unit Test coverage
 results. Just open `target/scala-2.11/scoverage-report/index.html`
