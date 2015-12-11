@@ -9,4 +9,6 @@ object LambdaTermHelpers {
 
   def lfunc(varName: String, body: => LambdaTerm): LambdaTerm =
     lfunc(List(varName), body)
+
+  def lvar(varName: String): LambdaTerm = LambdaVar(varName)
 }
