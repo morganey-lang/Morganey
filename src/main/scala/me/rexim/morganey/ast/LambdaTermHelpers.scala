@@ -1,14 +1,16 @@
 package me.rexim.morganey.ast
 
 object LambdaTermHelpers {
-  def lfunc(varNames: List[String], body: => LambdaTerm): LambdaTerm = {
+  def lnested(varNames: List[String], body: LambdaTerm): LambdaTerm = {
     varNames.foldRight(body) {
-      case (varName, acc) => LambdaFunc(LambdaVar(varName), acc)
+      case (varName, acc) => lfunc(varName, acc)
     }
   }
 
-  def lfunc(varName: String, body: => LambdaTerm): LambdaTerm =
-    lfunc(List(varName), body)
+  def lfunc(varName: String, body: LambdaTerm): LambdaFunc =
+    LambdaFunc(lvar(varName), body)
 
-  def lvar(varName: String): LambdaTerm = LambdaVar(varName)
+  def lvar(varName: String): LambdaVar = LambdaVar(varName)
+
+  def lapp(left: LambdaTerm, right: LambdaTerm): LambdaApp = LambdaApp(left, right)
 }

@@ -1,32 +1,32 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
+import me.rexim.morganey.ast.LambdaApp
 import me.rexim.morganey.ast.LambdaTermHelpers._
-import me.rexim.morganey.ast.{LambdaApp, LambdaVar}
 import me.rexim.morganey.syntax.LambdaParser
 
 object MainRepl {
 
   val globalContext = Map(
     // I := λx.x
-    LambdaVar("I") -> lfunc("x", LambdaVar("x")),
+    lvar("I") -> lfunc("x", lvar("x")),
 
     // K := λx.λy.x
-    LambdaVar("K") -> lfunc(List("x", "y"), LambdaVar("x")),
+    lvar("K") -> lnested(List("x", "y"), lvar("x")),
 
     // S := λx.λy.λz.x z (y z)
-    LambdaVar("S") -> lfunc(List("x", "y", "z"),
+    lvar("S") -> lnested(List("x", "y", "z"),
       LambdaApp(
-        LambdaApp(LambdaVar("x"), LambdaVar("z")),
-        LambdaApp(LambdaVar("y"), LambdaVar("z"))
+        LambdaApp(lvar("x"), lvar("z")),
+        LambdaApp(lvar("y"), lvar("z"))
       )
     ),
 
     // B := λx.λy.λz.x (y z)
-    LambdaVar("B") -> lfunc(List("x", "y", "z"),
-      LambdaApp(LambdaVar("x"),
-        LambdaApp(LambdaVar("y"),
-          LambdaVar("z")))
+    lvar("B") -> lnested(List("x", "y", "z"),
+      LambdaApp(lvar("x"),
+        LambdaApp(lvar("y"),
+          lvar("z")))
     )
 
     // C := λx.λy.λz.x z y
