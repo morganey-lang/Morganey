@@ -1,17 +1,15 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar}
 import me.rexim.morganey.ast.LambdaTermHelpers._
+import me.rexim.morganey.ast.{LambdaApp, LambdaVar}
 import me.rexim.morganey.syntax.LambdaParser
 
 object MainRepl {
 
   val globalContext = Map(
     // I := λx.x
-    LambdaVar("I") -> LambdaFunc(LambdaVar("x"),
-      LambdaVar("x")
-    ),
+    LambdaVar("I") -> func("x", LambdaVar("x")),
 
     // K := λx.λy.x
     LambdaVar("K") -> func(List("x", "y"), LambdaVar("x")),
