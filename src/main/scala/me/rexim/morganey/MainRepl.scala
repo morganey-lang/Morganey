@@ -25,13 +25,10 @@ object MainRepl {
     ),
 
     // B := λx.λy.λz.x (y z)
-    LambdaVar("B") -> LambdaFunc(LambdaVar("x"),
-      LambdaFunc(LambdaVar("y"),
-        LambdaFunc(LambdaVar("z"),
-          LambdaApp(LambdaVar("x"),
-            LambdaApp(LambdaVar("y"), LambdaVar("z")))
-        )
-      )
+    LambdaVar("B") -> func(List("x", "y", "z"),
+      LambdaApp(LambdaVar("x"),
+        LambdaApp(LambdaVar("y"),
+          LambdaVar("z")))
     )
 
     // C := λx.λy.λz.x z y
