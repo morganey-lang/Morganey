@@ -29,7 +29,7 @@ normal order reduction strategy and output the normal form of the
 entered lambda term.
 
 **WARNING!** If the term is not reduciable to a beta normal form (for
-example `(\x . (x x)) (\x . (x x))`) the REPL will crash with the
+example `((\x . (x x)) (\x . (x x)))`) the REPL will crash with the
 stack overflow exception.
 
 To quit the REPL just `^C` it.
