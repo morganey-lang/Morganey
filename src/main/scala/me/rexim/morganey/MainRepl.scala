@@ -34,9 +34,18 @@ object MainRepl {
     // W := λx.λy.x y y
     lvar("W") -> lnested(List("x", "y"),
       lapp(lapp(lvar("x"), lvar("y")), lvar("y"))
-    )
+    ),
 
     // U := λx.λy.y (x x y)
+    lvar("U") -> lnested(List("x", "y"),
+      lapp(
+        lvar("y"),
+        lapp(
+          lapp(lvar("x"), lvar("x")),
+          lvar("y")
+        )
+      )
+    )
   )
 
   def main(args: Array[String]) = {
