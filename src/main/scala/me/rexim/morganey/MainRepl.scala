@@ -17,14 +17,10 @@ object MainRepl {
     LambdaVar("K") -> func(List("x", "y"), LambdaVar("x")),
 
     // S := λx.λy.λz.x z (y z)
-    LambdaVar("S") -> LambdaFunc(LambdaVar("x"),
-      LambdaFunc(LambdaVar("y"),
-        LambdaFunc(LambdaVar("z"),
-          LambdaApp(
-            LambdaApp(LambdaVar("x"), LambdaVar("z")),
-            LambdaApp(LambdaVar("y"), LambdaVar("z"))
-          )
-        )
+    LambdaVar("S") -> func(List("x", "y", "z"),
+      LambdaApp(
+        LambdaApp(LambdaVar("x"), LambdaVar("z")),
+        LambdaApp(LambdaVar("y"), LambdaVar("z"))
       )
     ),
 
