@@ -7,9 +7,37 @@ interprets lambda terms! \o/
 
 ## Usage ##
 
-It's unusable yet. But we are working on this. Right now you can run
-some unit tests. To do that you need to install [sbt][scala-sbt]
-first. And after that you can simply
+Before doing anything useful with Morganey you need to install
+[sbt][scala-sbt] first.
+
+### REPL ###
+
+To run the REPL just enter
+
+    $ sbt run
+
+in the source code directory and start typing lambda terms there. The
+syntax of the lambda terms is
+
+    <term> ::= <variable> | <function> | <application>
+    <variable> ::= [a-z]+
+    <function> ::= ( <lambda-symbol> . <variable> <term> )
+    <application> ::= ( <term> <term> )
+    <lambda-symbol> ::= λ | \
+
+The REPL will take the entered lambda term, beta-reduce it with the
+normal order reduction strategy and output the normal form of the
+entered lambda term.
+
+**WARNING!** If the term is not reduciable to a beta normal form (for
+example `(\x . (x x)) (\x . (x x))`) the REPL will crash with the
+stack overflow exception.
+
+To quit the REPL just `^C` it.
+
+### Unit Tests ###
+
+To run the Unit Tests enter
 
     $ sbt clean coverage test
 
