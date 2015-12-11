@@ -6,6 +6,8 @@ scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
+mainClass := Some("me.rexim.morganey.MainRepl")
+
 libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
