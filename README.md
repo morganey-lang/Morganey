@@ -20,7 +20,7 @@ in the source code directory and start typing lambda terms there. The
 syntax of the lambda terms is
 
     <term> ::= <variable> | <function> | <application>
-    <variable> ::= [a-z]+
+    <variable> ::= [a-zA-Z]+
     <function> ::= ( <lambda-symbol> . <variable> <term> )
     <application> ::= ( <term> <term> )
     <lambda-symbol> ::= λ | \
