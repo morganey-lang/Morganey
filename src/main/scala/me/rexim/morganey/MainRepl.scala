@@ -51,6 +51,7 @@ object MainRepl {
     lvar("omega") -> lfunc("x", lapp(lvar("x"), lvar("x"))),
 
     // Ω := ω ω
+    lvar("Omega") -> lapp(lvar("omega"), lvar("omega"))
 
     // Y := λg.(λx.g (x x)) (λx.g (x x))
   )
