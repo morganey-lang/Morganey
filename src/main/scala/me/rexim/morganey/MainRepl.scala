@@ -24,9 +24,13 @@ object MainRepl {
     // B := λx.λy.λz.x (y z)
     lvar("B") -> lnested(List("x", "y", "z"),
       lapp(lvar("x"), lapp(lvar("y"), lvar("z")))
-    )
+    ),
 
     // C := λx.λy.λz.x z y
+    lvar("C") -> lnested(List("x", "y", "z"),
+      lapp(lapp(lvar("x"), lvar("z")), lvar("y"))
+    )
+
     // W := λx.λy.x y y
     // U := λx.λy.y (x x y)
   )
