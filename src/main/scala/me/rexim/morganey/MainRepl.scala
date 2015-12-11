@@ -9,13 +9,13 @@ object MainRepl {
 
   val globalContext = Map(
     // I := λx.x
-    LambdaVar("I") -> func("x", LambdaVar("x")),
+    LambdaVar("I") -> lfunc("x", LambdaVar("x")),
 
     // K := λx.λy.x
-    LambdaVar("K") -> func(List("x", "y"), LambdaVar("x")),
+    LambdaVar("K") -> lfunc(List("x", "y"), LambdaVar("x")),
 
     // S := λx.λy.λz.x z (y z)
-    LambdaVar("S") -> func(List("x", "y", "z"),
+    LambdaVar("S") -> lfunc(List("x", "y", "z"),
       LambdaApp(
         LambdaApp(LambdaVar("x"), LambdaVar("z")),
         LambdaApp(LambdaVar("y"), LambdaVar("z"))
@@ -23,7 +23,7 @@ object MainRepl {
     ),
 
     // B := λx.λy.λz.x (y z)
-    LambdaVar("B") -> func(List("x", "y", "z"),
+    LambdaVar("B") -> lfunc(List("x", "y", "z"),
       LambdaApp(LambdaVar("x"),
         LambdaApp(LambdaVar("y"),
           LambdaVar("z")))

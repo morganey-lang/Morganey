@@ -7,7 +7,7 @@ import org.scalatest.{Matchers, FlatSpec}
 class LambdaTermHelpersSpec extends FlatSpec with Matchers {
   "func constructor" should "construct functions with multiple arguments as multiple" +
     "nested functions" in {
-    func(List("x", "y"), LambdaVar("x")) should be (LambdaFunc(LambdaVar("x"),
+    lfunc(List("x", "y"), LambdaVar("x")) should be (LambdaFunc(LambdaVar("x"),
       LambdaFunc(LambdaVar("y"), LambdaVar("x"))
     ))
   }
