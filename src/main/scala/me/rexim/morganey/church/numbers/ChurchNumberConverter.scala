@@ -13,7 +13,7 @@ object ChurchNumberConverter {
     }
   }
 
-  def convert(term: LambdaTerm): Option[Int] = term match {
+  def convertNumber(term: LambdaTerm): Option[Int] = term match {
     case LambdaFunc(LambdaVar(f), LambdaFunc(LambdaVar(x), number)) =>
       unwrapNumber(f, x, number)
     case _ => None
