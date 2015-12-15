@@ -1,0 +1,22 @@
+package me.rexim.morganey
+
+import me.rexim.morganey.church.numbers.ChurchNumberConverter._
+import me.rexim.morganey.ast.LambdaTermHelpers._
+import me.rexim.morganey.helpers.TestTerms
+import org.scalatest._
+
+class ChurchNumberConverterSpec extends FlatSpec with Matchers with TestTerms {
+  "An identity function" should "be converted to None" in {
+    convert(I(x)) should be (None)
+  }
+
+  "A Church number" should "be converted to a regular number" in {
+    val zero = lnested(List("f", "x"), lvar("x"))
+    val one = lnested(List("f", "x"), lapp(lvar("f"), lvar("x")))
+    val two = lnested(List("f", "x"), lapp(lvar("f"), lapp(lvar("f"), lvar("x"))))
+
+    convert(zero) should be (Some(0))
+    convert(one) should be (Some(1))
+    convert(two) should be (Some(2))
+  }
+}
