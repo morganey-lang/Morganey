@@ -13,6 +13,10 @@ object ChurchPairConverter {
       case _ => None
     }
 
-  def convertList(list: LambdaTerm): Option[List[LambdaTerm]] =
-    ???
+  def convertList(list: LambdaTerm): List[LambdaTerm] =
+    convertPair(list) match {
+      case Some((first, second)) => first :: convertList(second)
+      case None => List(list)
+    }
+
 }
