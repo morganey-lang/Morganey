@@ -26,4 +26,9 @@ object ChurchPairConverter {
         case (x, acc) => acc.flatMap(xs => x.map(s => s :: xs))
       }
   }
+
+  def convertString(s: LambdaTerm): Option[String] =
+    convertListOfNumbers(s).map {
+      xs => xs.map(_.toChar).mkString
+    }
 }
