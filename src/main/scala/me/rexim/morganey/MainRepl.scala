@@ -2,6 +2,7 @@ package me.rexim.morganey
 
 import jline.console.ConsoleReader
 import me.rexim.morganey.ast.LambdaTermHelpers._
+import me.rexim.morganey.church.ChurchPairConverter
 import me.rexim.morganey.syntax.LambdaParser
 
 object MainRepl {
@@ -77,7 +78,11 @@ object MainRepl {
       val termParseResult = LambdaParser.parse(LambdaParser.term, line)
 
       if (termParseResult.successful) {
-        con.println(termParseResult.get.addContext(globalContext).normalOrder().toString)
+        val result = termParseResult.get.addContext(globalContext).normalOrder()
+        ChurchPairConverter.convertString(result) match {
+          case Some(text) => con.println("string: " + text)
+          case None => con.println("term: " + result.toString)
+        }
       } else {
         con.println(termParseResult.toString)
       }
