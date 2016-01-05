@@ -7,7 +7,7 @@ import org.scalatest._
 class ContextSpecs extends FlatSpec with Matchers with TestTerms {
   "A context" should "be wrapped over the expression" in {
     val inputExpression = I(x)
-    val context = Map(
+    val context = Seq(
       y -> I(y),
       z -> I(z)
     )
