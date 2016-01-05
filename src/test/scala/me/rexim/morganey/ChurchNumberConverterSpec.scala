@@ -1,6 +1,6 @@
 package me.rexim.morganey
 
-import me.rexim.morganey.church.numbers.ChurchNumberConverter._
+import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._

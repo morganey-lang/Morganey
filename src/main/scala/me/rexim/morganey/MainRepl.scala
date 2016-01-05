@@ -2,7 +2,7 @@ package me.rexim.morganey
 
 import jline.console.ConsoleReader
 import me.rexim.morganey.ast.LambdaTermHelpers._
-import me.rexim.morganey.church.numbers.ChurchPairConverter
+import me.rexim.morganey.church.ChurchPairConverter
 import me.rexim.morganey.syntax.LambdaParser
 
 object MainRepl {

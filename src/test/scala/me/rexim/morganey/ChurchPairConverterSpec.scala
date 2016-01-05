@@ -1,10 +1,11 @@
 package me.rexim.morganey
 
 import me.rexim.morganey.ast.LambdaTermHelpers._
-import me.rexim.morganey.church.numbers.ChurchPairConverter._
+import me.rexim.morganey.church.ChurchNumberHelpers._
+import me.rexim.morganey.church.ChurchPairHelpers._
+import me.rexim.morganey.church.ChurchPairConverter._
 import me.rexim.morganey.helpers.TestTerms
 import me.rexim.morganey.syntax.LambdaParser
-import me.rexim.morganey.ast.LambdaTermHelpers._
 import org.scalatest._
 
 class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
@@ -33,5 +34,21 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
     val expectedList = Some(List(2, 1, 0))
 
     convertListOfNumbers(term) should be (expectedList)
+  }
+
+  "A church list of ASCII codes" should "be converted to a string" in {
+    val one = succ(zero)
+    val three = succ(plus(one, one))
+    val seven = succ(plus(three, three))
+    val nine = mult(three, three)
+    val ten = succ(nine)
+
+    val ninetySeven = plus(mult(nine, ten), seven)
+    val ninetyEight = succ(ninetySeven)
+    val ninetyNine = succ(ninetyEight)
+
+    val abc = pair(ninetySeven, pair(ninetyEight, ninetyNine))
+
+    convertString(abc) should be (Some("abc"))
   }
 }

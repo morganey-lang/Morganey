@@ -4,7 +4,7 @@ import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.syntax.LambdaParser
 
-class ChurchNumberHelpers {
+object ChurchNumberHelpers {
   val zero = lfunc("f", lfunc("x", lvar("x")))
 
   // SUCC = λn.λf.λx.f (n f x)
