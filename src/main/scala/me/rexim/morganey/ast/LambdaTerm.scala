@@ -10,7 +10,7 @@ sealed trait LambdaTerm {
     */
   def containsFreeVar(v: LambdaVar): Boolean
 
-  def addContext(context: Map[LambdaVar, LambdaTerm]): LambdaTerm =
+  def addContext(context: Seq[(LambdaVar, LambdaTerm)]): LambdaTerm =
     context.foldLeft(this) {
       case (acc, (variable, value)) =>
         LambdaApp(LambdaFunc(variable, acc), value)

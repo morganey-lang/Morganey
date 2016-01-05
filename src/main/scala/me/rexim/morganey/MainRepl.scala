@@ -7,7 +7,7 @@ import me.rexim.morganey.syntax.LambdaParser
 
 object MainRepl {
 
-  val globalContext = Map(
+  val globalContext = Seq(
     // I := λx.x
     lvar("I") -> lfunc("x", lvar("x")),
 
