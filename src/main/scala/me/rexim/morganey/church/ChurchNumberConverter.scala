@@ -1,4 +1,4 @@
-package me.rexim.morganey.church.numbers
+package me.rexim.morganey.church
 
 import me.rexim.morganey.ast.{LambdaApp, LambdaVar, LambdaFunc, LambdaTerm}
 
