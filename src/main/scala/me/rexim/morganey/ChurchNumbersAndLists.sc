@@ -1,6 +1,6 @@
 import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.ast.LambdaTermHelpers._
-import me.rexim.morganey.church.numbers.ChurchPairConverter._
+import me.rexim.morganey.church.ChurchPairConverter._
 import me.rexim.morganey.syntax.LambdaParser
 
 def parseTerm(s: String): Option[LambdaTerm] = {
@@ -20,8 +20,8 @@ def pair(first: LambdaTerm, second: LambdaTerm) =
       lapp(lvar("z"), first),
       second))
 
+// SUCC = λn.λf.λx.f (n f x)
 def succ(number: LambdaTerm) = {
-  // SUCC = λn.λf.λx.f (n f x)
   val internalSucc = parseTerm("(λn.(λf.(λx.(f ((n f) x)))))")
   internalSucc.map(lapp(_, number).normalOrder())
 }
