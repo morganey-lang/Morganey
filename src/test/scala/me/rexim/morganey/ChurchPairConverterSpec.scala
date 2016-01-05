@@ -25,7 +25,9 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
   "A church list" should "be converted to some list" in {
     val rawTerm = "(λ z . ((z x) (λ z . ((z x) y))))"
     val term = LambdaParser.parse(LambdaParser.term, rawTerm).get
-    val expectedList = "khooy".map(c => lvar(c.toString))
+    val expectedList = "xxy".map(c => lvar(c.toString)).toList
+
+    convertList(term) should be (expectedList)
   }
 
   "A church list of number" should "be converted to some list of numbers" in {
