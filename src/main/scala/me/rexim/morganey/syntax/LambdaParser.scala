@@ -33,5 +33,7 @@ object LambdaParser extends RegexParsers {
     }
 
   def replCommand: Parser[MorganeyNode] = binding | term
+
+  def script: Parser[List[MorganeyNode]] = rep(replCommand)
 }
 
