@@ -1,13 +1,12 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.ast._
 import me.rexim.morganey.church.ChurchPairConverter
 import me.rexim.morganey.syntax.LambdaParser
 
-import scala.util.{Failure, Try}
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 object Main {
 
@@ -79,9 +78,13 @@ object Main {
   }
 
   def interpretFile(fileName: String) : Try[Unit] = {
-    val sourceCode = Try(Source.fromFile(fileName).mkString)
-    sourceCode
-      .map(LambdaParser.parse(LambdaParser.script, _).get)
+    Try(Source.fromFile(fileName).mkString)
+      .map (LambdaParser.parseAll(LambdaParser.script, _))
+      .flatMap {
+        case parsedCode => parsedCode
+            .map(Success(_))
+            .getOrElse(Failure(new IllegalArgumentException(s"$fileName ${parsedCode.toString}")))
+      }
       .map {
         case nodes => globalContext = interpertMorganeyNodes(nodes, globalContext)
       }
