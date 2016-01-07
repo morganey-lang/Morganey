@@ -10,9 +10,8 @@ import scala.util.{Failure, Success, Try}
 
 object Main {
 
-  var globalContext = List[MorganeyBinding]()
-
   def startRepl() = {
+    var globalContext = List[MorganeyBinding]()
     val con = new ConsoleReader()
     con.setPrompt("> ")
 
@@ -77,7 +76,7 @@ object Main {
     }
   }
 
-  def interpretFile(fileName: String) : Try[Unit] = {
+  def interpretFile(fileName: String, context: List[MorganeyBinding]) : Try[List[MorganeyBinding]] = {
     Try(Source.fromFile(fileName).mkString)
       .map (LambdaParser.parseAll(LambdaParser.script, _))
       .flatMap {
@@ -85,17 +84,18 @@ object Main {
             .map(Success(_))
             .getOrElse(Failure(new IllegalArgumentException(s"$fileName ${parsedCode.toString}")))
       }
-      .map {
-        case nodes => globalContext = interpertMorganeyNodes(nodes, globalContext)
-      }
+      .map (interpertMorganeyNodes(_, context))
+
   }
 
   def main(args: Array[String]) = {
     if (args.isEmpty) {
       startRepl()
     } else {
-      args.toStream.map(interpretFile).dropWhile(_.isSuccess) match {
-        case Failure(e) #:: _ => println(s"[ERROR] ${e.getMessage}")
+      args.toStream.foldLeft[Try[List[MorganeyBinding]]](Success(List())) {
+        case (context, fileName) => context.flatMap(interpretFile(fileName, _))
+      } match {
+        case Failure(e) => println(s"[ERROR] ${e.getMessage}")
         case _ =>
       }
     }
