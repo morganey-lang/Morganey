@@ -1,6 +1,6 @@
 package me.rexim.morganey.ast
 
-sealed trait LambdaTerm {
+sealed trait LambdaTerm extends MorganeyNode {
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
   def callByName(): LambdaTerm
   def normalOrder(): LambdaTerm
@@ -10,9 +10,9 @@ sealed trait LambdaTerm {
     */
   def containsFreeVar(v: LambdaVar): Boolean
 
-  def addContext(context: Seq[(LambdaVar, LambdaTerm)]): LambdaTerm =
-    context.foldLeft(this) {
-      case (acc, (variable, value)) =>
+  def addContext(context: Seq[MorganeyBinding]): LambdaTerm =
+    context.foldRight(this) {
+      case (MorganeyBinding(variable, value), acc) =>
         LambdaApp(LambdaFunc(variable, acc), value)
     }
 }
