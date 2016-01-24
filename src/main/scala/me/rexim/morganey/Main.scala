@@ -28,14 +28,7 @@ object Main {
 
           case term : LambdaTerm => {
             val result = term.addContext(globalContext).normalOrder()
-            ChurchPairConverter.convertListOfNumbers(result) match {
-              case Some(numbers) => if (numbers.forall(x => 32 <= x && x <= 176)) {
-                con.println("string: " + numbers.map(_.toChar).mkString)
-              } else {
-                con.println("numbers: " + numbers.mkString(","))
-              }
-              case None => con.println("term: " + result.toString)
-            }
+            con.println(ReplHelper.smartPrintTerm(result))
           }
         }
       } else {
@@ -51,21 +44,8 @@ object Main {
 
       case term : LambdaTerm => {
         val result = term.addContext(context).normalOrder()
-
-        ChurchPairConverter.convertListOfNumbers(result) match {
-          case Some(numbers) => if (numbers.forall(x => 32 <= x && x <= 176)) {
-            println(numbers.map(_.toChar).mkString)
-            context
-          } else {
-            println(numbers.mkString(","))
-            context
-          }
-
-          case None => {
-            println(result.toString)
-            context
-          }
-        }
+        println(ReplHelper.smartPrintTerm(result))
+        context
       }
     }
   }
