@@ -30,11 +30,10 @@ object MorganeyInterpreter {
     Try(Source.fromFile(fileName).mkString)
       .map (LambdaParser.parseAll(LambdaParser.script, _))
       .flatMap {
-      case parsedCode => parsedCode
-        .map(Success(_))
-        .getOrElse(Failure(new IllegalArgumentException(s"$fileName ${parsedCode.toString}")))
-    }
+        case parsedCode => parsedCode
+          .map(Success(_))
+          .getOrElse(Failure(new IllegalArgumentException(s"$fileName ${parsedCode.toString}")))
+      }
       .map (interpertMorganeyNodes(_, context))
-
   }
 }
