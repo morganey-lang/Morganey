@@ -40,7 +40,16 @@ object Main {
       startRepl()
     } else {
       args.toStream.foldLeft[Try[List[MorganeyBinding]]](Success(List())) {
-        case (context, fileName) => context.flatMap(MorganeyInterpreter.interpretFile(fileName, _))
+        case (contextTry, fileName) => contextTry.flatMap {
+          context => {
+            MorganeyInterpreter.interpretFile(fileName, context).flatMap {
+              result => {
+                result.foreach(x => println(ReplHelper.smartPrintTerm(x._1)))
+                Success(result.last._2)
+              }
+            }
+          }
+        }
       } match {
         case Failure(e) => println(s"[ERROR] ${e.getMessage}")
         case _ =>

@@ -7,26 +7,35 @@ import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 object MorganeyInterpreter {
-  def interpretOneMorganeyNode(node: MorganeyNode, context: List[MorganeyBinding]): List[MorganeyBinding] = {
+  type Context = List[MorganeyBinding]
+
+  def interpretOneMorganeyNode(node: MorganeyNode, context: Context): (LambdaTerm, Context) = {
     node match {
-      case MorganeyBinding(variable, term) =>
-        MorganeyBinding(variable, term.addContext(context).normalOrder()) :: context
+      case MorganeyBinding(variable, term) => {
+        val result = term.addContext(context).normalOrder()
+        val binding = MorganeyBinding(variable, result)
+        (result, binding :: context)
+      }
 
       case term : LambdaTerm => {
         val result = term.addContext(context).normalOrder()
-        println(ReplHelper.smartPrintTerm(result))
-        context
+        (result, context)
       }
     }
   }
 
-  def interpertMorganeyNodes(nodes: List[MorganeyNode], context: List[MorganeyBinding]): List[MorganeyBinding] = {
-    nodes.foldLeft(context) {
-      case (acc, node) => interpretOneMorganeyNode(node, acc)
-    }
+  def interpertMorganeyNodes(nodes: Stream[MorganeyNode], context: Context): Stream[(LambdaTerm, Context)] = {
+    def result : Stream[(LambdaTerm, Context)] = Stream.cons(
+      interpretOneMorganeyNode(nodes.head, context),
+      nodes.tail.zip(result.map(_._2)).map {
+        case (node, context1) => interpretOneMorganeyNode(node, context1)
+      }
+    )
+
+    result
   }
 
-  def interpretFile(fileName: String, context: List[MorganeyBinding]) : Try[List[MorganeyBinding]] = {
+  def interpretFile(fileName: String, context: Context) : Try[Stream[(LambdaTerm, Context)]] = {
     Try(Source.fromFile(fileName).mkString)
       .map (LambdaParser.parseAll(LambdaParser.script, _))
       .flatMap {
@@ -34,6 +43,6 @@ object MorganeyInterpreter {
           .map(Success(_))
           .getOrElse(Failure(new IllegalArgumentException(s"$fileName ${parsedCode.toString}")))
       }
-      .map (interpertMorganeyNodes(_, context))
+      .map (code => interpertMorganeyNodes(code.toStream, context))
   }
 }
