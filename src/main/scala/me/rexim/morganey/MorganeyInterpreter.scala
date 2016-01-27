@@ -9,7 +9,7 @@ import scala.util.{Failure, Success, Try}
 object MorganeyInterpreter {
   type Context = List[MorganeyBinding]
 
-  def interpretOneMorganeyNode(node: MorganeyNode, context: Context): (LambdaTerm, Context) = {
+  def interpretOneNode(node: MorganeyNode, context: Context): (LambdaTerm, Context) = {
     node match {
       case MorganeyBinding(variable, term) => {
         val result = term.addContext(context).normalOrder()
@@ -24,18 +24,21 @@ object MorganeyInterpreter {
     }
   }
 
-  def interpertMorganeyNodes(nodes: Stream[MorganeyNode], context: Context): Stream[(LambdaTerm, Context)] = {
-    def result : Stream[(LambdaTerm, Context)] = Stream.cons(
-      interpretOneMorganeyNode(nodes.head, context),
-      nodes.tail.zip(result.map(_._2)).map {
-        case (node, context1) => interpretOneMorganeyNode(node, context1)
-      }
-    )
+  def interpertNodes(nodes: Stream[MorganeyNode], initialContext: Context): Stream[(LambdaTerm, Context)] =
+    nodes match {
+      case firstNode #:: restNodes => {
+        lazy val result : Stream[(LambdaTerm, Context)] =
+          interpretOneNode(firstNode, initialContext) #:: restNodes.zip(result).map {
+            case (node, (_, context)) => interpretOneNode(node, context)
+          }
 
-    result
+        result
+      }
+
+      case _ => Stream.empty
   }
 
-  def interpretFile(fileName: String, context: Context) : Try[Stream[(LambdaTerm, Context)]] = {
+  def interpretFile(fileName: String, initialContext: Context) : Try[Stream[(LambdaTerm, Context)]] = {
     Try(Source.fromFile(fileName).mkString)
       .map (LambdaParser.parseAll(LambdaParser.script, _))
       .flatMap {
@@ -43,6 +46,6 @@ object MorganeyInterpreter {
           .map(Success(_))
           .getOrElse(Failure(new IllegalArgumentException(s"$fileName ${parsedCode.toString}")))
       }
-      .map (code => interpertMorganeyNodes(code.toStream, context))
+      .map (code => interpertNodes(code.toStream, initialContext))
   }
 }
