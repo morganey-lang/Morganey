@@ -8,8 +8,9 @@ import scala.util.{Failure, Success, Try}
 
 object MorganeyInterpreter {
   type Context = List[MorganeyBinding]
+  type EvalResult = (LambdaTerm, Context)
 
-  def interpretOneNode(node: MorganeyNode, context: Context): (LambdaTerm, Context) = {
+  def interpretOneNode(node: MorganeyNode, context: Context): EvalResult = {
     node match {
       case MorganeyBinding(variable, term) => {
         val result = term.addContext(context).normalOrder()
@@ -24,10 +25,10 @@ object MorganeyInterpreter {
     }
   }
 
-  def interpertNodes(nodes: Stream[MorganeyNode], initialContext: Context): Stream[(LambdaTerm, Context)] =
+  def interpertNodes(nodes: Stream[MorganeyNode], initialContext: Context): Stream[EvalResult] =
     nodes match {
       case firstNode #:: restNodes => {
-        lazy val result : Stream[(LambdaTerm, Context)] =
+        lazy val result : Stream[EvalResult] =
           interpretOneNode(firstNode, initialContext) #:: restNodes.zip(result).map {
             case (node, (_, context)) => interpretOneNode(node, context)
           }
@@ -38,7 +39,7 @@ object MorganeyInterpreter {
       case _ => Stream.empty
   }
 
-  def interpretFile(fileName: String, initialContext: Context) : Try[Stream[(LambdaTerm, Context)]] = {
+  def interpretFile(fileName: String, initialContext: Context) : Try[Stream[EvalResult]] = {
     Try(Source.fromFile(fileName).mkString)
       .map (LambdaParser.parseAll(LambdaParser.script, _))
       .flatMap {
