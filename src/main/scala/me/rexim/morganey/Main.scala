@@ -39,14 +39,14 @@ object Main {
     if (args.isEmpty) {
       startRepl()
     } else {
-      args.toStream.foldLeft[Try[List[MorganeyBinding]]](Success(List())) {
-        case (contextTry, fileName) => contextTry.flatMap {
-          context => {
-            MorganeyInterpreter.interpretFile(fileName, context).flatMap {
-              result => {
-                result.foreach(x => println(ReplHelper.smartPrintTerm(x._1)))
-                Success(result.last._2)
-              }
+      args.toStream.foldLeft[Try[MorganeyEval]](Success(MorganeyEval())) { (evalTry, fileName) =>
+        evalTry.flatMap { eval =>
+          MorganeyInterpreter.readNodes(fileName).map { nodes =>
+            nodes.foldLeft(eval) {
+              case (evalAcc, node) =>
+                val evalNext = evalAcc.flatMap(MorganeyInterpreter.evalOneNode(node))
+                evalNext.result.foreach(term => println(ReplHelper.smartPrintTerm(term)))
+                evalNext
             }
           }
         }
