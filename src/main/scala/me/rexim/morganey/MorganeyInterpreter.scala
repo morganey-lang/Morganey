@@ -1,7 +1,9 @@
 package me.rexim.morganey
 
+import java.io.FileReader
+
 import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyNode}
-import me.rexim.morganey.syntax.LambdaParser
+import me.rexim.morganey.syntax.{LambdaParserException, LambdaParser}
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -25,7 +27,7 @@ object MorganeyInterpreter {
     }
   }
 
-  def interpertNodes(nodes: Stream[MorganeyNode], initialContext: Context): Stream[EvalResult] =
+  def interpretNodes(nodes: Stream[MorganeyNode], initialContext: Context): Stream[EvalResult] =
     nodes match {
       case firstNode #:: restNodes => {
         lazy val result : Stream[EvalResult] =
@@ -39,14 +41,25 @@ object MorganeyInterpreter {
       case _ => Stream.empty
   }
 
-  def interpretFile(fileName: String, initialContext: Context) : Try[Stream[EvalResult]] = {
-    Try(Source.fromFile(fileName).mkString)
-      .map (LambdaParser.parseAll(LambdaParser.script, _))
+  def interpretReader(reader: java.io.Reader, initialContext: Context): Try[Stream[EvalResult]] = {
+    Try(LambdaParser.parseAll(LambdaParser.script, reader))
       .flatMap {
         case parsedCode => parsedCode
           .map(Success(_))
-          .getOrElse(Failure(new IllegalArgumentException(s"$fileName ${parsedCode.toString}")))
+          .getOrElse(Failure(new LambdaParserException(s"${parsedCode.toString}")))
       }
-      .map (code => interpertNodes(code.toStream, initialContext))
+      .map(code => interpretNodes(code.toStream, initialContext))
   }
+
+  def interpretFile(fileName: String, initialContext: Context) : Try[Stream[EvalResult]] = {
+    Try(new FileReader(fileName))
+      .flatMap(reader => interpretReader(reader, initialContext))
+      .recoverWith {
+        case parserException: LambdaParserException => {
+          val message = s"$fileName: ${parserException.getMessage}"
+          Failure(new LambdaParserException(message, parserException))
+        }
+        case e: Throwable => Failure(e)
+      }
+    }
 }
