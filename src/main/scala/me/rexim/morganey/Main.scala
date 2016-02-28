@@ -18,14 +18,16 @@ object Main {
       val termParseResult = LambdaParser.parse(LambdaParser.replCommand, line)
 
       if (termParseResult.successful) {
+        import reduction.NormalOrder._
+
         termParseResult.get match {
           case MorganeyBinding(variable, term) => {
-            globalContext = MorganeyBinding(variable, term.addContext(globalContext).normalOrder()) :: globalContext
+            globalContext = MorganeyBinding(variable, term.addContext(globalContext).norReduce()) :: globalContext
             con.println("Bound " + variable.name)
           }
 
           case term : LambdaTerm => {
-            val result = term.addContext(globalContext).normalOrder()
+            val result = term.addContext(globalContext).norReduce()
             con.println(ReplHelper.smartPrintTerm(result))
           }
         }
