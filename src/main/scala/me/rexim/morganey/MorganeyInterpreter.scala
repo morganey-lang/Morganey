@@ -4,6 +4,7 @@ import java.io.FileReader
 
 import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyNode}
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
+import me.rexim.morganey.reduction.NormalOrder._
 
 import scala.util.{Failure, Success, Try}
 
@@ -13,12 +14,12 @@ object MorganeyInterpreter {
   def evalOneNode(node: MorganeyNode)(context: Context): MorganeyEval =
     node match {
       case MorganeyBinding(variable, term) =>
-        val result = term.addContext(context).normalOrder()
+        val result = term.addContext(context).norReduce()
         val binding = MorganeyBinding(variable, result)
         MorganeyEval(binding :: context, Some(result))
 
       case term : LambdaTerm =>
-        val result = term.addContext(context).normalOrder()
+        val result = term.addContext(context).norReduce()
         MorganeyEval(context, Some(result))
     }
 

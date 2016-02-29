@@ -15,22 +15,15 @@ object Main {
 
     while (true) {
       val line = con.readLine()
-      val termParseResult = LambdaParser.parse(LambdaParser.replCommand, line)
+      val nodeParseResult = LambdaParser.parse(LambdaParser.replCommand, line)
 
-      if (termParseResult.successful) {
-        termParseResult.get match {
-          case MorganeyBinding(variable, term) => {
-            globalContext = MorganeyBinding(variable, term.addContext(globalContext).normalOrder()) :: globalContext
-            con.println("Bound " + variable.name)
-          }
-
-          case term : LambdaTerm => {
-            val result = term.addContext(globalContext).normalOrder()
-            con.println(ReplHelper.smartPrintTerm(result))
-          }
-        }
+      if (nodeParseResult.successful) {
+        val node = nodeParseResult.get
+        val evalResult = MorganeyInterpreter.evalOneNode(node)(globalContext)
+        globalContext = evalResult.context
+        evalResult.result.foreach(r => con.println(ReplHelper.smartPrintTerm(r)))
       } else {
-        con.println(termParseResult.toString)
+        con.println(nodeParseResult.toString)
       }
     }
   }

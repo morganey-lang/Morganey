@@ -3,6 +3,7 @@ package me.rexim.morganey.church
 import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.syntax.LambdaParser
+import me.rexim.morganey.reduction.NormalOrder._
 
 object ChurchNumberHelpers {
   val zero = lfunc("f", lfunc("x", lvar("x")))
@@ -12,7 +13,7 @@ object ChurchNumberHelpers {
     val sourceCode = "(λn.(λf.(λx.(f ((n f) x)))))"
     LambdaParser
       .parse(LambdaParser.term, sourceCode)
-      .map(lapp(_, number).normalOrder())
+      .map(lapp(_, number).norReduce())
       .get
   }
 
@@ -21,7 +22,7 @@ object ChurchNumberHelpers {
     val sourceCode = "(λm.(λn.(λf.(λx.((m f) ((n f) x))))))"
     LambdaParser
       .parse(LambdaParser.term, sourceCode)
-      .map(f => lapp(lapp(f, x), y).normalOrder())
+      .map(f => lapp(lapp(f, x), y).norReduce())
       .get
   }
 
@@ -30,7 +31,7 @@ object ChurchNumberHelpers {
     val sourceCode = "(λm.(λn.(λf.(m (n f)))))"
     LambdaParser
       .parse(LambdaParser.term, sourceCode)
-      .map(f => lapp(lapp(f, x), y).normalOrder())
+      .map(f => lapp(lapp(f, x), y).norReduce())
       .get
   }
 }

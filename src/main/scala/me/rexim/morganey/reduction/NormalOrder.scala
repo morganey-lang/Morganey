@@ -6,6 +6,15 @@ object NormalOrder {
   import CallByName._
 
   implicit class NormalOrderStrategy(val term: LambdaTerm) {
+
+    def norReduce(): LambdaTerm = {
+      var result = term
+      while (!result.norIsFinished()) {
+        result = result.norStepReduce()
+      }
+      result
+    }
+
     def norStepReduce(): LambdaTerm = term match {
       case LambdaApp(LambdaFunc(x, t), r) => t.substitute(x -> r)
       case LambdaApp(l, r) if !l.cbnIsFinished() => LambdaApp(l.cbnStepReduce(), r)
