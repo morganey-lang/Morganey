@@ -6,17 +6,23 @@ import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._
 
 class ChurchNumberConverterSpec extends FlatSpec with Matchers with TestTerms {
+  val zero = lnested(List("f", "x"), lvar("x"))
+  val one = lnested(List("f", "x"), lapp(lvar("f"), lvar("x")))
+  val two = lnested(List("f", "x"), lapp(lvar("f"), lapp(lvar("f"), lvar("x"))))
+
   "An identity function" should "be converted to None" in {
-    convertNumber(I(x)) should be (None)
+    decodeNumber(I(x)) should be (None)
   }
 
-  "A Church number" should "be converted to a regular number" in {
-    val zero = lnested(List("f", "x"), lvar("x"))
-    val one = lnested(List("f", "x"), lapp(lvar("f"), lvar("x")))
-    val two = lnested(List("f", "x"), lapp(lvar("f"), lapp(lvar("f"), lvar("x"))))
+  "A Church number" should "be decoded to a regular number" in {
+    decodeNumber(zero) should be (Some(0))
+    decodeNumber(one) should be (Some(1))
+    decodeNumber(two) should be (Some(2))
+  }
 
-    convertNumber(zero) should be (Some(0))
-    convertNumber(one) should be (Some(1))
-    convertNumber(two) should be (Some(2))
+  "A a regular number" should "be encoded to a Church number" in {
+    encodeNumber(0) should be (zero)
+    encodeNumber(1) should be (one)
+    encodeNumber(2) should be (two)
   }
 }
