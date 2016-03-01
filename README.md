@@ -16,9 +16,12 @@ To run the REPL just enter the following in the source code directory
 
     $ sbt run
 
-and start typing lambda terms there. The syntax of the lambda terms is
+and start typing REPL commands there. The syntax of the REPL commands is
 
+    <repl-command> := <term> | <binding>
     <term> ::= <variable> | <function> | <application>
+    <binding> ::= <variable> := <term>
+
     <variable> ::= [a-zA-Z]+
     <function> ::= ( <lambda-symbol> . <variable> <term> )
     <application> ::= ( <term> <term> )
