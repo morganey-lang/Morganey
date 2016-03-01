@@ -19,10 +19,11 @@ To run the REPL just enter the following in the source code directory
 and start typing REPL commands there. The syntax of the REPL commands is
 
     <repl-command> := <term> | <binding>
-    <term> ::= <variable> | <function> | <application>
+    <term> ::= <numeric-literal> | <variable> | <function> | <application>
     <binding> ::= <variable> := <term>
 
-    <variable> ::= [a-zA-Z]+
+    <numeric-literal> ::= [0-9]+
+    <variable> ::= [a-zA-Z][a-zA-Z0-9]*
     <function> ::= ( <lambda-symbol> . <variable> <term> )
     <application> ::= ( <term> <term> )
     <lambda-symbol> ::= λ | \

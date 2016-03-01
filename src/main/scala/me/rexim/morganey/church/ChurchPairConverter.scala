@@ -21,7 +21,7 @@ object ChurchPairConverter {
 
   def convertListOfNumbers(list: LambdaTerm): Option[List[Int]] = {
     convertList(list)
-      .map(ChurchNumberConverter.convertNumber)
+      .map(ChurchNumberConverter.decodeNumber)
       .foldRight[Option[List[Int]]] (Some(List[Int]())) {
         case (x, acc) => acc.flatMap(xs => x.map(s => s :: xs))
       }
