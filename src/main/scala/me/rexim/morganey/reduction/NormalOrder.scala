@@ -1,6 +1,7 @@
 package me.rexim.morganey.reduction
 
 import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaTerm}
+import scala.concurrent._
 
 object NormalOrder {
   import CallByName._
@@ -13,6 +14,20 @@ object NormalOrder {
         result = result.norStepReduce()
       }
       result
+    }
+
+    def norReduceCancellable(): (() => LambdaTerm, () => Unit) = {
+      var cancelled = false
+      val computation = { () =>
+        var result = term
+        while (!cancelled && !result.norIsFinished()) {
+          result = result.norStepReduce()
+        }
+        result
+      }
+      val cancel = () => cancelled = true
+
+      (computation, cancel)
     }
 
     def norStepReduce(): LambdaTerm = term match {
