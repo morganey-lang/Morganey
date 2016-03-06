@@ -1,7 +1,10 @@
 package me.rexim.morganey.reduction
 
+import java.util.concurrent.FutureTask
+
 import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaTerm}
 import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object NormalOrder {
   import CallByName._
@@ -16,13 +19,19 @@ object NormalOrder {
       result
     }
 
-    def norReduceCancellable(): (() => LambdaTerm, () => Unit) = {
-      var cancelled = false
-      val computation = { () =>
+    def norReduceCancellable(): (Future[LambdaTerm], () => Unit) = {
+      @volatile var cancelled = false
+      val computation = Future {
         var result = term
+
         while (!cancelled && !result.norIsFinished()) {
           result = result.norStepReduce()
         }
+
+        if (cancelled) {
+          throw new ComputationCancelledException()
+        }
+
         result
       }
       val cancel = () => cancelled = true
