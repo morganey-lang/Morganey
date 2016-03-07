@@ -1,6 +1,7 @@
 package me.rexim.morganey.helpers
 
-import me.rexim.morganey.ast.{LambdaFunc, LambdaVar}
+import me.rexim.morganey.ast.{LambdaFunc, LambdaVar, LambdaTerm}
+import me.rexim.morganey.ast.LambdaTermHelpers._
 
 trait TestTerms {
   val x = LambdaVar("x")
@@ -11,4 +12,10 @@ trait TestTerms {
     LambdaVar(s"$prefix##$number")
 
   def I(v : LambdaVar) = LambdaFunc(v, v)
+
+  def pair(first: LambdaTerm, second: LambdaTerm) =
+    lfunc("z",
+      lapp(
+        lapp(lvar("z"), first),
+        second))
 }
