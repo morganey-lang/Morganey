@@ -1,17 +1,18 @@
 package me.rexim.morganey.church
 
-import me.rexim.morganey.ast.LambdaTermHelpers.{lnested, lvar, lfunc}
+import me.rexim.morganey.ast.LambdaTermHelpers.lnested
 import me.rexim.morganey.ast._
 
 import scala.annotation.tailrec
 
 object ChurchNumberConverter {
 
-  private def unwrapNumber(f: String, x: String, number: LambdaTerm): Option[Int] = {
+  @tailrec
+  private def unwrapNumber(f: String, x: String, number: LambdaTerm, acc: Int = 0): Option[Int] = {
     number match {
-      case LambdaVar(x1) if x == x1 => Some(0)
+      case LambdaVar(x1) if x == x1 => Some(acc)
       case LambdaApp(LambdaVar(f1), restNumber)
-        if f1 == f => unwrapNumber(f, x, restNumber).map(_ + 1)
+        if f1 == f => unwrapNumber(f, x, restNumber, acc + 1)
       case _ => None
     }
   }
