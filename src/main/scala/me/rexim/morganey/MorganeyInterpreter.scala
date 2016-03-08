@@ -8,22 +8,16 @@ import me.rexim.morganey.reduction.NormalOrder._
 
 import scala.util.{Failure, Success, Try}
 import scala.concurrent._
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object MorganeyInterpreter {
   type Context = List[MorganeyBinding]
 
-  def evalOneNode(node: MorganeyNode)(context: Context): MorganeyEval =
-    node match {
-      case MorganeyBinding(variable, term) =>
-        val result = term.addContext(context).norReduce()
-        val binding = MorganeyBinding(variable, result)
-        MorganeyEval(binding :: context, Some(result))
-
-      case term : LambdaTerm =>
-        val result = term.addContext(context).norReduce()
-        MorganeyEval(context, Some(result))
-    }
+  def evalOneNode(node: MorganeyNode)(context: Context): MorganeyEval = {
+    val (computation, _) = evalOneNodeCancellable(node)(context)
+    Await.result(computation, Duration.Inf)
+  }
 
   def evalOneNodeCancellable(node: MorganeyNode)(context: Context): (Future[MorganeyEval], () => Unit) = {
     node match {
