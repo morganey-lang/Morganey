@@ -11,24 +11,25 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object Main {
+object Main extends SignalHandler {
 
-  val replSignalHandler = new SignalHandler {
-    override def handle(signal: Signal): Unit = {
-      if (cancel != null) {
-        cancel()
-      }
+  override def handle(signal: Signal): Unit = {
+    currentCancel.foreach(_())
+  }
+
+  var currentCancel: Option[() => Unit] = None
+
+  def withCancel(cancel: () => Unit)(body: => Unit) = {
+    try {
+      currentCancel = Some(cancel)
+      body
+    } finally {
+      currentCancel = None
     }
-
-    def setCancel(cancel: () => Unit): Unit = {
-      this.cancel = cancel
-    }
-
-    var cancel: () => Unit = null
   }
 
   def startRepl() = {
-    Signal.handle(new Signal("INT"), replSignalHandler)
+    Signal.handle(new Signal("INT"), this)
 
     var globalContext = List[MorganeyBinding]()
     val con = new ConsoleReader()
@@ -47,13 +48,14 @@ object Main {
         val node = nodeParseResult.get
         val (evalResult, cancel) = MorganeyInterpreter.evalOneNodeCancellable(node)(globalContext)
 
-        replSignalHandler.setCancel(cancel)
-        try {
-          val MorganeyEval(context, result) = Await.result(evalResult, Duration.Inf)
-          globalContext = context
-          result.foreach(t => con.println(ReplHelper.smartPrintTerm(t)))
-        } catch {
-          case e: ComputationCancelledException => con.println("Computation cancelled")
+        withCancel(cancel) {
+          try {
+            val MorganeyEval(context, result) = Await.result(evalResult, Duration.Inf)
+            globalContext = context
+            result.foreach(t => con.println(ReplHelper.smartPrintTerm(t)))
+          } catch {
+            case e: ComputationCancelledException => con.println("Computation cancelled")
+          }
         }
       } else {
         con.println(nodeParseResult.toString)
