@@ -1,6 +1,8 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
+import me.rexim.morganey.MorganeyInterpreter.{evalOneNode, readNodes}
+import me.rexim.morganey.ReplHelper.smartPrintTerm
 import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.ComputationCancelledException
 import me.rexim.morganey.syntax.LambdaParser
@@ -52,7 +54,7 @@ object Main extends SignalHandler {
           try {
             val MorganeyEval(context, result) = Await.result(evalResult, Duration.Inf)
             globalContext = context
-            result.foreach(t => con.println(ReplHelper.smartPrintTerm(t)))
+            result.foreach(t => con.println(smartPrintTerm(t)))
           } catch {
             case e: ComputationCancelledException => con.println("Computation cancelled")
           }
@@ -63,21 +65,26 @@ object Main extends SignalHandler {
     }
   }
 
+  def evalAndPrintNextNode(previousEval: MorganeyEval, nextNode: MorganeyNode): MorganeyEval = {
+    val nextEval = previousEval.flatMap(evalOneNode(nextNode))
+    nextEval.result.foreach(term => println(smartPrintTerm(term)))
+    nextEval
+  }
+
+  def evalAllNodes(initialEval: MorganeyEval)(nodes: List[MorganeyNode]): MorganeyEval = {
+    nodes.foldLeft(initialEval)(evalAndPrintNextNode)
+  }
+
+  def evalFile(fileName: String)(eval: MorganeyEval): Try[MorganeyEval] = {
+    readNodes(fileName).map(evalAllNodes(eval))
+  }
+
   def main(args: Array[String]) = {
     if (args.isEmpty) {
       startRepl()
     } else {
       args.toStream.foldLeft[Try[MorganeyEval]](Success(MorganeyEval())) { (evalTry, fileName) =>
-        evalTry.flatMap { eval =>
-          MorganeyInterpreter.readNodes(fileName).map { nodes =>
-            nodes.foldLeft(eval) {
-              case (evalAcc, node) =>
-                val evalNext = evalAcc.flatMap(MorganeyInterpreter.evalOneNode(node))
-                evalNext.result.foreach(term => println(ReplHelper.smartPrintTerm(term)))
-                evalNext
-            }
-          }
-        }
+        evalTry.flatMap(evalFile(fileName))
       } match {
         case Failure(e) => println(s"[ERROR] ${e.getMessage}")
         case _ =>
