@@ -3,39 +3,42 @@ package me.rexim.morganey
 import java.io.FileReader
 
 import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyNode}
-import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
+import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.reduction.NormalOrder._
+import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
 
-import scala.util.{Failure, Success, Try}
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success, Try}
 
 object MorganeyInterpreter {
   type Context = List[MorganeyBinding]
 
   def evalOneNode(node: MorganeyNode)(context: Context): MorganeyEval = {
-    val (computation, _) = evalOneNodeCancellable(node)(context)
-    Await.result(computation, Duration.Inf)
+    val computation = evalOneNodeComputation(node)(context)
+    Await.result(computation.future, Duration.Inf)
   }
 
-  def evalOneNodeCancellable(node: MorganeyNode)(context: Context): (Future[MorganeyEval], () => Unit) = {
+  def evalOneNodeComputation(node: MorganeyNode)(context: Context): Computation[MorganeyEval] = {
     node match {
       case MorganeyBinding(variable, term) =>
-        val (reductionResult, cancel) = term.addContext(context).norReduceCancellable()
-        val morganeyEval = reductionResult.map { result =>
-          val binding = MorganeyBinding(variable, result)
-          MorganeyEval(binding :: context, Some(result))
+        term.addContext(context).norReduceComputation().map { resultTerm =>
+          MorganeyEval(MorganeyBinding(variable, resultTerm) :: context, Some(resultTerm))
         }
-        (morganeyEval, cancel)
 
-      case term : LambdaTerm =>
-        val (reductionResult, cancel) = term.addContext(context).norReduceCancellable()
-        val morganeyEval = reductionResult.map { term =>
-          MorganeyEval(context, Some(term))
+      case term: LambdaTerm =>
+        term.addContext(context).norReduceComputation().map { resultTerm =>
+          MorganeyEval(context, Some(resultTerm))
         }
-        (morganeyEval, cancel)
     }
+  }
+
+  def evalNodesComputation(nodes: List[MorganeyNode])(context: Context): Stream[Computation[MorganeyEval]] = {
+    lazy val computations: Stream[Computation[MorganeyEval]] =
+      evalOneNodeComputation(nodes.head)(context) #:: computations.zip(nodes.tail).map {
+        case (computation, node) => computation.flatMap(eval => evalOneNodeComputation(node)(eval.context))
+      }
+    computations
   }
 
   def evalNodes(nodes: List[MorganeyNode])(context: Context): MorganeyEval =

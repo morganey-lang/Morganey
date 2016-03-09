@@ -1,32 +1,31 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.MorganeyInterpreter.{evalOneNode, readNodes}
+import me.rexim.morganey.MorganeyInterpreter.{evalOneNodeComputation, evalOneNode, readNodes}
 import me.rexim.morganey.ReplHelper.smartPrintTerm
 import me.rexim.morganey.ast._
-import me.rexim.morganey.reduction.ComputationCancelledException
+import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.syntax.LambdaParser
 import sun.misc.{Signal, SignalHandler}
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
-import scala.concurrent._
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main extends SignalHandler {
 
   override def handle(signal: Signal): Unit = {
-    currentCancel.foreach(_())
+    currentComputation.foreach(_.cancel())
   }
 
-  var currentCancel: Option[() => Unit] = None
+  var currentComputation: Option[Computation[MorganeyEval]] = None
 
-  def withCancel(cancel: () => Unit)(body: => Unit) = {
+  def awaitComputationResult(computation: Computation[MorganeyEval]): Try[MorganeyEval] = {
     try {
-      currentCancel = Some(cancel)
-      body
+      currentComputation = Some(computation)
+      Try(Await.result(computation.future, Duration.Inf))
     } finally {
-      currentCancel = None
+      currentComputation = None
     }
   }
 
@@ -35,32 +34,32 @@ object Main extends SignalHandler {
 
     var globalContext = List[MorganeyBinding]()
     val con = new ConsoleReader()
-    con.setPrompt("> ")
+    con.setPrompt("λ> ")
 
     while (true) {
-      val line = con.readLine()
+      val line = con.readLine().trim()
 
       if (line == "exit") {
         System.exit(0)
       }
 
-      val nodeParseResult = LambdaParser.parse(LambdaParser.replCommand, line)
+      if (!line.isEmpty) {
+        val nodeParseResult = LambdaParser.parse(LambdaParser.replCommand, line)
 
-      if (nodeParseResult.successful) {
-        val node = nodeParseResult.get
-        val (evalResult, cancel) = MorganeyInterpreter.evalOneNodeCancellable(node)(globalContext)
+        if (nodeParseResult.successful) {
+          val node = nodeParseResult.get
+          val computation = evalOneNodeComputation(node)(globalContext)
 
-        withCancel(cancel) {
-          try {
-            val MorganeyEval(context, result) = Await.result(evalResult, Duration.Inf)
-            globalContext = context
-            result.foreach(t => con.println(smartPrintTerm(t)))
-          } catch {
-            case e: ComputationCancelledException => con.println("Computation cancelled")
+          awaitComputationResult(computation) match {
+            case Success(MorganeyEval(context, result)) =>
+              globalContext = context
+              result.foreach(t => con.println(smartPrintTerm(t)))
+            case Failure(e) =>
+              con.println(e.getMessage)
           }
+        } else {
+          con.println(nodeParseResult.toString)
         }
-      } else {
-        con.println(nodeParseResult.toString)
       }
     }
   }
