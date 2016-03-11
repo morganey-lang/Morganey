@@ -1,12 +1,9 @@
 package me.rexim.morganey.ast
 
 sealed trait LambdaTerm extends MorganeyNode {
-  def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
+  val freeVars: Set[String]
 
-  /**
-    * Tells whether this term contains v as a free variable
-    */
-  def containsFreeVar(v: LambdaVar): Boolean
+  def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
 
   def addContext(context: Seq[MorganeyBinding]): LambdaTerm =
     context.foldRight(this) {
@@ -21,9 +18,9 @@ case class LambdaVar(name: String) extends LambdaTerm {
     if (name == v.name) r else this
   }
 
-  override def containsFreeVar(v: LambdaVar): Boolean = v == this
-
   override def toString = name
+
+  override val freeVars: Set[String] = Set(name)
 }
 
 case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm {
@@ -31,12 +28,14 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
     val (v, r) = substitution
     if (parameter == v) {
       this
-    } else if (r.containsFreeVar(parameter)) {
+    } else if (r.freeVars.contains(parameter.name)) {
+      val commonFreeVars = r.freeVars ++ body.freeVars
+
       val newParameter =
-        Stream.from(0)
-          .map(number => LambdaVar(s"${parameter.name}##$number"))
-          .dropWhile(x => r.containsFreeVar(x) || body.containsFreeVar(x))
-          .head
+        LambdaVar(Stream.from(0)
+          .map(number => s"${parameter.name}##$number")
+          .dropWhile(commonFreeVars.contains)
+          .head)
 
       val newBody = body.substitute(parameter -> newParameter)
       LambdaFunc(newParameter, newBody.substitute(v -> r))
@@ -45,10 +44,9 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
     }
   }
 
-  override def containsFreeVar(v: LambdaVar): Boolean =
-    parameter != v && body.containsFreeVar(v)
-
   override def toString = s"(λ ${parameter.name} . $body)"
+
+  override val freeVars: Set[String] = body.freeVars - parameter.name
 }
 
 case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends LambdaTerm {
@@ -59,8 +57,7 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
       rightTerm.substitute(v -> r))
   }
 
-  override def containsFreeVar(v: LambdaVar): Boolean =
-    leftTerm.containsFreeVar(v) || rightTerm.containsFreeVar(v)
-
   override def toString = s"($leftTerm $rightTerm)"
+
+  override val freeVars: Set[String] = leftTerm.freeVars ++ rightTerm.freeVars
 }
