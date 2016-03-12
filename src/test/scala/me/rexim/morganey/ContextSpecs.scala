@@ -5,7 +5,7 @@ import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._
 
 class ContextSpecs extends FlatSpec with Matchers with TestTerms {
-  "A context" should "be wrapped over the expression" in {
+  "Context" should "be wrapped over the expression" in {
     val inputExpression = I(x)
     val context = Seq(
       MorganeyBinding(z, I(z)),
