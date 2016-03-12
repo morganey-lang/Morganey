@@ -6,7 +6,7 @@ sealed trait LambdaTerm extends MorganeyNode {
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
 
   def addContext(context: Seq[MorganeyBinding]): LambdaTerm =
-    context.foldRight(this) {
+    context.filter(b => freeVars.contains(b.variable.name)).foldRight(this) {
       case (MorganeyBinding(variable, value), acc) =>
         LambdaApp(LambdaFunc(variable, acc), value)
     }
