@@ -2,7 +2,8 @@ package me.rexim.morganey.reduction
 
 import me.rexim.morganey.ast.LambdaTerm
 
-import scala.concurrent.Future
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class StrategyComputation(base: LambdaTerm, strategy: Strategy) extends Computation[LambdaTerm] {
   @volatile var cancelled = false
