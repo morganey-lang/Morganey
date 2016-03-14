@@ -1,11 +1,12 @@
-package me.rexim.morganey.reduction
+package me.rexim.morganey.strategy
 
 import me.rexim.morganey.ast.LambdaTerm
+import me.rexim.morganey.computation.{ComputationCancelledException, Computation}
 
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class StrategyComputation(base: LambdaTerm, strategy: Strategy) extends Computation[LambdaTerm] {
+class StrategyComputation(base: LambdaTerm, val strategy: Strategy) extends Computation[LambdaTerm] {
   @volatile var cancelled = false
 
   override def future: Future[LambdaTerm] = Future {

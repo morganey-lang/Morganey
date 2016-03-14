@@ -1,8 +1,8 @@
-package me.rexim.morganey.reduction
+package me.rexim.morganey.strategy
 
 import me.rexim.morganey.ast.{LambdaFunc, LambdaApp, LambdaTerm}
 
-object NormalOrderStrategy extends Strategy {
+object NormalOrder extends Strategy {
   override def stepReduce(term: LambdaTerm): LambdaTerm = term match {
     case LambdaApp(LambdaFunc(x, t), r) => t.substitute(x -> r)
     case LambdaApp(l, r) if isFinished(l) => LambdaApp(stepReduce(l), r)

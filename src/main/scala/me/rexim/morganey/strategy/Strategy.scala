@@ -1,4 +1,4 @@
-package me.rexim.morganey.reduction
+package me.rexim.morganey.strategy
 
 import me.rexim.morganey.ast.LambdaTerm
 
