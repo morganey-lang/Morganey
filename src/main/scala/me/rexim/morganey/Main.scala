@@ -4,7 +4,7 @@ import jline.console.ConsoleReader
 import me.rexim.morganey.MorganeyInterpreter.{evalOneNodeComputation, evalOneNode, readNodes}
 import me.rexim.morganey.ReplHelper.smartPrintTerm
 import me.rexim.morganey.ast._
-import me.rexim.morganey.reduction.Computation
+import me.rexim.morganey.computation.Computation
 import me.rexim.morganey.syntax.LambdaParser
 import sun.misc.{Signal, SignalHandler}
 
