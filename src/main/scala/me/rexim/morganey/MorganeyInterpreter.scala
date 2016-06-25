@@ -3,8 +3,8 @@ package me.rexim.morganey
 import java.io.FileReader
 
 import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyNode}
-import me.rexim.morganey.computation.Computation
-import me.rexim.morganey.strategy.{NormalOrder, StrategyComputation}
+import me.rexim.morganey.reduction.Computation
+import me.rexim.morganey.reduction.NormalOrder._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
 
 import scala.concurrent._
@@ -22,16 +22,12 @@ object MorganeyInterpreter {
   def evalOneNodeComputation(node: MorganeyNode)(context: Context): Computation[MorganeyEval] = {
     node match {
       case MorganeyBinding(variable, term) =>
-        val termWithContext = term.addContext(context)
-        val normalOrderComputation = new StrategyComputation(termWithContext, NormalOrder)
-        normalOrderComputation.map { resultTerm =>
+        term.addContext(context).norReduceComputation().map { resultTerm =>
           MorganeyEval(MorganeyBinding(variable, resultTerm) :: context, Some(resultTerm))
         }
 
       case term: LambdaTerm =>
-        val termWithContext = term.addContext(context)
-        val normalOrderComputation = new StrategyComputation(termWithContext, NormalOrder)
-        normalOrderComputation.map { resultTerm =>
+        term.addContext(context).norReduceComputation().map { resultTerm =>
           MorganeyEval(context, Some(resultTerm))
         }
     }
