@@ -1,7 +1,7 @@
-package me.rexim.morganey.computation
+package me.rexim.morganey.reduction
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait Computation[T] { self =>
   def future: Future[T]
