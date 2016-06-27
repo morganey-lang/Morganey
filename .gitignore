@@ -138,3 +138,7 @@ local.properties
 
 # Code Recommenders
 .recommenders/
+
+.cache-main
+.cache-tests
+
