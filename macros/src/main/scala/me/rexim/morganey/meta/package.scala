@@ -4,10 +4,14 @@ import scala.language.experimental.macros
 
 package object meta {
 
-  def \(args: Any*): Any = macro TestMacro.quote
+  private[meta] trait Quasiquotation {
+    def apply(args: Any*): Any = macro TestMacro.quote
+    def unapply(): Any = ???
+  }
 
-  def λ(args: Any*): Any = macro TestMacro.quote
-
-  def m(args: Any*): Any = macro TestMacro.quote
+  implicit class Quasiquote(ctx: StringContext) {
+    object m extends Quasiquotation
+    object lc extends Quasiquotation
+  }
 
 }

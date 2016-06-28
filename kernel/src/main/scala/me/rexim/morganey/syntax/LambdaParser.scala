@@ -14,7 +14,9 @@ object IntMatcher {
     }
 }
 
-object LambdaParser extends RegexParsers {
+object LambdaParser extends LambdaParser
+
+class LambdaParser extends RegexParsers {
 
   def variable: Parser[LambdaVar] = {
     "[a-zA-Z][a-zA-Z0-9]*".r ^^ {
