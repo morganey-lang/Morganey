@@ -9,16 +9,16 @@ import org.scalatest._
 
 class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
   "An identity function" should "be converted to None" in {
-    convertPair(I(x)) should be (None)
+    decodePair(I(x)) should be (None)
   }
 
   "A church pair" should "be pair converted to some pair" in {
     val pair = lfunc("z" , lapp(lapp(lvar("z"), lvar("x")), lvar("y")))
-    convertPair(pair) should be (Some((lvar("x"), lvar("y"))))
+    decodePair(pair) should be (Some((lvar("x"), lvar("y"))))
   }
 
   "An identity function" should "be list converted to a list with itself" in {
-    convertList(I(x)) should be (List(I(x)))
+    decodeList(I(x)) should be (List(I(x)))
   }
 
   "A church list" should "be converted to some list" in {
@@ -26,7 +26,7 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
     val term = LambdaParser.parse(LambdaParser.term, rawTerm).get
     val expectedList = "xxy".map(c => lvar(c.toString)).toList
 
-    convertList(term) should be (expectedList)
+    decodeList(term) should be (expectedList)
   }
 
   "A church list of number" should "be converted to some list of numbers" in {
@@ -34,7 +34,7 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
     val term = LambdaParser.parse(LambdaParser.term, rawTerm).get
     val expectedList = Some(List(2, 1, 0))
 
-    convertListOfNumbers(term) should be (expectedList)
+    decodeListOfNumbers(term) should be (expectedList)
   }
 
   "A church list of ASCII codes" should "be converted to a string" in {
@@ -44,6 +44,6 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
 
     val abc = pair(ninetySeven, pair(ninetyEight, ninetyNine))
 
-    convertString(abc) should be (Some("abc"))
+    decodeString(abc) should be (Some("abc"))
   }
 }

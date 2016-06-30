@@ -1,10 +1,11 @@
 package me.rexim.morganey.church
 
 import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar, LambdaTerm}
+import me.rexim.morganey.ast.LambdaTerm
 
 object ChurchPairConverter {
   // (λ z . ((z x) y))
-  def convertPair(pair: LambdaTerm): Option[(LambdaTerm, LambdaTerm)] =
+  def decodePair(pair: LambdaTerm): Option[(LambdaTerm, LambdaTerm)] =
     pair match {
       case LambdaFunc(LambdaVar(cons),
         LambdaApp(LambdaApp(LambdaVar(cons1), car), cdr)
@@ -13,22 +14,35 @@ object ChurchPairConverter {
       case _ => None
     }
 
-  def convertList(list: LambdaTerm): List[LambdaTerm] =
-    convertPair(list) match {
-      case Some((first, second)) => first :: convertList(second)
-      case None => List(list)
+  def encodePair(p: (LambdaTerm, LambdaTerm), cons: String = "x"): LambdaTerm = {
+    val (car, cdr) = p
+    LambdaFunc(LambdaVar(cons),
+      LambdaApp(LambdaApp(LambdaVar(cons), car), cdr)
+    )
+  }
+
+  def decodeList(list: LambdaTerm): List[LambdaTerm] =
+    decodePair(list) match {
+      case Some((first, second)) => first :: decodeList(second)
+      case None                  => List(list)
     }
 
-  def convertListOfNumbers(list: LambdaTerm): Option[List[Int]] = {
-    convertList(list)
+  /** Returns `None`, if list is empty */
+  def encodeList(xs: List[LambdaTerm]): Option[LambdaTerm] = xs match {
+    case init :+ last => Some(init.foldRight(last) { case (a, term) => encodePair((a, term)) })
+    case _            => None
+  }
+
+  def decodeListOfNumbers(list: LambdaTerm): Option[List[Int]] = {
+    decodeList(list)
       .map(ChurchNumberConverter.decodeNumber)
       .foldRight[Option[List[Int]]] (Some(List[Int]())) {
         case (x, acc) => acc.flatMap(xs => x.map(s => s :: xs))
       }
   }
 
-  def convertString(s: LambdaTerm): Option[String] =
-    convertListOfNumbers(s).map {
+  def decodeString(s: LambdaTerm): Option[String] =
+    decodeListOfNumbers(s).map {
       xs => xs.map(_.toChar).mkString
     }
 }
