@@ -5,7 +5,7 @@ import scala.language.experimental.macros
 package object meta {
 
   private[meta] trait Quasiquotation {
-    def apply(args: Any*): Any = macro TestMacro.quote
+    def apply(args: Any*): Any = macro QuotationMacro.quote
     def unapply(): Any = ???
   }
 

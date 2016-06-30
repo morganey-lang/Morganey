@@ -4,7 +4,7 @@ import scala.reflect.macros.whitebox.Context
 import scala.util.{ Try => MTry }
 import me.rexim.morganey.ast._
 
-private[meta] class TestMacro(val c: Context) {
+private[meta] class QuotationMacro(val c: Context) {
   import c.universe._
 
   private def macroApplication() = {
@@ -17,7 +17,7 @@ private[meta] class TestMacro(val c: Context) {
     (mCall orElse lCall).get
   }
 
-  private val (parts, args)   = macroApplication()
+  private val (parts, args) = macroApplication()
 
   private def buildProgram(): String = {
     val pi = parts.iterator
