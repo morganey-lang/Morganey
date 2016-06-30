@@ -16,7 +16,7 @@ private[meta] class TestMacro(val c: Context) {
     (mCall orElse lCall).get
   }
 
-  val (parts, args) = macroApplication()
+  private val (parts, args) = macroApplication()
 
   def quote(args: Tree*): Tree =
     q"""Predef.println("Hi, Macro")"""
