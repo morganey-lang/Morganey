@@ -15,6 +15,11 @@ trait DefaultLiftableInstances {
   implicit val liftInt  = Liftable[Int](encodeNumber)
   implicit val liftChar = Liftable[Char](c => encodeNumber(c.toInt))
 
+  implicit val liftString = Liftable[String] { s =>
+    val lift = implicitly[Liftable[Seq[Char]]]
+    lift(s.toSeq)
+  }
+
   implicit def liftPair[A, B](implicit liftA: Liftable[A], liftB: Liftable[B]): Liftable[(A, B)] =
     Liftable[(A, B)] {
       case (a, b) => encodePair( (liftA(a), liftB(b)) )
