@@ -7,7 +7,7 @@ package object meta extends AnyRef
 
   private[meta] trait Quasiquotation {
     def apply[T](args: T*): Any = macro QuotationMacro.quote
-    def unapply(): Any = ???
+    def unapply(arg: Any): Any = macro QuotationMacro.unquote
   }
 
   implicit class Quasiquote(ctx: StringContext) {
