@@ -9,6 +9,7 @@ private[meta] class QuotationMacro(val c: Context) {
   import c.universe._
 
   private type Lift[T]      = me.rexim.morganey.meta.Liftable[T]
+  private type Unlift[T]    = me.rexim.morganey.meta.Unliftable[T]
   private val LambdaTermTpe = typeOf[LambdaTerm]
 
   private def macroApplication() =
@@ -62,7 +63,7 @@ private[meta] class QuotationMacro(val c: Context) {
       arg
     } else {
       val liftT = appliedType(typeOf[Lift[_]], tpe)
-      val lift = c.inferImplicitValue(liftT, silent = true)
+      val lift  = c.inferImplicitValue(liftT, silent = true)
       if (lift.nonEmpty) {
         q"$lift($arg)"
       } else {
@@ -73,9 +74,34 @@ private[meta] class QuotationMacro(val c: Context) {
     }
   }
 
+  private def hasSubpatterns(): Boolean = {
+    val patterns = c.internal.subpatterns(args.head).get
+    args.indices exists { idx =>
+      patterns(idx) match {
+        case pq"$_: $tpt" => true
+        case pq"$x @ _"   => false
+      }
+    }
+  }
+
   private def unquoteArg(i: Int): Tree = {
     val x = TermName(s"x$i")
-    pq"$x @ _"
+    val subpattern = c.internal.subpatterns(args.head).get.apply(i)
+    subpattern match {
+      case pq"$_: $tpt" =>
+        val tpe = c.typecheck(tpt, c.TYPEmode).tpe
+        val UnliftT = appliedType(typeOf[Unlift[_]], tpe)
+        val unlift  = c.inferImplicitValue(UnliftT, silent = true)
+        if (unlift.nonEmpty) {
+          pq"$unlift($x @ _)"
+        } else {
+          val reason = s"Because no implicit value of type me.rexim.morganey.meta.Unliftable[$tpe] could be found!"
+          val msg    = s"Couldn't unlift a lambda term to a value of type $tpe! ($reason)"
+          c.abort(subpattern.pos, msg)
+        }
+      case _ =>
+        pq"$x @ _"
+    }
   }
 
   private implicit def liftAst[A <: LambdaTerm]: Liftable[A] = Liftable {
@@ -96,7 +122,7 @@ private[meta] class QuotationMacro(val c: Context) {
 
   private def extractor(term: LambdaTerm): Tree = {
     val ps = parts.indices.init
-    val (ifp, elp) = parts match {
+    lazy val (ifp, elp) = parts match {
       case Nil      =>
         c.abort(c.enclosingPosition, "Internal error: \"parts\" is empty.")
       case hd :: Nil =>
@@ -108,7 +134,7 @@ private[meta] class QuotationMacro(val c: Context) {
         (q"_root_.scala.Some((..$ys))", q"_root_.scala.None")
     }
 
-    if (ps.size == 1) {
+    if (!hasSubpatterns() && ps.size == 1) {
       q"""
         new {
           def unapply(input: $LambdaTermTpe) = Option(input)
@@ -124,6 +150,7 @@ private[meta] class QuotationMacro(val c: Context) {
         }.unapply(..$args)
       """
     }
+
   }
 
   private def expand() = transform(parse(buildProgram()))
