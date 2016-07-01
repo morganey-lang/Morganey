@@ -2,7 +2,8 @@ package me.rexim.morganey
 
 import scala.language.experimental.macros
 
-package object meta {
+package object meta extends AnyRef
+  with DefaultLiftableInstances {
 
   private[meta] trait Quasiquotation {
     def apply(args: Any*): Any = macro QuotationMacro.quote

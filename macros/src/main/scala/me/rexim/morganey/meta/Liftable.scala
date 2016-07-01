@@ -10,12 +10,7 @@ trait Liftable[T] extends (T => LambdaTerm) {
   def apply(x: T): LambdaTerm
 }
 
-object Liftable {
-
-  def apply[T](f: T => LambdaTerm): Liftable[T] =
-    new Liftable[T] {
-      def apply(x: T): LambdaTerm = f(x)
-    }
+trait DefaultLiftableInstances {
 
   implicit val liftInt  = Liftable[Int](encodeNumber)
   implicit val liftChar = Liftable[Char](c => encodeNumber(c.toInt))
@@ -29,7 +24,16 @@ object Liftable {
     Liftable[CC[A]] { xs =>
       val ys = xs map lift
       encodeList(ys.toList).getOrElse(
-        sys.error("Can't transform empty list into lambda terms!")
-      )
+        sys.error("Can't transform empty list into lambda terms!"))
     }
+
+}
+
+object Liftable {
+
+  def apply[T](f: T => LambdaTerm): Liftable[T] =
+    new Liftable[T] {
+      def apply(x: T): LambdaTerm = f(x)
+    }
+
 }
