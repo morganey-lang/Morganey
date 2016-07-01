@@ -1,21 +1,20 @@
 package me.rexim.morganey.meta
 
 import scala.reflect.macros.whitebox.Context
-import scala.util.{ Try => MTry }
 import me.rexim.morganey.ast._
 
 private[meta] class QuotationMacro(val c: Context) {
   import c.universe._
 
-  private def macroApplication() = {
-    val mCall = MTry(c.macroApplication).map {
-      case q"$_($_(..${parts: List[String]})).m.apply(..$args)" => (parts, args)
+  private type Lift[T] = me.rexim.morganey.meta.Liftable[T]
+
+  private def macroApplication() =
+    Option(c.macroApplication) collect {
+      case q"$_($_(..${parts: List[String]})).m.apply[..$_](..$args)"  => (parts, args)
+      case q"$_($_(..${parts: List[String]})).lc.apply[..$_](..$args)" => (parts, args)
+    } getOrElse {
+      c.abort(c.enclosingPosition, "Invalid usage of interpolator!")
     }
-    val lCall = MTry(c.macroApplication).map {
-      case q"$_($_(..${parts: List[String]})).lc.apply(..$args)" => (parts, args)
-    }
-    (mCall orElse lCall).get
-  }
 
   private val (parts, args) = macroApplication()
 
@@ -45,9 +44,27 @@ private[meta] class QuotationMacro(val c: Context) {
     }
   }
 
+  private def argument(i: Int): Tree = {
+    val arg = args(i)
+    val tpe = arg.tpe
+    if (tpe <:< typeOf[LambdaTerm]) {
+      arg
+    } else {
+      val liftT = appliedType(typeOf[Lift[_]], tpe)
+      val lift = c.inferImplicitValue(liftT, silent = true)
+      if (lift.nonEmpty) {
+        q"$lift($arg)"
+      } else {
+        val reason = s"Because no implicit value of type me.rexim.morganey.meta.Liftable[$tpe] could be found!"
+        val msg    = s"Couldn't lift a value of type $tpe to lambda term! ($reason)"
+        c.abort(arg.pos, msg)
+      }
+    }
+  }
+
   private implicit def liftAst[A <: LambdaTerm]: Liftable[A] = Liftable {
     case LambdaVar(Hole(n))      =>
-      args(n)
+      argument(n)
     case LambdaVar(name)         =>
       q"_root_.me.rexim.morganey.ast.LambdaVar($name)"
     case LambdaFunc(param, body) =>

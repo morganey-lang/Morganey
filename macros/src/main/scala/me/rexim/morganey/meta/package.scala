@@ -6,7 +6,7 @@ package object meta extends AnyRef
   with DefaultLiftableInstances {
 
   private[meta] trait Quasiquotation {
-    def apply(args: Any*): Any = macro QuotationMacro.quote
+    def apply[T](args: T*): Any = macro QuotationMacro.quote
     def unapply(): Any = ???
   }
 
