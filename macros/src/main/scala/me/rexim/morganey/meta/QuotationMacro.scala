@@ -1,7 +1,9 @@
 package me.rexim.morganey.meta
 
-import scala.reflect.macros.whitebox.Context
 import me.rexim.morganey.ast._
+
+import scala.collection.mutable.ArrayBuffer
+import scala.reflect.macros.whitebox.Context
 
 private[meta] class QuotationMacro(val c: Context) {
   import c.universe._
@@ -48,7 +50,12 @@ private[meta] class QuotationMacro(val c: Context) {
     }
   }
 
-  private def argument(i: Int): Tree = {
+  private def argument(i: Int): Tree = method match {
+    case TermName("apply")   => quoteArg(i)
+    case TermName("unapply") => unquoteArg(i)
+  }
+
+  private def quoteArg(i: Int): Tree = {
     val arg = args(i)
     val tpe = arg.tpe
     if (tpe <:< typeOf[LambdaTerm]) {
@@ -64,6 +71,11 @@ private[meta] class QuotationMacro(val c: Context) {
         c.abort(arg.pos, msg)
       }
     }
+  }
+
+  private def unquoteArg(i: Int): Tree = {
+    val x = TermName(s"x$i")
+    pq"$x @ _"
   }
 
   private implicit def liftAst[A <: LambdaTerm]: Liftable[A] = Liftable {
@@ -83,14 +95,35 @@ private[meta] class QuotationMacro(val c: Context) {
   }
 
   private def extractor(term: LambdaTerm): Tree = {
-    q"""
-      new {
-        def unapply(input: $LambdaTermTpe) = input match {
-          case $term => true
-          case _     => false
+    val ps = parts.indices.init
+    val (ifp, elp) = parts match {
+      case Nil      =>
+        c.abort(c.enclosingPosition, "Internal error: \"parts\" is empty.")
+      case hd :: Nil =>
+        (q"true", q"false")
+      case _       =>
+        val ys = ps map { i =>
+          TermName(s"x$i")
         }
-      }.unapply(..$args)
-    """
+        (q"_root_.scala.Some((..$ys))", q"_root_.scala.None")
+    }
+
+    if (ps.size == 1) {
+      q"""
+        new {
+          def unapply(input: $LambdaTermTpe) = Option(input)
+        }.unapply(..$args)
+      """
+    } else {
+      q"""
+        new {
+          def unapply(input: $LambdaTermTpe) = input match {
+            case $term => $ifp
+            case _     => $elp
+          }
+        }.unapply(..$args)
+      """
+    }
   }
 
   private def expand() = transform(parse(buildProgram()))
@@ -99,4 +132,3 @@ private[meta] class QuotationMacro(val c: Context) {
   def unquote(arg: Tree): Tree = expand()
 
 }
-
