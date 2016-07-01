@@ -2,6 +2,8 @@ package me.rexim.morganey.church
 
 import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar, LambdaTerm}
 import me.rexim.morganey.ast.LambdaTerm
+import me.rexim.morganey.church.ChurchNumberConverter.decodeNumber
+import me.rexim.morganey.util._
 
 object ChurchPairConverter {
   // (λ z . ((z x) y))
@@ -34,11 +36,8 @@ object ChurchPairConverter {
   }
 
   def decodeListOfNumbers(list: LambdaTerm): Option[List[Int]] = {
-    decodeList(list)
-      .map(ChurchNumberConverter.decodeNumber)
-      .foldRight[Option[List[Int]]] (Some(List[Int]())) {
-        case (x, acc) => acc.flatMap(xs => x.map(s => s :: xs))
-      }
+    val decodeResults = decodeList(list).map(decodeNumber)
+    sequence(decodeResults)
   }
 
   def decodeString(s: LambdaTerm): Option[String] =
