@@ -2,7 +2,7 @@ package me.rexim.morganey.church
 
 import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar, LambdaTerm}
 import me.rexim.morganey.ast.LambdaTerm
-import me.rexim.morganey.church.ChurchNumberConverter.decodeNumber
+import me.rexim.morganey.church.ChurchNumberConverter.{decodeNumber, encodeNumber}
 import me.rexim.morganey.util._
 
 object ChurchPairConverter {
@@ -40,8 +40,14 @@ object ChurchPairConverter {
     sequence(decodeResults)
   }
 
+  def encodeListOfNumbers(xs: List[Int]): Option[LambdaTerm] = 
+    encodeList(xs.map(encodeNumber))
+
   def decodeString(s: LambdaTerm): Option[String] =
     decodeListOfNumbers(s).map {
       xs => xs.map(_.toChar).mkString
     }
+
+  def encodeString(s: String): Option[LambdaTerm] =
+    encodeListOfNumbers(s.toList.map(_.toInt))
 }

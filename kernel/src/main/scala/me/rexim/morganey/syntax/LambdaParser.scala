@@ -1,7 +1,8 @@
 package me.rexim.morganey.syntax
 
 import me.rexim.morganey.ast._
-import me.rexim.morganey.church.ChurchNumberConverter
+import me.rexim.morganey.church.{ChurchNumberConverter, ChurchPairConverter}
+import me.rexim.morganey.util._
 
 import scala.util.parsing.combinator._
 
@@ -16,7 +17,7 @@ object IntMatcher {
 
 object LambdaParser extends LambdaParser
 
-class LambdaParser extends RegexParsers {
+class LambdaParser extends JavaTokenParsers {
 
   def variable: Parser[LambdaVar] = {
     "[a-zA-Z][a-zA-Z0-9]*".r ^^ {
@@ -28,6 +29,13 @@ class LambdaParser extends RegexParsers {
     "[0-9]+".r ^? ({
       case IntMatcher(x) => ChurchNumberConverter.encodeNumber(x)
     }, { (rawInt) => s"`$rawInt' is too big"})
+
+  def morganeyStringLiteral: Parser[LambdaTerm] =
+    stringLiteral ^^ {
+      case s => {
+        ChurchPairConverter.encodeString(unquoteString(s)).get
+      }
+    }
 
   def func: Parser[LambdaFunc] = {
     "(" ~ ("λ" | "\\") ~ variable ~ "." ~ term ~ ")" ^^ {
@@ -42,7 +50,7 @@ class LambdaParser extends RegexParsers {
   }
 
   def term: Parser[LambdaTerm] =
-    variable | numericLiteral | func | application
+    variable | numericLiteral | morganeyStringLiteral | func | application
 
   def binding: Parser[MorganeyBinding] =
     variable ~ ":=" ~ term ^^ {
