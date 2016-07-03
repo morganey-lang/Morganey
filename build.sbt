@@ -24,6 +24,9 @@ lazy val kernelSettings = Seq(
   name := "morganey-kernel",
   libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 )
+ 
+lazy val dependencySettings =
+  "compile->compile;test->test"
 
 /*
  * ==================================== tasks =====================================
@@ -49,12 +52,16 @@ build := {
 lazy val morganey = (project in file("."))
   .settings(commonSettings :_*)
   .settings(mainClass := Some("me.rexim.morganey.Main"))
-  .dependsOn(macros, kernel)
+  .aggregate(macros, kernel)
+  .dependsOn(
+    macros % dependencySettings, 
+    kernel % dependencySettings
+  )
   
 lazy val macros = (project in file("macros"))
   .settings(commonSettings :_*)
   .settings(macroSettings :_*)
-  .dependsOn(kernel)
+  .dependsOn(kernel % dependencySettings)
   
 lazy val kernel = (project in file("kernel"))
   .settings(commonSettings :_*)
