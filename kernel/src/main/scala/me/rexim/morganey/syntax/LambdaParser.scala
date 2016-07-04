@@ -30,7 +30,7 @@ class LambdaParser extends JavaTokenParsers {
       case IntMatcher(x) => ChurchNumberConverter.encodeNumber(x)
     }, { (rawInt) => s"`$rawInt' is too big"})
 
-  def morganeyStringLiteral: Parser[LambdaTerm] =
+  def stringLiteralTerm: Parser[LambdaTerm] =
     stringLiteral ^^ {
       case s => {
         ChurchPairConverter.encodeString(unquoteString(s)).get
@@ -50,7 +50,7 @@ class LambdaParser extends JavaTokenParsers {
   }
 
   def term: Parser[LambdaTerm] =
-    variable | numericLiteral | morganeyStringLiteral | func | application
+    variable | numericLiteral | stringLiteralTerm | func | application
 
   def binding: Parser[MorganeyBinding] =
     variable ~ ":=" ~ term ^^ {
