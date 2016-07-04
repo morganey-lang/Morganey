@@ -142,3 +142,11 @@ local.properties
 .cache-main
 .cache-tests
 
+
+# Created by https://www.gitignore.io/api/ensime
+
+### Ensime ###
+# Ensime specific
+.ensime
+.ensime_cache/
+.ensime_lucene/
