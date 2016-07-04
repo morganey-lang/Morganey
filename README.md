@@ -19,10 +19,15 @@ To run the REPL just enter the following in the source code directory
 and start typing REPL commands there. The syntax of the REPL commands is
 
     <repl-command> := <term> | <binding>
-    <term> ::= <numeric-literal> | <variable> | <function> | <application>
+    <term> ::= <variable> |
+               <numeric-literal> |
+               <string-literal> |
+               <function> |
+               <application>
     <binding> ::= <variable> := <term>
 
     <numeric-literal> ::= [0-9]+
+    <string-literal> ::= <java-string-literal>
     <variable> ::= [a-zA-Z][a-zA-Z0-9]*
     <function> ::= ( <lambda-symbol> . <variable> <term> )
     <application> ::= ( <term> <term> )
