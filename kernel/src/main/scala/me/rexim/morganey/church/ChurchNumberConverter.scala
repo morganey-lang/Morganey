@@ -7,6 +7,8 @@ import scala.annotation.tailrec
 
 object ChurchNumberConverter {
 
+  private val printableChars = Set(32 to 176 :_*).map(_.toChar)
+
   @tailrec
   private def unwrapNumber(f: String, x: String, number: LambdaTerm, acc: Int = 0): Option[Int] = {
     number match {
@@ -33,5 +35,9 @@ object ChurchNumberConverter {
 
   def encodeNumber(number: Int): LambdaTerm = {
     lnested(List("f", "x"), wrapNumber(number))
+  }
+
+  def decodeChar(term: LambdaTerm): Option[Char] = {
+    decodeNumber(term).map(_.toChar) filter (printableChars.contains _)
   }
 }

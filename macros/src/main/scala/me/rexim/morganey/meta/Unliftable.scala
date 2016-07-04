@@ -1,7 +1,7 @@
 package me.rexim.morganey.meta
 
 import me.rexim.morganey.ast.LambdaTerm
-import me.rexim.morganey.church.ChurchNumberConverter.decodeNumber
+import me.rexim.morganey.church.ChurchNumberConverter.{decodeNumber, decodeChar}
 import me.rexim.morganey.church.ChurchPairConverter.{decodeList, decodePair}
 import me.rexim.morganey.util.sequence
 
@@ -14,12 +14,8 @@ trait Unliftable[T] {
 
 trait DefaultUnliftableInstances {
 
-  private val chars = Set(0 to 10 :_*).map(_.toChar)
-
   implicit val unliftInt = Unliftable[Int](decodeNumber)
-  implicit val unliftChar = Unliftable[Char] { t =>
-    decodeNumber(t).map(_.toChar) filter (chars.contains _)
-  }
+  implicit val unliftChar = Unliftable[Char](decodeChar)
 
   implicit val unliftString = Unliftable[String] { s =>
     val unlift = implicitly[Unliftable[Seq[Char]]]
