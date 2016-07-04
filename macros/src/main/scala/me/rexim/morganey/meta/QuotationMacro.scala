@@ -2,8 +2,8 @@ package me.rexim.morganey.meta
 
 import me.rexim.morganey.ast._
 
-import scala.collection.mutable.ArrayBuffer
 import scala.reflect.macros.whitebox.Context
+import StringContext.treatEscapes
 
 private[meta] class QuotationMacro(val c: Context) {
   import c.universe._
@@ -29,7 +29,7 @@ private[meta] class QuotationMacro(val c: Context) {
 
     while (parts.hasNext) {
       val part = parts.next
-      b ++= part
+      b ++= treatEscapes(part)
       if (parts.hasNext) {
         val hole = Hole(i)
         i += 1
