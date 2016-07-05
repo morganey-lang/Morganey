@@ -30,6 +30,25 @@ class LambdaParser extends JavaTokenParsers {
       case IntMatcher(x) => ChurchNumberConverter.encodeNumber(x)
     }, { (rawInt) => s"`$rawInt' is too big"})
 
+  def characterLiteral: Parser[LambdaTerm] = (
+    """'\\[\\'"bfnrt]'""".r ^^ { s =>
+      ChurchNumberConverter.encodeNumber(escapeSequences(s charAt 2))
+    }
+  | "'[\u0020-\u00B0]'".r ^^ { s =>
+      ChurchNumberConverter.encodeNumber(s charAt 1)
+    }
+  )
+
+  /** For handling escape sequences, which are currently supported as `characterLiteral` */
+  private def escapeSequences =
+    Map[Char, Char](
+      'b' -> '\b',
+      'f' -> '\f',
+      'n' -> '\n',
+      'r' -> '\r',
+      't' -> '\t'
+    ) withDefault identity
+
   def stringLiteralTerm: Parser[LambdaTerm] =
     stringLiteral ^^ {
       case s => {
@@ -50,7 +69,7 @@ class LambdaParser extends JavaTokenParsers {
   }
 
   def term: Parser[LambdaTerm] =
-    variable | numericLiteral | stringLiteralTerm | func | application
+    variable | numericLiteral | characterLiteral | stringLiteralTerm | func | application
 
   def binding: Parser[MorganeyBinding] =
     variable ~ ":=" ~ term ^^ {
