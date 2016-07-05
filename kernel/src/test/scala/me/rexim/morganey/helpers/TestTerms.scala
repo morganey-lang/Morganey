@@ -4,6 +4,11 @@ import me.rexim.morganey.ast.{LambdaFunc, LambdaVar, LambdaTerm}
 import me.rexim.morganey.ast.LambdaTermHelpers._
 
 trait TestTerms {
+  val b = LambdaVar("b")
+  val c = LambdaVar("c")
+  val d = LambdaVar("d")
+  val e = LambdaVar("e")
+
   val x = LambdaVar("x")
   val y = LambdaVar("y")
   val z = LambdaVar("z")
@@ -13,10 +18,10 @@ trait TestTerms {
 
   def I(v : LambdaVar) = LambdaFunc(v, v)
 
-  def pair(first: LambdaTerm, second: LambdaTerm) =
-    lfunc("z",
+  def pair(first: LambdaTerm, second: LambdaTerm, variable: String = "z") =
+    lfunc(variable,
       lapp(
-        lapp(lvar("z"), first),
+        lapp(lvar(variable), first),
         second))
 
   val random = scala.util.Random
@@ -25,4 +30,8 @@ trait TestTerms {
     val id = s"##${random.nextInt(100500)}"
     lapp(lfunc(id, body), lvar(id))
   }
+
+  val zero = lnested(List("f", "x"), lvar("x"))
+  val one = lnested(List("f", "x"), lapp(lvar("f"), lvar("x")))
+  val two = lnested(List("f", "x"), lapp(lvar("f"), lapp(lvar("f"), lvar("x"))))
 }
