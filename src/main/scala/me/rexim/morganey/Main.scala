@@ -29,37 +29,54 @@ object Main extends SignalHandler {
     }
   }
 
+  def exitRepl() = {
+    System.exit(0)
+  }
+
+  def handleLine(con: ConsoleReader)(globalContext: List[MorganeyBinding], line: String): Option[List[MorganeyBinding]] = {
+    import LambdaParser.{parse, replCommand}
+    val nodeParseResult = parse(replCommand, line)
+
+    if (nodeParseResult.successful) {
+      val node = nodeParseResult.get
+      val computation = evalOneNodeComputation(node)(globalContext)
+
+      awaitComputationResult(computation) match {
+        case Success(MorganeyEval(context, result)) =>
+          result.foreach(t => con.println(smartPrintTerm(t)))
+          Some(context)
+        case Failure(e) =>
+          con.println(e.getMessage)
+          None
+      }
+    } else {
+      con.println(nodeParseResult.toString)
+      None
+    }
+  }
+
   def startRepl() = {
     Signal.handle(new Signal("INT"), this)
 
+    val running = true
     var globalContext = List[MorganeyBinding]()
     val con = new ConsoleReader()
     con.setPrompt("λ> ")
 
-    while (true) {
-      val line = con.readLine().trim()
+    def line(): String = {
+      val rawLine = con.readLine()
+      if (rawLine eq null) null
+      else rawLine.trim()
+    }
 
-      if (line == "exit") {
-        System.exit(0)
-      }
+    val evalLine = handleLine(con) _
 
-      if (!line.isEmpty) {
-        val nodeParseResult = LambdaParser.parse(LambdaParser.replCommand, line)
-
-        if (nodeParseResult.successful) {
-          val node = nodeParseResult.get
-          val computation = evalOneNodeComputation(node)(globalContext)
-
-          awaitComputationResult(computation) match {
-            case Success(MorganeyEval(context, result)) =>
-              globalContext = context
-              result.foreach(t => con.println(smartPrintTerm(t)))
-            case Failure(e) =>
-              con.println(e.getMessage)
-          }
-        } else {
-          con.println(nodeParseResult.toString)
-        }
+    while (running) line() match {
+      case null   => exitRepl() // eof
+      case ""     => ()
+      case "exit" => exitRepl()
+      case line   => evalLine(globalContext, line) foreach { context =>
+        globalContext = context
       }
     }
   }
