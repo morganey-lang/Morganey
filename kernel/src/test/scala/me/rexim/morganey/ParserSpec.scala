@@ -16,6 +16,20 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
 
   private val parse = LambdaParser.parseAll(LambdaParser.term, _: String)
 
+  "A program just containing comments" should "be a valid (but empty) program" in {
+    val program =
+      """
+        | /*
+        |  * This is an empty program
+        |  */
+        | // (\x.x)
+      """.stripMargin
+
+    val result = LambdaParser.parseAll(LambdaParser.script, program)
+    result.successful should be (true)
+    result.get        should be (Nil)
+  }
+
   private val validPrograms = Seq(
     // string-literals
     """"Hello!"""",
@@ -30,6 +44,15 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     """'\''""",
     """'\"'""",
     """'"'""",
+
+    // comments
+    "variable // this single-line comment is on the same line as a simple term",
+    """
+      |(\x . /*
+      | * This multi-line comment is in the middle
+      | * of a lambda-application.
+      | */ x)
+    """.stripMargin,
 
     // number-literals
     "0",
