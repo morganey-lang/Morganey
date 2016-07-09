@@ -19,6 +19,9 @@ object LambdaParser extends LambdaParser
 
 class LambdaParser extends JavaTokenParsers {
 
+  /* comment-regex taken from: http://stackoverflow.com/a/5954831 */
+  protected override val whiteSpace = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+""".r
+
   def variable: Parser[LambdaVar] = {
     "[a-zA-Z][a-zA-Z0-9]*".r ^^ {
       name => LambdaVar(name)
