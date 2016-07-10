@@ -5,7 +5,7 @@ import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.church.ChurchPairConverter._
 
 object ReplHelper {
-  def smartPrintTerm(term: LambdaTerm): String = {
+  def smartShowTerm(term: LambdaTerm): String = {
     decodeListOfNumbers(term) match {
       case Some(numbers) => if (numbers.forall(x => 32 <= x && x <= 176)) {
         s"string: ${numbers.map(_.toChar).mkString}"
