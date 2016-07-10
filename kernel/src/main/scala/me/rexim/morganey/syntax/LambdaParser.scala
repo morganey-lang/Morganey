@@ -79,8 +79,15 @@ class LambdaParser extends JavaTokenParsers {
       case lambdaVar ~ _ ~ term => MorganeyBinding(lambdaVar, term)
     }
 
-  def replCommand: Parser[MorganeyNode] = binding | term
+  def loading: Parser[MorganeyLoading] =
+    "load" ~ modulePath ^^ {
+      case "load" ~ path => MorganeyLoading(path)
+    }
+
+  def modulePath: Parser[String] =
+    "[a-zA-Z][a-zA-Z0-9/]*".r
+
+  def replCommand: Parser[MorganeyNode] = loading | binding | term
 
   def script: Parser[List[MorganeyNode]] = rep(replCommand)
 }
-

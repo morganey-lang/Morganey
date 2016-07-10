@@ -14,7 +14,7 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     term.get should be (LambdaApp(I(x), I(y)))
   }
 
-  private val parse = LambdaParser.parseAll(LambdaParser.term, _: String)
+  private val parse = LambdaParser.parseAll(LambdaParser.script, _: String)
 
   "A program just containing comments" should "be a valid (but empty) program" in {
     val program =
@@ -60,7 +60,11 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     "42",
 
     "(λa.b)", "(a b)",
-    "(λa.(a b))", "((a b) (a b))"
+    "(λa.(a b))", "((a b) (a b))",
+
+    // loads
+    "load foo/bar",
+    "load Foo10"
   )
 
   for (program <- validPrograms) {
@@ -74,7 +78,8 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     "'a",
     "(a b",
     "(a . b)",
-    "(\\\\a . b)"
+    "(\\\\a . b)",
+    "load #&*$"
   )
 
   for (program <- invalidPrograms) {
