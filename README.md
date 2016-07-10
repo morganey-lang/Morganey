@@ -41,6 +41,12 @@ entered lambda term.
 
 To quit the REPL just `^C` it.
 
+### Comments ###
+
+In Morganey there are two types of comments: single-line (starting
+with double slash `//`, extending to the end of the line) and
+multi-line comments (any text, surrounded by `/*` and `*/`).
+
 ### Unit Tests ###
 
 To run the Unit Tests enter the following in the source code directory
