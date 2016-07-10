@@ -63,19 +63,15 @@ object Main extends SignalHandler {
     val con = new ConsoleReader()
     con.setPrompt("λ> ")
 
-    def line(): String = {
-      val rawLine = con.readLine()
-      if (rawLine eq null) null
-      else rawLine.trim()
-    }
+    def line() = Option(con.readLine()).map(_.trim)
 
     val evalLine = handleLine(con) _
 
     while (running) line() match {
-      case null   => exitRepl() // eof
-      case ""     => ()
-      case "exit" => exitRepl()
-      case line   => evalLine(globalContext, line) foreach { context =>
+      case None         => exitRepl() // eof
+      case Some("")     => ()
+      case Some("exit") => exitRepl()
+      case Some(line)   => evalLine(globalContext, line) foreach { context =>
         globalContext = context
       }
     }
