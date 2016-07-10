@@ -1,7 +1,7 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.MorganeyInterpreter.{evalOneNodeComputation, evalOneNode, readNodes}
+import me.rexim.morganey.MorganeyInterpreter._
 import me.rexim.morganey.ReplHelper.smartShowTerm
 import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.Computation
@@ -75,18 +75,6 @@ object Main extends SignalHandler {
         globalContext = context
       }
     }
-  }
-
-  def evalNextNode(previousEval: MorganeyEval, nextNode: MorganeyNode): MorganeyEval = {
-    previousEval.flatMap(evalOneNode(nextNode))
-  }
-
-  def evalAllNodes(initialEval: MorganeyEval)(nodes: List[MorganeyNode]): MorganeyEval = {
-    nodes.foldLeft(initialEval)(evalNextNode)
-  }
-
-  def evalFile(fileName: String)(eval: MorganeyEval): Try[MorganeyEval] = {
-    readNodes(fileName).map(evalAllNodes(eval))
   }
 
   def main(args: Array[String]) = {

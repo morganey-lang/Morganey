@@ -1,11 +1,13 @@
 package me.rexim.morganey
 
 import java.io.FileReader
+import java.io.File
 
-import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyNode}
+import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.reduction.NormalOrder._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
+import me.rexim.morganey.module.ModuleFinder
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -14,9 +16,30 @@ import scala.util.{Failure, Success, Try}
 object MorganeyInterpreter {
   type Context = List[MorganeyBinding]
 
+  val moduleFinder = new ModuleFinder(List(new File("./std/")))
+
+  def evalNextNode(previousEval: MorganeyEval, nextNode: MorganeyNode): MorganeyEval = {
+    previousEval.flatMap(evalOneNode(nextNode))
+  }
+
+  def evalAllNodes(initialEval: MorganeyEval)(nodes: List[MorganeyNode]): MorganeyEval = {
+    nodes.foldLeft(initialEval)(evalNextNode)
+  }
+
+  def evalFile(fileName: String)(eval: MorganeyEval): Try[MorganeyEval] = {
+    readNodes(fileName).map(evalAllNodes(eval))
+  }
+
   def evalOneNode(node: MorganeyNode)(context: Context): MorganeyEval = {
     val computation = evalOneNodeComputation(node)(context)
     Await.result(computation.future, Duration.Inf)
+  }
+
+  def loadFile(context: Context)(file: File): Computation[MorganeyEval] = {
+    readNodes(file.getAbsolutePath()) match {
+      case Success(nodes) => Computation(evalNodes(nodes)(context))
+      case Failure(e) => Computation.fromFuture(Future.failed(e))
+    }
   }
 
   def evalOneNodeComputation(node: MorganeyNode)(context: Context): Computation[MorganeyEval] = {
@@ -30,6 +53,13 @@ object MorganeyInterpreter {
         term.addContext(context).norReduceComputation().map { resultTerm =>
           MorganeyEval(context, Some(resultTerm))
         }
+
+      case MorganeyLoading(modulePath) => {
+        moduleFinder.findModuleFile(modulePath) match {
+          case Some(moduleFile) => loadFile(context)(moduleFile)
+          case None => Computation.fromFuture(Future.failed(new IllegalArgumentException(s"$modulePath doesn't exist")))
+        }
+      }
     }
   }
 
