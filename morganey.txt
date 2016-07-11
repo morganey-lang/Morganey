@@ -1,6 +1,5 @@
-SUCC := (λn.(λf.(λx.(f ((n f) x)))))
-PLUS := (λm.(λn.(λf.(λx.((m f) ((n f) x))))))
-MULT := (λm.(λn.(λf.(m (n f)))))
+load arithmetic
+
 PAIR := (λx . (λy . (λ z . ((z x) y))))
 I := (λx . x)
 a0 := (λf . I)
