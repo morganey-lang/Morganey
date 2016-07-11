@@ -37,7 +37,7 @@ object MorganeyInterpreter {
 
   def loadFile(context: Context)(file: File): Computation[MorganeyEval] = {
     readNodes(file.getAbsolutePath()) match {
-      case Success(nodes) => Computation(evalNodes(nodes)(context))
+      case Success(nodes) => evalNodesComputation(nodes)(context).last
       case Failure(e) => Computation.fromFuture(Future.failed(e))
     }
   }
