@@ -23,8 +23,10 @@ trait Computation[T] { self =>
 }
 
 object Computation {
-  def apply[T](x: T): Computation[T] = new Computation[T] {
+  def apply[T](x: => T): Computation[T] = fromFuture(Future(x))
+
+  def fromFuture[T](f: Future[T]): Computation[T] = new Computation[T] {
     override def cancel(): Unit = ()
-    override def future: Future[T] = Future(x)
+    override def future: Future[T] = f
   }
 }

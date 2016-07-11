@@ -18,7 +18,7 @@ To run the REPL just enter the following in the source code directory
 
 and start typing REPL commands there. The syntax of the REPL commands is
 
-    <repl-command> := <term> | <binding>
+    <repl-command> := <term> | <binding> | <loading>
     <term> ::= <variable>
              | <numeric-literal>
              | <character-literal>
@@ -26,6 +26,8 @@ and start typing REPL commands there. The syntax of the REPL commands is
              | <function>
              | <application>
     <binding> ::= <variable> := <term>
+    <loading> ::= load <module-path>
+    <module-path> := [a-zA-Z][a-zA-Z0-9.]*
 
     <numeric-literal> ::= [0-9]+
     <character-literal> ::= '[\u0020-\u00B0]' | '\\[\\'"bfnrt]'
