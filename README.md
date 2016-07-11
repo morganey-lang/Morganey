@@ -27,7 +27,7 @@ and start typing REPL commands there. The syntax of the REPL commands is
              | <application>
     <binding> ::= <variable> := <term>
     <loading> ::= load <module-path>
-    <module-path> := [a-zA-Z][a-zA-Z0-9/]*
+    <module-path> := [a-zA-Z][a-zA-Z0-9.]*
 
     <numeric-literal> ::= [0-9]+
     <character-literal> ::= '[\u0020-\u00B0]' | '\\[\\'"bfnrt]'

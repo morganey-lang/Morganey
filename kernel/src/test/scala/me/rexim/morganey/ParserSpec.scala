@@ -63,7 +63,7 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     "(λa.(a b))", "((a b) (a b))",
 
     // loads
-    "load foo/bar",
+    "load foo.bar",
     "load Foo10"
   )
 

@@ -85,7 +85,7 @@ class LambdaParser extends JavaTokenParsers {
     }
 
   def modulePath: Parser[String] =
-    "[a-zA-Z][a-zA-Z0-9/]*".r
+    "[a-zA-Z][a-zA-Z0-9.]*".r
 
   def replCommand: Parser[MorganeyNode] = loading | binding | term
 

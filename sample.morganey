@@ -1,4 +1,4 @@
-load arithmetic
+load prelude
 
 PAIR := (λx . (λy . (λ z . ((z x) y))))
 I := (λx . x)
