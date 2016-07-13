@@ -6,15 +6,15 @@ import java.util.{List => Jlist}
 import jline.console.completer.Completer
 import me.rexim.morganey.ast.MorganeyBinding
 import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.interpreter.InterpreterContext
 
 import scala.annotation.tailrec
 import scala.util.Try
 
-class ReplAutocompletion(globalContext: () => List[MorganeyBinding],
-                         moduleFinder: () => ModuleFinder) extends Completer {
+class ReplAutocompletion(globalContext: () => InterpreterContext) extends Completer {
 
   override def complete(buffer: String, cursor: Int, candidates: Jlist[CharSequence]): Int = {
-    val knownVariableNames = globalContext().map(_.variable.name)
+    val knownVariableNames = globalContext().bindings.map(_.variable.name)
     val (beforeCursor, _) = buffer splitAt cursor
     lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames)
 
@@ -43,7 +43,7 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding],
   private def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean): List[String] = {
     import ModuleFinder._
 
-    val moduleFinder = this.moduleFinder()
+    val moduleFinder = this.globalContext().moduleFinder
 
     def validMorganeyElement(f: File) =
       f.isDirectory || isMorganeyModule(f)

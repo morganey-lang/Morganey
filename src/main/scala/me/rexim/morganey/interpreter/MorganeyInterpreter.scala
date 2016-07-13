@@ -14,10 +14,6 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
 object MorganeyInterpreter {
-  type Context = List[MorganeyBinding]
-
-  val moduleFinder = new ModuleFinder(List(new File("./std/")))
-
   def evalNextNode(previousEval: MorganeyEval, nextNode: MorganeyNode): MorganeyEval = {
     previousEval.flatMap(evalOneNode(nextNode))
   }
@@ -30,32 +26,32 @@ object MorganeyInterpreter {
     readNodes(fileName).map(evalAllNodes(eval))
   }
 
-  def evalOneNode(node: MorganeyNode)(context: Context): MorganeyEval = {
+  def evalOneNode(node: MorganeyNode)(context: InterpreterContext): MorganeyEval = {
     val computation = evalOneNodeComputation(node)(context)
     Await.result(computation.future, Duration.Inf)
   }
 
-  def loadFile(context: Context)(file: File): Computation[MorganeyEval] = {
+  def loadFile(context: InterpreterContext)(file: File): Computation[MorganeyEval] = {
     readNodes(file.getAbsolutePath()) match {
       case Success(nodes) => evalNodesComputation(nodes)(context).last
       case Failure(e) => Computation.fromFuture(Future.failed(e))
     }
   }
 
-  def evalOneNodeComputation(node: MorganeyNode)(context: Context): Computation[MorganeyEval] = {
+  def evalOneNodeComputation(node: MorganeyNode)(context: InterpreterContext): Computation[MorganeyEval] = {
     node match {
       case MorganeyBinding(variable, term) =>
-        term.addContext(context).norReduceComputation().map { resultTerm =>
-          MorganeyEval(MorganeyBinding(variable, resultTerm) :: context, Some(resultTerm))
+        term.addContext(context.bindings).norReduceComputation().map { resultTerm =>
+          MorganeyEval(context.addBinding(MorganeyBinding(variable, resultTerm)), Some(resultTerm))
         }
 
       case term: LambdaTerm =>
-        term.addContext(context).norReduceComputation().map { resultTerm =>
+        term.addContext(context.bindings).norReduceComputation().map { resultTerm =>
           MorganeyEval(context, Some(resultTerm))
         }
 
       case MorganeyLoading(modulePath) => {
-        moduleFinder.findModuleFile(modulePath) match {
+        context.moduleFinder.findModuleFile(modulePath) match {
           case Some(moduleFile) => loadFile(context)(moduleFile)
           case None => Computation.fromFuture(Future.failed(new IllegalArgumentException(s"$modulePath doesn't exist")))
         }
@@ -63,7 +59,7 @@ object MorganeyInterpreter {
     }
   }
 
-  def evalNodesComputation(nodes: List[MorganeyNode])(context: Context): Stream[Computation[MorganeyEval]] = {
+  def evalNodesComputation(nodes: List[MorganeyNode])(context: InterpreterContext): Stream[Computation[MorganeyEval]] = {
     lazy val computations: Stream[Computation[MorganeyEval]] =
       evalOneNodeComputation(nodes.head)(context) #:: computations.zip(nodes.tail).map {
         case (computation, node) => computation.flatMap(eval => evalOneNodeComputation(node)(eval.context))
@@ -71,7 +67,7 @@ object MorganeyInterpreter {
     computations
   }
 
-  def evalNodes(nodes: List[MorganeyNode])(context: Context): MorganeyEval =
+  def evalNodes(nodes: List[MorganeyNode])(context: InterpreterContext): MorganeyEval =
     nodes.foldLeft(MorganeyEval(context)) {
       (eval, node) => eval.flatMap(evalOneNode(node))
     }
