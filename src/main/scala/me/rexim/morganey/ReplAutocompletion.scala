@@ -85,7 +85,7 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Com
       // load |
       case (Nil, false)      => topLevelDefinitions().map(stripExtensionIfModuleFile).map(_.getName)
       // load math.ari|
-      case (xs :+ x, false)  => everythingIn(xs, _ startsWith x)
+      case (xs :+ x, false)  => everythingIn(xs, s => s.toLowerCase startsWith x.toLowerCase)
     }
   }
 
