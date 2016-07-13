@@ -65,9 +65,10 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Com
       if (isMorganeyModule(f)) new File(f.getParent, f.getName.replaceAll(s".$fileExtension", ""))
       else f
 
-    def everythingIn(path: List[String]) =
+    def everythingIn(path: List[String], fileNameFilter: String => Boolean = _ => true) =
       findAllModulesIn(path.mkString("."))
         .map { case (root, f) => (root, stripExtensionIfModuleFile(f)) }
+        .filter { case (root, f) => fileNameFilter(f.getName) }
         .map(relativize)
         .map(relativeFileToLoadPath)
 
@@ -84,7 +85,7 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Com
       // load |
       case (Nil, false)      => topLevelDefinitions().map(stripExtensionIfModuleFile).map(_.getName)
       // load math.ari|
-      case (xs :+ x, false)  => everythingIn(xs).filter(_ startsWith x)
+      case (xs :+ x, false)  => everythingIn(xs, _ startsWith x)
     }
   }
 
