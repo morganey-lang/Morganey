@@ -48,6 +48,12 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     autocomplete("suc", 3, bindings) should be (expect)
   }
 
+  it should "autocomplete names containing numbers, if the typed text matches them" in {
+    val bindings = List("a123", "a987")
+    autocomplete("a1", 2, bindings) should be (Set("a123"))
+    autocomplete("a9", 2, bindings) should be (Set("a987"))
+  }
+
   it should "autocomplete all known names, if nothing was typed into the repl" in {
     val bindings = List("SUCC", "PRED", "MULT", "PLUS")
     val expect = bindings.toSet

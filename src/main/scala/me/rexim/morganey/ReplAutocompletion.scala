@@ -43,35 +43,47 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Com
       name <- knownVariableNames
       matchLength = countPrefixMatch(line, name)
       if matchLength > 0
-      prefix = line.substring(0, line.length - matchLength)
+      prefix = line dropRight matchLength
     } yield prefix + name
 
   private def countPrefixMatch(line: String, definition: String): Int = {
     @tailrec
-    def helper(xs: List[Char], ys: List[Char], acc: Int): Int = (xs, ys) match {
-      case (xh :: xt, yh :: yt) =>
-        if (xh == yh) helper(xt, yt, acc + 1)
-        else acc
-      case _ =>
-        acc
+    def countMatchingLetters(xs: List[Char], ys: List[Char], acc: Int): Int = (xs, ys) match {
+      case (xh :: xt, yh :: yt) if xh == yh => countMatchingLetters(xt, yt, acc + 1)
+      case _                                => acc
     }
 
-    def normalize(s: String) =
-      s.toLowerCase.toList
+    def normalize(s: String) = s.toLowerCase.toList
+    val lineLowerCase = line.toLowerCase
+
+    /**
+      * Only autocomplete:
+      * - If the user typed in a single incomplete name: autocomplete if the name,
+      *    which was typed into the repl is a prefix of the name of a definition
+      * - If the user typed in a single name, which is part of a complex term
+      */
+    def keepNamesAndComplexTerms(nameInLine: String): Boolean = nameInLine match {
+      // input of repl is exactly `nameInLine`
+      case s if s == lineLowerCase     => definition startsWith lineLowerCase
+      // REPL has a complex term as input
+      case s if s.length < line.length => true
+      case _                           => false
+    }
 
     lastNameInLine(line)
-        .map(ln => helper(normalize(definition), normalize(ln), 0))
-        .getOrElse(0)
+      .filter(keepNamesAndComplexTerms)
+      .map(ln => countMatchingLetters(normalize(definition), normalize(ln), 0))
+      .getOrElse(0)
   }
 
-  private val reversedName = "[a-zA-Z0-9]*[a-zA-Z]"
+  private val namePattern = "[a-zA-Z][a-zA-Z0-9]*"
 
   private def lastNameInLine(line: String): Option[String] = {
     def stringMatches(n: Int): Option[String] =
-      Option(line takeRight n).filter(_.matches(reversedName))
+      Option(line takeRight n).filter(_.matches(namePattern))
 
     def size(str: Option[String]): Int =
-      str.map(_.length).getOrElse(0)
+      str.map(_.length).getOrElse(Int.MinValue)
 
     val lengths = (0 to line.length).toStream
     lengths.map(stringMatches).maxBy(size)
