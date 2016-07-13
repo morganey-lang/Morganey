@@ -62,7 +62,7 @@ object Main extends SignalHandler {
     var globalContext = List[MorganeyBinding]()
     val con = new ConsoleReader()
     con.setPrompt("λ> ")
-    con.addCompleter(new ReplAutocompletion(() => globalContext))
+    con.addCompleter(new ReplAutocompletion(() => globalContext, () => moduleFinder))
 
     def line() = Option(con.readLine()).map(_.trim)
 
