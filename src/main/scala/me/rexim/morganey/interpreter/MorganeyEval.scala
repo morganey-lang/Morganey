@@ -1,4 +1,4 @@
-package me.rexim.morganey
+package me.rexim.morganey.interpreter
 
 import me.rexim.morganey.ast.LambdaTerm
 

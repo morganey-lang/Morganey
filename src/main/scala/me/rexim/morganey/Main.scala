@@ -1,7 +1,8 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.MorganeyInterpreter._
+import me.rexim.morganey.interpreter.MorganeyInterpreter._
+import me.rexim.morganey.interpreter.MorganeyEval
 import me.rexim.morganey.ReplHelper.smartShowTerm
 import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.Computation
