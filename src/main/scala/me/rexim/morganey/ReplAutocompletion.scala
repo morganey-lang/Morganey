@@ -14,27 +14,21 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Com
     val (beforeCursor, _) = buffer splitAt cursor
     lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames)
 
-    if (knownVariableNames.isEmpty) {
+    def autoCompleteWith(xs: List[String]) = {
+      for (elem <- xs) candidates.add(elem)
+      if (candidates.isEmpty) -1 else 0
+    }
+
+    beforeCursor match {
       // if there are no names, REPL can't autocomplete
-      -1
-    } else if (definitions.nonEmpty) {
-      // if there are matching definitions, use them for autocompletion
-      for (definition <- definitions) candidates.add(definition)
-      0
-    } else {
-      // if there aren't any matching definitions
-      if (buffer.trim.isEmpty) {
-        // .. and nothing was typed in the REPL, yet:
-        // autocomplete with all known variable names
-        for (name <- knownVariableNames) candidates.add(name)
-      } else {
-        // .. and something was typed in the REPL, yet:
-        // autocomplete with all variable names starting with it
-        for (name <- knownVariableNames) {
-          if (name.toLowerCase startsWith beforeCursor.toLowerCase) candidates.add(name)
-        }
-      }
-      0
+      case _ if knownVariableNames.isEmpty => -1
+      // if there are definitions matching the users input, use them for completion
+      case _ if definitions.nonEmpty       => autoCompleteWith(definitions)
+      // if nothing was typed into the repl, autocomplete with all known names
+      case _ if buffer.trim.isEmpty        => autoCompleteWith(knownVariableNames)
+      // if something was typed into the repl, autocomplete with all names starting with the input text
+      case _                               =>
+        autoCompleteWith(knownVariableNames filter (_.toLowerCase startsWith beforeCursor.toLowerCase))
     }
   }
 
