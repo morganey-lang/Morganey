@@ -10,7 +10,8 @@ import me.rexim.morganey.module.ModuleFinder
 import scala.annotation.tailrec
 import scala.util.Try
 
-class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Completer {
+class ReplAutocompletion(globalContext: () => List[MorganeyBinding],
+                         moduleFinder: () => ModuleFinder) extends Completer {
 
   override def complete(buffer: String, cursor: Int, candidates: Jlist[CharSequence]): Int = {
     val knownVariableNames = globalContext().map(_.variable.name)
@@ -40,8 +41,9 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Com
   }
 
   private def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean): List[String] = {
-    import MorganeyInterpreter.moduleFinder
     import ModuleFinder._
+
+    val moduleFinder = this.moduleFinder()
 
     def validMorganeyElement(f: File) =
       f.isDirectory || isMorganeyModule(f)
