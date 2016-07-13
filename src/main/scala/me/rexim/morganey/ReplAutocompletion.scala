@@ -1,11 +1,14 @@
 package me.rexim.morganey
 
+import java.io.File
 import java.util.{List => Jlist}
 
 import jline.console.completer.Completer
 import me.rexim.morganey.ast.MorganeyBinding
+import me.rexim.morganey.module.ModuleFinder
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Completer {
 
@@ -20,16 +23,79 @@ class ReplAutocompletion(globalContext: () => List[MorganeyBinding]) extends Com
     }
 
     beforeCursor match {
+      // if a load statement was typed in (potential partially)
+      case LoadStatement(parts, endsWithDot) =>
+        val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot)
+        autoCompleteWith(autocompletedModules map (m => s"load $m"))
       // if there are no names, REPL can't autocomplete
-      case _ if knownVariableNames.isEmpty => -1
+      case _ if knownVariableNames.isEmpty   => -1
       // if there are definitions matching the users input, use them for completion
-      case _ if definitions.nonEmpty       => autoCompleteWith(definitions)
+      case _ if definitions.nonEmpty         => autoCompleteWith(definitions)
       // if nothing was typed into the repl, autocomplete with all known names
-      case _ if buffer.trim.isEmpty        => autoCompleteWith(knownVariableNames)
+      case _ if buffer.trim.isEmpty          => autoCompleteWith(knownVariableNames)
       // if something was typed into the repl, autocomplete with all names starting with the input text
-      case _                               =>
+      case _                                 =>
         autoCompleteWith(knownVariableNames filter (_.toLowerCase startsWith beforeCursor.toLowerCase))
     }
+  }
+
+  private def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean): List[String] = {
+    import MorganeyInterpreter.moduleFinder
+    import ModuleFinder._
+
+    def validMorganeyElement(f: File) =
+      f.isDirectory || isMorganeyModule(f)
+
+    def topLevelDefinitions() =
+      moduleFinder.paths.filter(validMorganeyElement)
+
+    // List(root-file-of-module-path, module-file or directory)
+    def findAllModulesIn(path: String): List[(File, File)] =
+      Try(
+        moduleFinder.paths.toStream
+          .map { f => (f, new File(f, loadPathToRelativeFile(path))) }
+          .filter { case (_, f) => f.exists() }
+          .flatMap { case (root, f) => f.listFiles() map (root -> _) }
+          .filter { case (_, f) => validMorganeyElement(f) }
+          .distinct
+          .toList
+      ).toOption.getOrElse(Nil)
+
+    def stripExtensionIfModuleFile(f: File): File =
+      if (isMorganeyModule(f)) new File(f.getParent, f.getName.replaceAll(s".$fileExtension", ""))
+      else f
+
+    def everythingIn(path: List[String]) =
+      findAllModulesIn(path.mkString("."))
+        .map { case (root, f) => (root, stripExtensionIfModuleFile(f)) }
+        .map(relativize)
+        .map(relativeFileToLoadPath)
+
+    def relativize(baseAndFile: (File, File)): String = {
+      val (base, file) = baseAndFile
+      base.toURI().relativize(file.toURI()).getPath()
+    }
+
+    (parts, endsWithDot) match {
+      // load .|
+      case (Nil, true)       => Nil
+      // load a.b.|
+      case (xs, true)        => everythingIn(xs)
+      // load |
+      case (Nil, false)      => topLevelDefinitions().map(stripExtensionIfModuleFile).map(_.getName)
+      // load math.ari|
+      case (xs :+ x, false)  => everythingIn(xs).filter(_ startsWith x)
+    }
+  }
+
+  private object LoadStatement {
+    private val loadStatement = "load (.*)".r
+
+    def unapply(line: String): Option[(List[String], Boolean)] =
+      Option(line) collect {
+        case loadStatement(modulePath) =>
+          (modulePath.split("\\.").toList, modulePath.endsWith("."))
+      }
   }
 
   private def matchingDefinitions(line: String, knownVariableNames: List[String]): List[String] =
