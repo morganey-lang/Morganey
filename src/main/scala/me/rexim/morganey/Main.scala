@@ -60,12 +60,11 @@ object Main extends SignalHandler {
     }
   }
 
-  def startRepl() = {
+  def startRepl(context: InterpreterContext) = {
     Signal.handle(new Signal("INT"), this)
 
     val running = true
-    var globalContext = InterpreterContext(List[MorganeyBinding](),
-      new ModuleFinder(List(new File("./std/"))))
+    var globalContext = context
     val con = new ConsoleReader()
     con.setPrompt("λ> ")
     con.addCompleter(new ReplAutocompletion(() => globalContext))
@@ -84,18 +83,23 @@ object Main extends SignalHandler {
     }
   }
 
+  def startProgram(context: InterpreterContext, args: Array[String]) = {
+    val result = args.toStream.foldLeft[Try[MorganeyEval]](Success(MorganeyEval(context, None))) { (evalTry, fileName) =>
+      evalTry.flatMap(evalFile(fileName))
+    } match {
+      case Failure(e) => println(s"[ERROR] ${e.getMessage}")
+      case Success(eval) => eval.result.foreach(t => println(smartShowTerm(t)))
+    }
+  }
+
   def main(args: Array[String]) = {
+    val context =
+      InterpreterContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/"))))
+
     if (args.isEmpty) {
-      startRepl()
+      startRepl(context)
     } else {
-      var globalContext = InterpreterContext(List[MorganeyBinding](),
-        new ModuleFinder(List(new File("./std/"))))
-      val result = args.toStream.foldLeft[Try[MorganeyEval]](Success(MorganeyEval(globalContext, None))) { (evalTry, fileName) =>
-        evalTry.flatMap(evalFile(fileName))
-      } match {
-        case Failure(e) => println(s"[ERROR] ${e.getMessage}")
-        case Success(eval) => eval.result.foreach(t => println(smartShowTerm(t)))
-      }
+      startProgram(context, args)
     }
   }
 }
