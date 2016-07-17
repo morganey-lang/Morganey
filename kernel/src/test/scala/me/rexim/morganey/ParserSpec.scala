@@ -88,4 +88,25 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     }
   }
 
+
+  "Morganey module" should "consist of loadings and bindings only" in {
+    val validModule =
+      """
+        |load foo
+        |load bar
+        |x := 1
+      """.stripMargin
+
+    val invalidModule =
+      """
+        |load foo
+        |load bar
+        |(x (y z))
+        |x := 1
+      """.stripMargin
+
+    LambdaParser.parseAll(LambdaParser.module, validModule).successful should be (true)
+    LambdaParser.parseAll(LambdaParser.module, invalidModule).successful should be (false)
+  }
+
 }

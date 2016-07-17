@@ -90,4 +90,6 @@ class LambdaParser extends JavaTokenParsers {
   def replCommand: Parser[MorganeyNode] = loading | binding | term
 
   def script: Parser[List[MorganeyNode]] = rep(replCommand)
+
+  def module: Parser[List[MorganeyNode]] = rep(loading | binding)
 }
