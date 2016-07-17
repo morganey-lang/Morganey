@@ -1,5 +1,10 @@
 package me.rexim.morganey
 
+import java.io.{FileInputStream, InputStreamReader, Reader}
+import java.nio.charset.StandardCharsets.UTF_8
+
+import scala.util.Try
+
 package object util {
 
   /**
@@ -26,4 +31,10 @@ package object util {
       }
       case c => c + unquoteString(s.tail)
     }
+
+  def reader(path: String): Try[Reader] = {
+    val inputStream = Try(new FileInputStream(path))
+    inputStream.map(new InputStreamReader(_, UTF_8))
+  }
+
 }
