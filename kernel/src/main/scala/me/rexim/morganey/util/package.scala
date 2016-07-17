@@ -1,6 +1,6 @@
 package me.rexim.morganey
 
-import java.io.{FileInputStream, InputStreamReader, Reader}
+import java.io.{FileInputStream, InputStreamReader, Reader, File}
 import java.nio.charset.StandardCharsets.UTF_8
 
 import scala.util.Try
@@ -32,16 +32,20 @@ package object util {
       case c => c + unquoteString(s.tail)
     }
 
-  def reader(path: String): Try[Reader] = {
-    val inputStream = Try(new FileInputStream(path))
+  def reader(path: String): Try[Reader] = reader(new File(path))
+
+  def reader(file: File): Try[Reader] = {
+    val inputStream = Try(new FileInputStream(file))
     inputStream.map(new InputStreamReader(_, UTF_8))
   }
 
   def withReader[T](path: String)(f: Reader => Try[T]): Try[T] =
-    reader(path).flatMap { reader =>
+    withReader(new File(path))(f)
+
+  def withReader[T](file: File)(f: Reader => Try[T]): Try[T] =
+    reader(file).flatMap { reader =>
       val result = f(reader)
       reader.close()
       result
     }
-
 }
