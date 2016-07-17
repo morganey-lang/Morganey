@@ -1,6 +1,5 @@
 package me.rexim.morganey.interpreter
 
-import java.io.FileReader
 import java.io.File
 
 import me.rexim.morganey.ast._
@@ -8,6 +7,7 @@ import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.reduction.NormalOrder._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
 import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.util._
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -80,9 +80,5 @@ object MorganeyInterpreter {
     }
 
   def readNodes(fileName: String): Try[List[MorganeyNode]] =
-    Try(new FileReader(fileName)).flatMap { reader =>
-      val nodes = readNodes(reader)
-      reader.close()
-      nodes
-    }
+    withReader(fileName)(readNodes)
 }
