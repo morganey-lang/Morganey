@@ -80,9 +80,5 @@ object MorganeyInterpreter {
     }
 
   def readNodes(fileName: String): Try[List[MorganeyNode]] =
-    reader(fileName).flatMap { reader =>
-      val nodes = readNodes(reader)
-      reader.close()
-      nodes
-    }
+    withReader(fileName)(readNodes)
 }

@@ -37,4 +37,11 @@ package object util {
     inputStream.map(new InputStreamReader(_, UTF_8))
   }
 
+  def withReader[T](path: String)(f: Reader => Try[T]): Try[T] =
+    reader(path).flatMap { reader =>
+      val result = f(reader)
+      reader.close()
+      result
+    }
+
 }
