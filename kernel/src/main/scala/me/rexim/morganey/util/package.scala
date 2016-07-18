@@ -7,13 +7,6 @@ import scala.util.Try
 
 package object util {
 
-  val OS_NAME_KEY      = "os.name"
-  val osName           = System.getProperty(OS_NAME_KEY)
-
-  val windowsOsName    = "windows"
-
-  val runningOnWindows = osName.toLowerCase contains windowsOsName
-
   /**
    * Returns 'None', if one of the Options in 'lst' is 'None',
    * otherwise the elements are collected in a 'Some'.

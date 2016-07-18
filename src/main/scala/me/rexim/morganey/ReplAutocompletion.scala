@@ -7,7 +7,6 @@ import jline.console.completer.Completer
 import me.rexim.morganey.ast.MorganeyBinding
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.InterpreterContext
-import me.rexim.morganey.util._
 
 import scala.annotation.tailrec
 import scala.util.Try
@@ -73,17 +72,13 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
         .map { case (root, f) => (root, stripExtensionIfModuleFile(f)) }
         .filter { case (root, f) => fileNameFilter(f.getName) }
         .map(relativize)
-        .map(fixRelativePathForWindows)
+        .map(_.replace('/', File.separatorChar))
         .map(relativeFileToLoadPath)
 
     def relativize(baseAndFile: (File, File)): String = {
       val (base, file) = baseAndFile
       base.toURI().relativize(file.toURI()).getPath()
     }
-
-    def fixRelativePathForWindows(path: String): String =
-      if (runningOnWindows) path.replace('/', File.separatorChar)
-      else path
 
     (parts, endsWithDot) match {
       // load .|
