@@ -72,6 +72,7 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
         .map { case (root, f) => (root, stripExtensionIfModuleFile(f)) }
         .filter { case (root, f) => fileNameFilter(f.getName) }
         .map(relativize)
+        .map(_.replace('/', File.separatorChar))
         .map(relativeFileToLoadPath)
 
     def relativize(baseAndFile: (File, File)): String = {
