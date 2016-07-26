@@ -39,8 +39,8 @@ object Main extends SignalHandler {
   }
 
   def handleLine(con: ConsoleReader)(globalContext: InterpreterContext, line: String): Option[InterpreterContext] = {
-    import LambdaParser.{parse, replCommand}
-    val nodeParseResult = parse(replCommand, line)
+    import LambdaParser.{parseAll, replCommand}
+    val nodeParseResult = parseAll(replCommand, line)
 
     if (nodeParseResult.successful) {
       val node = nodeParseResult.get
