@@ -36,6 +36,6 @@ object Language {
 
   val leftParentheis     = "("
 
-  val rightParentheis     = ")"
+  val rightParentheis    = ")"
 
 }
