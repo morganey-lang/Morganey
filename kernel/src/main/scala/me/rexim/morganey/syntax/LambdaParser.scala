@@ -3,6 +3,7 @@ package me.rexim.morganey.syntax
 import me.rexim.morganey.ast._
 import me.rexim.morganey.church.{ChurchNumberConverter, ChurchPairConverter}
 import me.rexim.morganey.util._
+import me.rexim.morganey.syntax.Language._
 
 import scala.util.parsing.combinator._
 
@@ -20,37 +21,27 @@ object LambdaParser extends LambdaParser
 class LambdaParser extends JavaTokenParsers {
 
   /* comment-regex taken from: http://stackoverflow.com/a/5954831 */
-  protected override val whiteSpace = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+""".r
+  protected override val whiteSpace = whiteSpacePattern.r
 
   def variable: Parser[LambdaVar] = {
-    "[a-zA-Z][a-zA-Z0-9]*".r ^^ {
+    identifier.r ^^ {
       name => LambdaVar(name)
     }
   }
 
   def numericLiteral: Parser[LambdaTerm] =
-    "[0-9]+".r ^? ({
+    numberLiteral.r ^? ({
       case IntMatcher(x) => ChurchNumberConverter.encodeNumber(x)
     }, { (rawInt) => s"`$rawInt' is too big"})
 
   def characterLiteral: Parser[LambdaTerm] = (
-    """'\\[\\'"bfnrt]'""".r ^^ { s =>
+    escapedCharLiteral.r ^^ { s =>
       ChurchNumberConverter.encodeNumber(escapeSequences(s charAt 2))
     }
-  | "'[\u0020-\u00B0]'".r ^^ { s =>
+      | symbolCharLiteral.r ^^ { s =>
       ChurchNumberConverter.encodeNumber(s charAt 1)
     }
-  )
-
-  /** For handling escape sequences, which are currently supported as `characterLiteral` */
-  private def escapeSequences =
-    Map[Char, Char](
-      'b' -> '\b',
-      'f' -> '\f',
-      'n' -> '\n',
-      'r' -> '\r',
-      't' -> '\t'
-    ) withDefault identity
+    )
 
   def stringLiteralTerm: Parser[LambdaTerm] =
     stringLiteral ^^ {
@@ -59,15 +50,20 @@ class LambdaParser extends JavaTokenParsers {
       }
     }
 
+  private def lambda = lambdaLetter | lambdaSlash
+
+  private def parenthesis[T](p: Parser[T]): Parser[T] =
+    leftParentheis ~> p <~ rightParentheis
+
   def func: Parser[LambdaFunc] = {
-    "(" ~ ("λ" | "\\") ~ variable ~ "." ~ term ~ ")" ^^ {
-      case "(" ~ _ ~ v ~ "." ~ t ~ ")" => LambdaFunc(v, t)
+    parenthesis(lambda ~ variable ~ abstractionDot ~ term) ^^ {
+      case _ ~ v ~ _ ~ t => LambdaFunc(v, t)
     }
   }
 
   def application: Parser[LambdaApp] = {
-    "(" ~ term ~ term ~ ")" ^^ {
-      case "(" ~ t1 ~ t2 ~ ")" => LambdaApp(t1, t2)
+    parenthesis(term ~ term) ^^ {
+      case t1 ~ t2 => LambdaApp(t1, t2)
     }
   }
 
@@ -75,19 +71,17 @@ class LambdaParser extends JavaTokenParsers {
     variable | numericLiteral | characterLiteral | stringLiteralTerm | func | application
 
   def binding: Parser[MorganeyBinding] =
-    variable ~ ":=" ~ term ^^ {
+    variable ~ bindingAssign ~ term ^^ {
       case lambdaVar ~ _ ~ term => MorganeyBinding(lambdaVar, term)
     }
 
   def loading: Parser[MorganeyLoading] =
-    "load" ~ modulePath ^^ {
-      case "load" ~ path => MorganeyLoading(path)
+    loadKeyword ~ modulePath.r ^^ {
+      case _ ~ path => MorganeyLoading(path)
     }
-
-  def modulePath: Parser[String] =
-    "[a-zA-Z][a-zA-Z0-9.]*".r
 
   def replCommand: Parser[MorganeyNode] = loading | binding | term
 
   def script: Parser[List[MorganeyNode]] = rep(replCommand)
+
 }
