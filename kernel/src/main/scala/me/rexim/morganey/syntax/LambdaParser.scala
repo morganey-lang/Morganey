@@ -49,7 +49,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   private def lambda = lambdaLetter | lambdaSlash
 
   private def parenthesis[T](p: Parser[T]): Parser[T] =
-    leftParentheis ~> p <~ rightParentheis
+    leftParenthesis ~> p <~ rightParenthesis
 
   def func: Parser[LambdaFunc] =
     parenthesis((lambda ~> variable) ~ (abstractionDot ~> term)) ^^ { LambdaFunc }

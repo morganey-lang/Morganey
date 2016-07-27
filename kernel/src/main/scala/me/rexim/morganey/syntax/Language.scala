@@ -34,8 +34,8 @@ object Language {
 
   val whiteSpacePattern  = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+"""
 
-  val leftParentheis     = "("
+  val leftParenthesis    = "("
 
-  val rightParentheis    = ")"
+  val rightParenthesis   = ")"
 
 }
