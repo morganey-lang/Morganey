@@ -18,16 +18,13 @@ object IntMatcher {
 
 object LambdaParser extends LambdaParser
 
-class LambdaParser extends JavaTokenParsers {
+class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
   /* comment-regex taken from: http://stackoverflow.com/a/5954831 */
   protected override val whiteSpace = whiteSpacePattern.r
 
-  def variable: Parser[LambdaVar] = {
-    identifier.r ^^ {
-      name => LambdaVar(name)
-    }
-  }
+  def variable: Parser[LambdaVar] =
+    identifier.r ^^ { LambdaVar }
 
   def numericLiteral: Parser[LambdaTerm] =
     numberLiteral.r ^? ({
@@ -38,16 +35,14 @@ class LambdaParser extends JavaTokenParsers {
     escapedCharLiteral.r ^^ { s =>
       ChurchNumberConverter.encodeNumber(escapeSequences(s charAt 2))
     }
-      | symbolCharLiteral.r ^^ { s =>
+    | symbolCharLiteral.r ^^ { s =>
       ChurchNumberConverter.encodeNumber(s charAt 1)
     }
-    )
+  )
 
   def stringLiteralTerm: Parser[LambdaTerm] =
-    stringLiteral ^^ {
-      case s => {
-        ChurchPairConverter.encodeString(unquoteString(s)).get
-      }
+    stringLiteral ^^ { s =>
+      ChurchPairConverter.encodeString(unquoteString(s)).get
     }
 
   private def lambda = lambdaLetter | lambdaSlash
@@ -55,30 +50,20 @@ class LambdaParser extends JavaTokenParsers {
   private def parenthesis[T](p: Parser[T]): Parser[T] =
     leftParentheis ~> p <~ rightParentheis
 
-  def func: Parser[LambdaFunc] = {
-    parenthesis(lambda ~ variable ~ abstractionDot ~ term) ^^ {
-      case _ ~ v ~ _ ~ t => LambdaFunc(v, t)
-    }
-  }
+  def func: Parser[LambdaFunc] =
+    parenthesis((lambda ~> variable) ~ (abstractionDot ~> term)) ^^ { LambdaFunc }
 
-  def application: Parser[LambdaApp] = {
-    parenthesis(term ~ term) ^^ {
-      case t1 ~ t2 => LambdaApp(t1, t2)
-    }
-  }
+  def application: Parser[LambdaApp] =
+    parenthesis(term ~ term) ^^ { LambdaApp }
 
   def term: Parser[LambdaTerm] =
     variable | numericLiteral | characterLiteral | stringLiteralTerm | func | application
 
   def binding: Parser[MorganeyBinding] =
-    variable ~ bindingAssign ~ term ^^ {
-      case lambdaVar ~ _ ~ term => MorganeyBinding(lambdaVar, term)
-    }
+    (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
 
   def loading: Parser[MorganeyLoading] =
-    loadKeyword ~ modulePath.r ^^ {
-      case _ ~ path => MorganeyLoading(path)
-    }
+    loadKeyword ~> modulePath.r ^^ { MorganeyLoading }
 
   def replCommand: Parser[MorganeyNode] = loading | binding | term
 
