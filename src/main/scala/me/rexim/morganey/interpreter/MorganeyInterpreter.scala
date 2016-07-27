@@ -76,11 +76,7 @@ object MorganeyInterpreter {
     }
 
   def readNodes(reader: java.io.Reader): Try[List[MorganeyNode]] =
-    Try(LambdaParser.parseAll(LambdaParser.script, reader)).flatMap {
-      case parsedCode => parsedCode
-        .map(Success(_))
-        .getOrElse(Failure(new LambdaParserException(s"${parsedCode.toString}")))
-    }
+    LambdaParser.parseWith(reader, _.script)
 
   def readNodes(fileName: String): Try[List[MorganeyNode]] =
     withReader(fileName)(readNodes)
