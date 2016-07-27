@@ -29,4 +29,7 @@ object Computation {
     override def cancel(): Unit = ()
     override def future: Future[T] = f
   }
+
+  def failed[T](message: String, exception: String => Throwable): Computation[T] =
+    fromFuture(Future.failed(exception(message)))
 }

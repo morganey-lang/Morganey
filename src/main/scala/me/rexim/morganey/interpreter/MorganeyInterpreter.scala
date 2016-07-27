@@ -50,10 +50,13 @@ object MorganeyInterpreter {
           MorganeyEval(context, Some(resultTerm))
         }
 
-      case MorganeyLoading(modulePath) => {
-        context.moduleFinder.findModuleFile(modulePath) match {
-          case Some(moduleFile) => loadFile(context)(moduleFile)
-          case None => Computation.fromFuture(Future.failed(new IllegalArgumentException(s"$modulePath doesn't exist")))
+      case MorganeyLoading(optionalModulePath) => {
+        optionalModulePath match {
+          case Some(modulePath) => context.moduleFinder.findModuleFile(modulePath) match {
+            case Some(moduleFile) => loadFile(context)(moduleFile)
+            case None => Computation.failed(s"$modulePath doesn't exist", new IllegalArgumentException(_))
+          }
+          case None => Computation.failed("Module path was not specified!", new IllegalArgumentException(_))
         }
       }
     }

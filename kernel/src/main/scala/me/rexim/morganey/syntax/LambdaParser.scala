@@ -6,6 +6,7 @@ import me.rexim.morganey.util._
 import me.rexim.morganey.syntax.Language._
 
 import scala.util.parsing.combinator._
+import scala.language.postfixOps
 
 object IntMatcher {
   def unapply(rawInt: String): Option[Int] =
@@ -63,7 +64,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
     (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
 
   def loading: Parser[MorganeyLoading] =
-    loadKeyword ~> modulePath.r ^^ { MorganeyLoading }
+    loadKeyword ~> (modulePath.r ?) ^^ { MorganeyLoading }
 
   def replCommand: Parser[MorganeyNode] = loading | binding | term
 
