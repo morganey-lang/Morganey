@@ -41,16 +41,19 @@ object Main extends SignalHandler {
 
   def handleLine(con: ConsoleReader)(globalContext: InterpreterContext, line: String): Option[InterpreterContext] = {
     val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
-    nodeParseResult.toOption flatMap { node =>
+
+    val evaluationResult = nodeParseResult flatMap { node =>
       val computation = evalOneNodeComputation(node)(globalContext)
-      awaitComputationResult(computation) match {
-        case Success(MorganeyEval(context, result)) =>
-          result.foreach(t => con.println(smartShowTerm(t)))
-          Some(context)
-        case Failure(e) =>
-          con.println(e.getMessage)
-          None
-      }
+      awaitComputationResult(computation)
+    }
+
+    evaluationResult match {
+      case Success(MorganeyEval(context, result)) =>
+        result.foreach(t => con.println(smartShowTerm(t)))
+        Some(context)
+      case Failure(e) =>
+        con.println(e.getMessage)
+        None
     }
   }
 
