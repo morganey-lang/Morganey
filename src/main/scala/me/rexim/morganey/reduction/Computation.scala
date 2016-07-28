@@ -30,6 +30,6 @@ object Computation {
     override def future: Future[T] = f
   }
 
-  def failed[T](message: String, exception: String => Throwable): Computation[T] =
-    fromFuture(Future.failed(exception(message)))
+  def failed[T](exception: Throwable): Computation[T] =
+    fromFuture(Future.failed(exception))
 }
