@@ -50,10 +50,13 @@ object MorganeyInterpreter {
           MorganeyEval(context, Some(resultTerm))
         }
 
-      case MorganeyLoading(modulePath) => {
-        context.moduleFinder.findModuleFile(modulePath) match {
-          case Some(moduleFile) => loadFile(context)(moduleFile)
-          case None => Computation.fromFuture(Future.failed(new IllegalArgumentException(s"$modulePath doesn't exist")))
+      case MorganeyLoading(optionalModulePath) => {
+        optionalModulePath match {
+          case Some(modulePath) => context.moduleFinder.findModuleFile(modulePath) match {
+            case Some(moduleFile) => loadFile(context)(moduleFile)
+            case None => Computation.failed(new IllegalArgumentException(s"$modulePath doesn't exist"))
+          }
+          case None => Computation.failed(new IllegalArgumentException("Module path was not specified!"))
         }
       }
     }
@@ -73,11 +76,7 @@ object MorganeyInterpreter {
     }
 
   def readNodes(reader: java.io.Reader): Try[List[MorganeyNode]] =
-    Try(LambdaParser.parseAll(LambdaParser.script, reader)).flatMap {
-      case parsedCode => parsedCode
-        .map(Success(_))
-        .getOrElse(Failure(new LambdaParserException(s"${parsedCode.toString}")))
-    }
+    LambdaParser.parseWith(reader, _.script)
 
   def readNodes(fileName: String): Try[List[MorganeyNode]] =
     withReader(fileName)(readNodes)

@@ -9,6 +9,7 @@ import me.rexim.morganey.ReplHelper.smartShowTerm
 import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.syntax.LambdaParser
+import me.rexim.morganey.util._
 import sun.misc.{Signal, SignalHandler}
 
 import scala.concurrent.Await
@@ -39,24 +40,20 @@ object Main extends SignalHandler {
   }
 
   def handleLine(con: ConsoleReader)(globalContext: InterpreterContext, line: String): Option[InterpreterContext] = {
-    import LambdaParser.{parseAll, replCommand}
-    val nodeParseResult = parseAll(replCommand, line)
+    val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
 
-    if (nodeParseResult.successful) {
-      val node = nodeParseResult.get
+    val evaluationResult = nodeParseResult flatMap { node =>
       val computation = evalOneNodeComputation(node)(globalContext)
+      awaitComputationResult(computation)
+    }
 
-      awaitComputationResult(computation) match {
-        case Success(MorganeyEval(context, result)) =>
-          result.foreach(t => con.println(smartShowTerm(t)))
-          Some(context)
-        case Failure(e) =>
-          con.println(e.getMessage)
-          None
-      }
-    } else {
-      con.println(nodeParseResult.toString)
-      None
+    evaluationResult match {
+      case Success(MorganeyEval(context, result)) =>
+        result.foreach(t => con.println(smartShowTerm(t)))
+        Some(context)
+      case Failure(e) =>
+        con.println(e.getMessage)
+        None
     }
   }
 

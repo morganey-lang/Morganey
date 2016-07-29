@@ -3,8 +3,10 @@ package me.rexim.morganey.syntax
 import me.rexim.morganey.ast._
 import me.rexim.morganey.church.{ChurchNumberConverter, ChurchPairConverter}
 import me.rexim.morganey.util._
+import me.rexim.morganey.syntax.Language._
 
 import scala.util.parsing.combinator._
+import scala.language.postfixOps
 
 object IntMatcher {
   def unapply(rawInt: String): Option[Int] =
@@ -17,77 +19,55 @@ object IntMatcher {
 
 object LambdaParser extends LambdaParser
 
-class LambdaParser extends JavaTokenParsers {
+class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
   /* comment-regex taken from: http://stackoverflow.com/a/5954831 */
-  protected override val whiteSpace = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+""".r
+  protected override val whiteSpace = whiteSpacePattern.r
 
-  def variable: Parser[LambdaVar] = {
-    "[a-zA-Z][a-zA-Z0-9]*".r ^^ {
-      name => LambdaVar(name)
-    }
-  }
+  def variable: Parser[LambdaVar] =
+    identifier.r ^^ { LambdaVar }
 
   def numericLiteral: Parser[LambdaTerm] =
-    "[0-9]+".r ^? ({
+    numberLiteral.r ^? ({
       case IntMatcher(x) => ChurchNumberConverter.encodeNumber(x)
     }, { (rawInt) => s"`$rawInt' is too big"})
 
   def characterLiteral: Parser[LambdaTerm] = (
-    """'\\[\\'"bfnrt]'""".r ^^ { s =>
+    escapedCharLiteral.r ^^ { s =>
       ChurchNumberConverter.encodeNumber(escapeSequences(s charAt 2))
     }
-  | "'[\u0020-\u00B0]'".r ^^ { s =>
+    | symbolCharLiteral.r ^^ { s =>
       ChurchNumberConverter.encodeNumber(s charAt 1)
     }
   )
 
-  /** For handling escape sequences, which are currently supported as `characterLiteral` */
-  private def escapeSequences =
-    Map[Char, Char](
-      'b' -> '\b',
-      'f' -> '\f',
-      'n' -> '\n',
-      'r' -> '\r',
-      't' -> '\t'
-    ) withDefault identity
-
   def stringLiteralTerm: Parser[LambdaTerm] =
-    stringLiteral ^^ {
-      case s => {
-        ChurchPairConverter.encodeString(unquoteString(s)).get
-      }
+    stringLiteral ^^ { s =>
+      ChurchPairConverter.encodeString(unquoteString(s)).get
     }
 
-  def func: Parser[LambdaFunc] = {
-    "(" ~ ("λ" | "\\") ~ variable ~ "." ~ term ~ ")" ^^ {
-      case "(" ~ _ ~ v ~ "." ~ t ~ ")" => LambdaFunc(v, t)
-    }
-  }
+  private def lambda = lambdaLetter | lambdaSlash
 
-  def application: Parser[LambdaApp] = {
-    "(" ~ term ~ term ~ ")" ^^ {
-      case "(" ~ t1 ~ t2 ~ ")" => LambdaApp(t1, t2)
-    }
-  }
+  private def parenthesis[T](p: Parser[T]): Parser[T] =
+    leftParenthesis ~> p <~ rightParenthesis
+
+  def func: Parser[LambdaFunc] =
+    parenthesis((lambda ~> variable) ~ (abstractionDot ~> term)) ^^ { LambdaFunc }
+
+  def application: Parser[LambdaApp] =
+    parenthesis(term ~ term) ^^ { LambdaApp }
 
   def term: Parser[LambdaTerm] =
     variable | numericLiteral | characterLiteral | stringLiteralTerm | func | application
 
   def binding: Parser[MorganeyBinding] =
-    variable ~ ":=" ~ term ^^ {
-      case lambdaVar ~ _ ~ term => MorganeyBinding(lambdaVar, term)
-    }
+    (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
 
   def loading: Parser[MorganeyLoading] =
-    "load" ~ modulePath ^^ {
-      case "load" ~ path => MorganeyLoading(path)
-    }
-
-  def modulePath: Parser[String] =
-    "[a-zA-Z][a-zA-Z0-9.]*".r
+    loadKeyword ~> (modulePath.r ?) ^^ { MorganeyLoading }
 
   def replCommand: Parser[MorganeyNode] = loading | binding | term
 
   def script: Parser[List[MorganeyNode]] = rep(replCommand)
+
 }
