@@ -34,4 +34,11 @@ object MorganeyExecutor {
       .getOrElse(moduleNotFound)
       .flatMap(withReader(_)(loadModuleFromReader(_, moduleFinder)))
   }
+
+  def compileProgram(bindings: List[MorganeyBinding]): Try[LambdaTerm] = {
+    (bindings.partition(_.variable.name == "main")) match {
+      case (List(MorganeyBinding(LambdaVar("main"), program)), bindings) => Success(program.addBindings(bindings))
+      case _ => Failure(new IllegalArgumentException(""))
+    }
+  }
 }
