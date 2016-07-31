@@ -1,5 +1,8 @@
 package me.rexim.morganey.ast
 
+import me.rexim.morganey.church.ChurchNumberConverter._
+import me.rexim.morganey.church.ChurchPairConverter._
+
 sealed trait LambdaTerm extends MorganeyNode {
   val freeVars: Set[String]
 
@@ -60,4 +63,15 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
   override def toString = s"($leftTerm $rightTerm)"
 
   override val freeVars: Set[String] = leftTerm.freeVars ++ rightTerm.freeVars
+}
+
+class LambdaInput(val input: Stream[Char]) extends LambdaTerm {
+  override val freeVars: Set[String] = Set()
+
+  override def substitute(substitution: (LambdaVar, LambdaTerm)): LambdaTerm =
+    input match {
+      case Stream(x) => encodeNumber(x.toInt)
+      case x #:: xs => encodePair((encodeNumber(x.toInt), new LambdaInput(xs))).substitute(substitution)
+      case _ => ???
+    }
 }
