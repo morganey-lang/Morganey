@@ -9,6 +9,8 @@ import me.rexim.morganey.util._
 
 import java.io.Reader
 
+import scala.io.Source
+
 object MorganeyExecutor {
 
   def interpretNode(node: MorganeyNode, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] =
@@ -37,7 +39,8 @@ object MorganeyExecutor {
 
   def compileProgram(bindings: List[MorganeyBinding]): Try[LambdaTerm] = {
     (bindings.partition(_.variable.name == "main")) match {
-      case (List(MorganeyBinding(LambdaVar("main"), program)), bindings) => Success(program.addBindings(bindings))
+      case (List(MorganeyBinding(LambdaVar("main"), program)), bindings) =>
+        Success(LambdaApp(program, new LambdaInput(Source.stdin.toStream)).addBindings(bindings))
       case _ => Failure(new IllegalArgumentException(""))
     }
   }
