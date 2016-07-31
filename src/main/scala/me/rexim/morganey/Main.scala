@@ -4,6 +4,7 @@ import jline.console.ConsoleReader
 import me.rexim.morganey.interpreter.MorganeyInterpreter._
 import me.rexim.morganey.interpreter.MorganeyEval
 import me.rexim.morganey.interpreter.InterpreterContext
+import me.rexim.morganey.interpreter.MorganeyExecutor
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.ReplHelper.smartShowTerm
 import me.rexim.morganey.ast._
@@ -92,14 +93,28 @@ object Main extends SignalHandler {
     }
   }
 
+  def executeProgram(context: InterpreterContext, programFile: String) = {
+    import MorganeyExecutor._
+    import me.rexim.morganey.reduction.NormalOrder._
+
+    val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder)
+      .flatMap(compileProgram)
+      .map(_.norReduce())
+
+    result match {
+      case Success(term) => println(ReplHelper.smartShowTerm(term))
+      case Failure(e) => println(e)
+    }
+  }
+
   def main(args: Array[String]) = {
     val context =
       InterpreterContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/"))))
 
-    if (args.isEmpty) {
-      startRepl(context)
-    } else {
-      startProgram(context, args)
+    args.toList match {
+      case Nil => startRepl(context)
+      case "exe" :: programFile :: rest => executeProgram(context, programFile)
+      case _ => startProgram(context, args)
     }
   }
 }
