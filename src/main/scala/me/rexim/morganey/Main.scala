@@ -19,6 +19,8 @@ import scala.util.{Failure, Success, Try}
 
 import java.io.File
 
+import scala.io.Source
+
 object Main extends SignalHandler {
 
   override def handle(signal: Signal): Unit = {
@@ -95,7 +97,7 @@ object Main extends SignalHandler {
     import me.rexim.morganey.reduction.NormalOrder._
 
     val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder)
-      .flatMap(compileProgram)
+      .flatMap(compileProgram(Source.stdin.toStream))
       .map(_.norReduce())
 
     result match {
