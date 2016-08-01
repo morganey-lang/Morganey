@@ -4,9 +4,12 @@ import java.io.File
 import java.util.{List => Jlist}
 
 import jline.console.completer.Completer
-import me.rexim.morganey.ast.MorganeyBinding
+import me.rexim.morganey.ast._
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.InterpreterContext
+import me.rexim.morganey.syntax.LambdaParser
+import me.rexim.morganey.syntax.Language.identifier
+import me.rexim.morganey.util._
 
 import scala.annotation.tailrec
 import scala.util.Try
@@ -49,7 +52,7 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
       f.isDirectory || isMorganeyModule(f)
 
     def topLevelDefinitions() =
-      moduleFinder.paths.filter(validMorganeyElement)
+      moduleFinder.paths.flatMap(_.listFiles).filter(validMorganeyElement)
 
     // List(root-file-of-module-path, module-file or directory)
     def findAllModulesIn(path: String): List[(File, File)] =
@@ -72,11 +75,18 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
         .map { case (root, f) => (root, stripExtensionIfModuleFile(f)) }
         .filter { case (root, f) => fileNameFilter(f.getName) }
         .map(relativize)
+        .map(_.replace('/', File.separatorChar))
         .map(relativeFileToLoadPath)
 
     def relativize(baseAndFile: (File, File)): String = {
       val (base, file) = baseAndFile
       base.toURI().relativize(file.toURI()).getPath()
+    }
+
+    def moduleName(file: File): String = {
+      val rawName = stripExtensionIfModuleFile(file).getName
+      val suffix = if (file.isDirectory) "." else ""
+      s"$rawName$suffix"
     }
 
     (parts, endsWithDot) match {
@@ -85,20 +95,36 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
       // load a.b.|
       case (xs, true)        => everythingIn(xs)
       // load |
-      case (Nil, false)      => topLevelDefinitions().map(stripExtensionIfModuleFile).map(_.getName)
+      case (Nil, false)      => topLevelDefinitions().map(moduleName)
       // load math.ari|
-      case (xs :+ x, false)  => everythingIn(xs, s => s.toLowerCase startsWith x.toLowerCase)
+      case (xs :+ x, false)  => everythingIn(xs, _.toLowerCase startsWith x.toLowerCase)
     }
   }
 
   private object LoadStatement {
-    private val loadStatement = "load (.*)".r
+    val zeroLoad = (Nil, false)
 
-    def unapply(line: String): Option[(List[String], Boolean)] =
-      Option(line) collect {
-        case loadStatement(modulePath) =>
-          (modulePath.split("\\.").toList, modulePath.endsWith("."))
+    def pathInformation(path: String) =
+      if (path.isEmpty) {
+        zeroLoad
+      } else if (path == ".") {
+        (Nil, true)
+      } else {
+        val pathElements = path.split("\\.", -1).toList
+        val endsWithDot  = pathElements.lastOption.exists(_.isEmpty)
+        val realPathElements =
+          if (endsWithDot) pathElements.init
+          else pathElements
+        (realPathElements, endsWithDot)
       }
+
+    def handleLoading(load: MorganeyLoading) =
+      load.modulePath map pathInformation getOrElse zeroLoad
+
+    def unapply(line: String): Option[(List[String], Boolean)] = {
+      val parseResult = LambdaParser.parseWith(line, _.loading).toOption
+      parseResult.map(handleLoading)
+    }
   }
 
   private def matchingDefinitions(line: String, knownVariableNames: List[String]): List[String] =
@@ -139,11 +165,9 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
       .getOrElse(0)
   }
 
-  private val namePattern = "[a-zA-Z][a-zA-Z0-9]*"
-
   private def lastNameInLine(line: String): Option[String] = {
     def stringMatches(n: Int): Option[String] =
-      Option(line takeRight n).filter(_.matches(namePattern))
+      Option(line takeRight n).filter(_.matches(identifier))
 
     def size(str: Option[String]): Int =
       str.map(_.length).getOrElse(Int.MinValue)

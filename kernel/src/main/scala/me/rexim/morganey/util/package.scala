@@ -4,6 +4,7 @@ import java.io.{FileInputStream, InputStreamReader, Reader, File}
 import java.nio.charset.StandardCharsets.UTF_8
 
 import scala.util._
+import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
 
 package object util {
 
@@ -53,4 +54,20 @@ package object util {
       reader.close()
       result
     }
+
+  implicit class ParserOps[T <: LambdaParser](parser: T) {
+    def parseWith[R](input: InputSource, f: T => parser.Parser[R]): Try[R] = {
+      val production = f(parser)
+      val result = input match {
+        case StringSource(string) => parser.parseAll(production, string)
+        case ReaderSource(reader) => parser.parseAll(production, reader)
+      }
+      handleResult(result)
+    }
+
+    private def handleResult[R](parseRes: parser.ParseResult[R]): Try[R] = parseRes match {
+      case parser.Success(result, _) => Success(result)
+      case res                       => Failure(new LambdaParserException(res.toString))
+    }
+  }
 }

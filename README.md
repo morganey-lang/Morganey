@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/rexim/Morganey.svg?branch=master)](https://travis-ci.org/rexim/Morganey)
+[![Build status](https://ci.appveyor.com/api/projects/status/8gdrv2hsu2xd3vir/branch/master?svg=true)](https://ci.appveyor.com/project/rexim/morganey/branch/master)
 
 # Morganey [![Status Ventis](https://img.shields.io/badge/status-ventis-yellow.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
 
@@ -33,7 +34,7 @@ and start typing REPL commands there. The syntax of the REPL commands is
     <character-literal> ::= '[\u0020-\u00B0]' | '\\[\\'"bfnrt]'
     <string-literal> ::= <java-string-literal>
     <variable> ::= [a-zA-Z][a-zA-Z0-9]*
-    <function> ::= ( <lambda-symbol> . <variable> <term> )
+    <function> ::= ( <lambda-symbol> <variable> . <term> )
     <application> ::= ( <term> <term> )
     <lambda-symbol> ::= λ | \
 
@@ -63,7 +64,7 @@ Enjoy!
 
 ## License ##
 
-Copyright (C) 2015 Codingteam
+Copyright (C) 2015–2016 Codingteam
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

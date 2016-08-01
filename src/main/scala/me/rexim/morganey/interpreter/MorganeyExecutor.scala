@@ -16,7 +16,8 @@ object MorganeyExecutor {
   def interpretNode(node: MorganeyNode, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] =
     node match {
       case binding: MorganeyBinding => Success(List(binding))
-      case MorganeyLoading(modulePath) => loadModule(modulePath, moduleFinder)
+      case MorganeyLoading(Some(modulePath)) => loadModule(modulePath, moduleFinder)
+      case MorganeyLoading(None) => Success(List())
     }
 
   def loadModuleFromReader(reader: Reader, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] =

@@ -1,0 +1,12 @@
+version: '{build}'
+install:
+  - cmd: choco install sbt --version 0.13.9
+  - cmd: set PATH=C:\Program Files (x86)\sbt\bin;%PATH%
+build_script:
+  - sbt clean compile
+test_script:
+  - sbt test-only
+cache:
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - C:\Program Files (x86)\sbt -> appveyor.yml
+  - C:\Users\appveyor\.ivy2
