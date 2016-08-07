@@ -34,7 +34,7 @@ class MorganeyExecutorSpecs extends FlatSpec with Matchers {
     MorganeyExecutor.compileProgram(programInput)(programBindings).isFailure should be (true)
   }
 
-  "Executor" should "note interpret empty loading nodes and just ignore them" in {
+  "Executor" should "not interpret empty loading nodes and just ignore them" in {
     MorganeyExecutor.interpretNode(MorganeyLoading(None), moduleFinder) should be (Success(List()))
   }
 
