@@ -65,7 +65,7 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
   override val freeVars: Set[String] = leftTerm.freeVars ++ rightTerm.freeVars
 }
 
-case class LambdaInput(val input: Stream[Char]) extends LambdaTerm {
+case class LambdaInput(input: Stream[Char]) extends LambdaTerm {
   override val freeVars: Set[String] = Set()
 
   override def substitute(substitution: (LambdaVar, LambdaTerm)): LambdaTerm =
@@ -74,4 +74,6 @@ case class LambdaInput(val input: Stream[Char]) extends LambdaTerm {
       case x #:: xs => encodePair((encodeNumber(x.toInt), LambdaInput(xs))).substitute(substitution)
       case _ => ???  // FIXME: This is just getting ridiculous! Please implement #62 already! :D
     }
+
+  override val toString = "<input>"
 }
