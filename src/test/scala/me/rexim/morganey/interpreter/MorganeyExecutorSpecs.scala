@@ -24,4 +24,8 @@ class MorganeyExecutorSpecs extends FlatSpec with Matchers {
     val expectedProgram = lapp(lvar("main"), LambdaInput(programInput)).addBindings(programBindings)
     MorganeyExecutor.compileProgram(programInput)(rawProgram) should be (Success(expectedProgram))
   }
+
+  "Executor" should "fail an incorrect program" in {
+    MorganeyExecutor.compileProgram(programInput)(programBindings).isFailure should be (true)
+  }
 }
