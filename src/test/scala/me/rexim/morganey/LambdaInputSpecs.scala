@@ -11,11 +11,11 @@ class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
   val longInput = LambdaInput("khooy".toStream)
   val singleCharInput = LambdaInput("k".toStream)
 
-  "Lambda input" should "has zero free vars by definition" in {
+  "Lambda input" should "have zero free vars by definition" in {
     longInput.freeVars.isEmpty should be (true)
   }
 
-  "Lambda input" should "lazily evaluated to a pair when substituted" in {
+  "Lambda input" should "be lazily evaluated to a pair when substituted" in {
     val forcedInput = decodePair(longInput.substitute(lvar("x") -> lvar("x")))
     forcedInput.isDefined should be (true)
 
