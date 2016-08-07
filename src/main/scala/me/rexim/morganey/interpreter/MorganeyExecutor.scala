@@ -36,8 +36,8 @@ object MorganeyExecutor {
       .flatMap(withReader(_)(loadModuleFromReader(_, moduleFinder)))
   }
 
-  def compileProgram(input: Stream[Char])(bindings: List[MorganeyBinding]): Try[LambdaTerm] = {
-    (bindings.partition(_.variable.name == "main")) match {
+  def compileProgram(input: Stream[Char])(rawProgram: List[MorganeyBinding]): Try[LambdaTerm] = {
+    rawProgram.partition(_.variable.name == "main") match {
       case (List(MorganeyBinding(LambdaVar("main"), program)), bindings) =>
         Success(LambdaApp(program, LambdaInput(input)).addBindings(bindings))
       case _ => Failure(new IllegalArgumentException(""))
