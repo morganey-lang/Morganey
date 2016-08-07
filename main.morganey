@@ -1,3 +1,0 @@
-load prelude
-
-main := (\input . ((PLUS input) 2))
