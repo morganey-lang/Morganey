@@ -8,7 +8,8 @@ import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._
 
 class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
-  val input = LambdaInput("khooy".toStream)
+  val longInput = LambdaInput("khooy".toStream)
+  val singleCharInput = LambdaInput("k".toStream)
 
   "Lambda input" should "has zero free vars by definition" in {
     longInput.freeVars.isEmpty should be (true)
@@ -20,5 +21,10 @@ class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
 
     val firstChar = decodeChar(forcedInput.get._1)
     firstChar should be (Some('k'))
+  }
+
+  "Lambda input with single character" should "be evaluated toa a single character" in {
+    val forcedInput = decodeChar(singleCharInput.substitute(lvar("x") -> lvar("x")))
+    forcedInput should be (Some('k'))
   }
 }
