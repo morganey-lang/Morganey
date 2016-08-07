@@ -39,7 +39,7 @@ object MorganeyExecutor {
   def compileProgram(input: Stream[Char])(bindings: List[MorganeyBinding]): Try[LambdaTerm] = {
     (bindings.partition(_.variable.name == "main")) match {
       case (List(MorganeyBinding(LambdaVar("main"), program)), bindings) =>
-        Success(LambdaApp(program, new LambdaInput(input)).addBindings(bindings))
+        Success(LambdaApp(program, LambdaInput(input)).addBindings(bindings))
       case _ => Failure(new IllegalArgumentException(""))
     }
   }
