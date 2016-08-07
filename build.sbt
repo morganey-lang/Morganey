@@ -1,4 +1,3 @@
-
 /*
  * =================================== settings ===================================
  */
@@ -24,7 +23,7 @@ lazy val kernelSettings = Seq(
   name := "morganey-kernel",
   libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 )
- 
+
 lazy val dependencySettings =
   "compile->compile;test->test"
 
@@ -38,12 +37,12 @@ build := {
   val (_, coreFile) = packagedArtifact.in(Compile, packageBin).value
   val (_, macroFile) = packagedArtifact.in(macros).in(Compile, packageBin).value
   val (_, kernelFile) = packagedArtifact.in(kernel).in(Compile, packageBin).value
-  
+
   val targetDir = coreFile.getParentFile()
-  
+
   IO.copyFile(macroFile, targetDir / macroFile.getName())
   IO.copyFile(kernelFile, targetDir / kernelFile.getName())
-} 
+}
 
 /*
  * =================================== projects ===================================
@@ -54,15 +53,15 @@ lazy val morganey = (project in file("."))
   .settings(mainClass := Some("me.rexim.morganey.Main"))
   .aggregate(macros, kernel)
   .dependsOn(
-    macros % dependencySettings, 
+    macros % dependencySettings,
     kernel % dependencySettings
   )
-  
+
 lazy val macros = (project in file("macros"))
   .settings(commonSettings :_*)
   .settings(macroSettings :_*)
   .dependsOn(kernel % dependencySettings)
-  
+
 lazy val kernel = (project in file("kernel"))
   .settings(commonSettings :_*)
   .settings(kernelSettings :_*)
