@@ -70,4 +70,5 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
   def script: Parser[List[MorganeyNode]] = rep(replCommand)
 
+  def module: Parser[List[MorganeyNode]] = rep(loading | binding)
 }

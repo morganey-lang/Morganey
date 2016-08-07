@@ -55,6 +55,8 @@ multi-line comments (any text, surrounded by `/*` and `*/`).
 To run the Unit Tests enter the following in the source code directory
 
     $ sbt clean coverage test
+    $ sbt coverageReport
+    $ sbt coverageAggregate
 
 And after that you can take a look at the Unit Test coverage
 results. Just open `target/scala-2.11/scoverage-report/index.html`
