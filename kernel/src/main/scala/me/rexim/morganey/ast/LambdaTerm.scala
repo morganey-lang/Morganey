@@ -72,6 +72,6 @@ class LambdaInput(val input: Stream[Char]) extends LambdaTerm {
     input match {
       case Stream(x) => encodeNumber(x.toInt)
       case x #:: xs => encodePair((encodeNumber(x.toInt), new LambdaInput(xs))).substitute(substitution)
-      case _ => ???
+      case _ => ???  // FIXME: This is just getting ridiculous! Please implement #62 already! :D
     }
 }
