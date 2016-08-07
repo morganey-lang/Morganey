@@ -19,11 +19,8 @@ object MorganeyExecutor {
     }
 
   def loadModuleFromReader(reader: Reader, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] =
-    LambdaParser.parseAll(LambdaParser.module, reader) match {
-      case LambdaParser.Success(nodes, _) => {
-        sequence(nodes.map(interpretNode(_, moduleFinder))).map(_.flatten)
-      }
-      case LambdaParser.NoSuccess(message, _) => Failure(new LambdaParserException(message))
+    LambdaParser.parseWith(reader, _.module).flatMap {
+      nodes => sequence(nodes.map(interpretNode(_, moduleFinder))).map(_.flatten)
     }
 
   def loadModule(modulePath: String, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] = {
