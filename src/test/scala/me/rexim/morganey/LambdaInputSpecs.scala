@@ -23,8 +23,14 @@ class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
     firstChar should be (Some('k'))
   }
 
-  "Lambda input with single character" should "be evaluated toa a single character" in {
+  "Lambda input with single character" should "be evaluated to a single character" in {
     val forcedInput = decodeChar(singleCharInput.substitute(lvar("x") -> lvar("x")))
     forcedInput should be (Some('k'))
+  }
+
+  "Empty lambda input" should "stay unimplemented because of Morganey lists nature" in {
+    intercept[NotImplementedError] {
+      LambdaInput(Stream.empty).substitute(lvar("x") -> lvar("x"))
+    }
   }
 }
