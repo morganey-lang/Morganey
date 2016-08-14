@@ -25,7 +25,7 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
 
   private val manyBindings            = List("SUCC", "PRED", "MULT", "PLUS")
   // toplevel modules of morganey, add a "." after names of directories
-  private val topLevelMorganeyModules = Set("prelude", "math.")
+  private val topLevelMorganeyModules = Set("boolean", "math.", "list", "prelude")
   // modules in math.*, add a "." after names of directories
   private val mathMorganeyModules     = Set("arithmetic")
 

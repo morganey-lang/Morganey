@@ -4,7 +4,7 @@ import scala.language.higherKinds
 
 import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.church.ChurchNumberConverter.encodeNumber
-import me.rexim.morganey.church.ChurchPairConverter.{encodeList, encodePair}
+import me.rexim.morganey.church.ChurchPairConverter.{encodeList, encodePair, encodeString}
 
 trait Liftable[T] extends (T => LambdaTerm) {
   def apply(x: T): LambdaTerm
@@ -16,8 +16,9 @@ trait DefaultLiftableInstances {
   implicit val liftChar = Liftable[Char](c => encodeNumber(c.toInt))
 
   implicit val liftString = Liftable[String] { s =>
-    val lift = implicitly[Liftable[Seq[Char]]]
-    lift(s.toSeq)
+//    val lift = implicitly[Liftable[Seq[Char]]]
+//    lift(s.toSeq)
+    encodeString(s)
   }
 
   implicit def liftPair[A, B](implicit liftA: Liftable[A], liftB: Liftable[B]): Liftable[(A, B)] =
@@ -28,8 +29,7 @@ trait DefaultLiftableInstances {
   implicit def liftColl[X, CC[X] <: Traversable[X], A](implicit lift: Liftable[A]): Liftable[CC[A]] =
     Liftable[CC[A]] { xs =>
       val ys = xs map lift
-      encodeList(ys.toList).getOrElse(
-        sys.error("Can't transform empty list into lambda terms!"))
+      encodeList(ys.toList)
     }
 
 }

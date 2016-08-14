@@ -43,7 +43,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
   def stringLiteralTerm: Parser[LambdaTerm] =
     stringLiteral ^^ { s =>
-      ChurchPairConverter.encodeString(unquoteString(s)).get
+      ChurchPairConverter.encodeString(unquoteString(s))
     }
 
   private def lambda = lambdaLetter | lambdaSlash

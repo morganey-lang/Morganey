@@ -34,14 +34,16 @@ trait DefaultUnliftableInstances {
   implicit def unliftColl[X, CC[X] <: Traversable[X], A]
                          (implicit unlift: Unliftable[A], cbf: CanBuildFrom[List[A], A, CC[A]]): Unliftable[CC[A]] =
     Unliftable[CC[A]] { t =>
-      val decodeResults = decodeList(t).map(unlift.unapply)
-      sequence(decodeResults) map { xs =>
-        val bl = cbf()
-        xs.foreach(bl += _)
-        bl.result()
+      decodeList(t).flatMap { xs =>
+        val decodeResults = xs.map(unlift.unapply)
+
+        sequence(decodeResults) map { xs =>
+          val bl = cbf()
+          xs.foreach(bl += _)
+          bl.result()
+        }
       }
     }
-
 }
 
 object Unliftable {
