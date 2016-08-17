@@ -60,6 +60,9 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
 
     val m"${numbers: List[Int]}" = pair(zero, pair(one, pair(two, zero)))
     numbers should be (List(0, 1, 2))
+
+    val m"${list: List[Int]}" = zero
+    list.isEmpty should be (true)
   }
 
 }
