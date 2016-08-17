@@ -12,7 +12,7 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
     decodePair(I(x)) should be (None)
   }
 
-  "A church pair" should "be pair converted to some pair" in {
+  "A Church pair" should "be pair converted to some pair" in {
     val pair = lfunc("z" , lapp(lapp(lvar("z"), lvar("x")), lvar("y")))
     decodePair(pair) should be (Some((lvar("x"), lvar("y"))))
   }
@@ -21,20 +21,20 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
     decodeList(I(x)) should be (None)
   }
 
-  "A church list" should "be converted to some list" in {
+  "A Church list" should "be converted to some list" in {
     val inputTerm = pair(x, pair(x, pair(y, zero)))
     val expectedList = Some("xxy".map(c => lvar(c.toString)).toList)
     decodeList(inputTerm) should be (expectedList)
   }
 
-  "A church list of numbers" should "be converted to some list of numbers" in {
+  "A Church list of numbers" should "be converted to some list of numbers" in {
     val inputTerm = pair(two, pair(one, pair(zero, zero)))
     val expectedList = Some(List(2, 1, 0))
 
     decodeListOfNumbers(inputTerm) should be (expectedList)
   }
 
-  "A church list of ASCII codes" should "be converted to a string" in {
+  "A Church list of ASCII codes" should "be converted to a string" in {
     val ninetySeven = encodeNumber(97)
     val ninetyEight = encodeNumber(98)
     val ninetyNine = encodeNumber(99)
