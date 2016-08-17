@@ -40,10 +40,8 @@ object MorganeyInterpreter {
 
   def evalOneNodeComputation(node: MorganeyNode)(context: InterpreterContext): Computation[MorganeyEval] = {
     node match {
-      case MorganeyBinding(variable, term) =>
-        term.addBindings(context.bindings).norReduceComputation().map { resultTerm =>
-          MorganeyEval(context.addBinding(MorganeyBinding(variable, resultTerm)), Some(resultTerm))
-        }
+      case binding: MorganeyBinding =>
+        Computation(MorganeyEval(context.addBinding(binding), None))
 
       case term: LambdaTerm =>
         term.addBindings(context.bindings).norReduceComputation().map { resultTerm =>

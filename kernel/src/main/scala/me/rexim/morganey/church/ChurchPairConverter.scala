@@ -23,24 +23,28 @@ object ChurchPairConverter {
     )
   }
 
-  def decodeList(list: LambdaTerm): List[LambdaTerm] =
-    decodePair(list) match {
-      case Some((first, second)) => first :: decodeList(second)
-      case None                  => List(list)
+  def decodeList(list: LambdaTerm): Option[List[LambdaTerm]] = {
+    def decodeListAgg(list: LambdaTerm, agg: List[LambdaTerm]): Option[List[LambdaTerm]] = {
+      decodeNumber(list) match {
+        case Some(0) => Some(agg)
+        case _ => decodePair(list) match {
+          case Some((first, second)) => decodeListAgg(second, first :: agg)
+          case _ => None
+        }
+      }
     }
 
-  /** Returns `None`, if list is empty */
-  def encodeList(xs: List[LambdaTerm]): Option[LambdaTerm] = xs match {
-    case init :+ last => Some(init.foldRight(last) { case (a, term) => encodePair((a, term)) })
-    case _            => None
+    decodeListAgg(list, List()).map(_.reverse)
   }
+
+  def encodeList(xs: List[LambdaTerm]): LambdaTerm =
+    xs.foldRight(encodeNumber(0)) { case (a, term) => encodePair((a, term)) }
 
   def decodeListOfNumbers(list: LambdaTerm): Option[List[Int]] = {
-    val decodeResults = decodeList(list).map(decodeNumber)
-    sequence(decodeResults)
+    decodeList(list).flatMap(xs => sequence(xs.map(decodeNumber)))
   }
 
-  def encodeListOfNumbers(xs: List[Int]): Option[LambdaTerm] = 
+  def encodeListOfNumbers(xs: List[Int]): LambdaTerm =
     encodeList(xs.map(encodeNumber))
 
   def decodeString(s: LambdaTerm): Option[String] =
@@ -48,6 +52,6 @@ object ChurchPairConverter {
       xs => xs.map(_.toChar).mkString
     }
 
-  def encodeString(s: String): Option[LambdaTerm] =
+  def encodeString(s: String): LambdaTerm =
     encodeListOfNumbers(s.toList.map(_.toInt))
 }

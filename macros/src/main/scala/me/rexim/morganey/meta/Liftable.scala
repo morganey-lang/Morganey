@@ -28,8 +28,7 @@ trait DefaultLiftableInstances {
   implicit def liftColl[X, CC[X] <: Traversable[X], A](implicit lift: Liftable[A]): Liftable[CC[A]] =
     Liftable[CC[A]] { xs =>
       val ys = xs map lift
-      encodeList(ys.toList).getOrElse(
-        sys.error("Can't transform empty list into lambda terms!"))
+      encodeList(ys.toList)
     }
 
 }

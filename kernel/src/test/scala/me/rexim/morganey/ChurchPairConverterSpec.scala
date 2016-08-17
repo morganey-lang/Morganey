@@ -12,37 +12,33 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
     decodePair(I(x)) should be (None)
   }
 
-  "A church pair" should "be pair converted to some pair" in {
+  "A Church pair" should "be pair converted to some pair" in {
     val pair = lfunc("z" , lapp(lapp(lvar("z"), lvar("x")), lvar("y")))
     decodePair(pair) should be (Some((lvar("x"), lvar("y"))))
   }
 
-  "An identity function" should "be list converted to a list with itself" in {
-    decodeList(I(x)) should be (List(I(x)))
+  "An identity function" should "not be recognized as a list" in {
+    decodeList(I(x)) should be (None)
   }
 
-  "A church list" should "be converted to some list" in {
-    val rawTerm = "(λ z . ((z x) (λ z . ((z x) y))))"
-    val term = LambdaParser.parse(LambdaParser.term, rawTerm).get
-    val expectedList = "xxy".map(c => lvar(c.toString)).toList
-
-    decodeList(term) should be (expectedList)
+  "A Church list" should "be converted to some list" in {
+    val inputTerm = pair(x, pair(x, pair(y, zero)))
+    val expectedList = Some("xxy".map(c => lvar(c.toString)).toList)
+    decodeList(inputTerm) should be (expectedList)
   }
 
-  "A church list of number" should "be converted to some list of numbers" in {
-    val rawTerm = "(λ z . ((z (\\f . (\\x . (f (f x))))) (λ z . ((z (\\f . (\\x . (f x)))) (\\f . (\\x . x))))))"
-    val term = LambdaParser.parse(LambdaParser.term, rawTerm).get
+  "A Church list of numbers" should "be converted to some list of numbers" in {
+    val inputTerm = pair(two, pair(one, pair(zero, zero)))
     val expectedList = Some(List(2, 1, 0))
 
-    decodeListOfNumbers(term) should be (expectedList)
+    decodeListOfNumbers(inputTerm) should be (expectedList)
   }
 
-  "A church list of ASCII codes" should "be converted to a string" in {
+  "A Church list of ASCII codes" should "be converted to a string" in {
     val ninetySeven = encodeNumber(97)
     val ninetyEight = encodeNumber(98)
     val ninetyNine = encodeNumber(99)
-
-    val abc = pair(ninetySeven, pair(ninetyEight, ninetyNine))
+    val abc = pair(ninetySeven, pair(ninetyEight, pair(ninetyNine, zero)))
 
     decodeString(abc) should be (Some("abc"))
   }
