@@ -4,7 +4,7 @@ import scala.language.higherKinds
 
 import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.church.ChurchNumberConverter.encodeNumber
-import me.rexim.morganey.church.ChurchPairConverter.{encodeList, encodePair, encodeString}
+import me.rexim.morganey.church.ChurchPairConverter.{encodeList, encodePair}
 
 trait Liftable[T] extends (T => LambdaTerm) {
   def apply(x: T): LambdaTerm
