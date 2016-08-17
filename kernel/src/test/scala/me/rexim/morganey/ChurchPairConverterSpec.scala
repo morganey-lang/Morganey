@@ -27,7 +27,7 @@ class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
     decodeList(inputTerm) should be (expectedList)
   }
 
-  "A church list of number" should "be converted to some list of numbers" in {
+  "A church list of numbers" should "be converted to some list of numbers" in {
     val inputTerm = pair(two, pair(one, pair(zero, zero)))
     val expectedList = Some(List(2, 1, 0))
 
