@@ -5,6 +5,7 @@ import me.rexim.morganey.church.{ChurchNumberConverter, ChurchPairConverter}
 import me.rexim.morganey.util._
 import me.rexim.morganey.syntax.Language._
 
+import scala.collection.immutable.NumericRange
 import scala.util.parsing.combinator._
 import scala.language.postfixOps
 
@@ -27,29 +28,53 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   def variable: Parser[LambdaVar] =
     identifier.r ^^ { LambdaVar }
 
-  def numericLiteral: Parser[LambdaTerm] =
+  def validNumberLiteral: Parser[Int] =
     numberLiteral.r ^? ({
-      case IntMatcher(x) => ChurchNumberConverter.encodeNumber(x)
+      case IntMatcher(x) => x
     }, { (rawInt) => s"`$rawInt' is too big"})
 
-  def characterLiteral: Parser[LambdaTerm] = (
+  def numericLiteral: Parser[LambdaTerm] =
+    validNumberLiteral ^^ ChurchNumberConverter.encodeNumber
+
+  def validCharacterLiteral: Parser[Char] = (
     escapedCharLiteral.r ^^ { s =>
-      ChurchNumberConverter.encodeNumber(escapeSequences(s charAt 2))
+      escapeSequences(s charAt 2)
     }
-    | symbolCharLiteral.r ^^ { s =>
-      ChurchNumberConverter.encodeNumber(s charAt 1)
-    }
+    | symbolCharLiteral.r ^^ { _ charAt 1 }
   )
+
+  def characterLiteral: Parser[LambdaTerm] =
+    validCharacterLiteral ^^ { c => ChurchNumberConverter.encodeNumber(c.toInt) }
 
   def stringLiteralTerm: Parser[LambdaTerm] =
     stringLiteral ^^ { s =>
       ChurchPairConverter.encodeString(unquoteString(s))
     }
 
+  private def range[T](p: => Parser[T])(implicit ev: Integral[T]): Parser[LambdaTerm] = {
+    val q = p
+    val parser = q ~ opt(comma ~> q) ~ (dotDot ~> q)
+    parser ^^ { case start ~ next ~ exit =>
+      val step  = next.map(ev.minus(_, start)).getOrElse(ev.one)
+      val range = NumericRange.inclusive(start, exit, step).toList
+      val nums  = range map ev.toInt map ChurchNumberConverter.encodeNumber
+      ChurchPairConverter.encodeList(nums)
+    }
+  }
+
+  def listLiteral: Parser[LambdaTerm] = (
+      brackets(repsep(term, comma)) ^^ ChurchPairConverter.encodeList
+    | brackets(range(validNumberLiteral))
+    | brackets(range(validCharacterLiteral))
+  )
+
   private def lambda = lambdaLetter | lambdaSlash
 
   private def parenthesis[T](p: Parser[T]): Parser[T] =
     leftParenthesis ~> p <~ rightParenthesis
+
+  private def brackets[T](p: Parser[T]): Parser[T] =
+    leftBracket ~> p <~ rightBracket
 
   def func: Parser[LambdaFunc] =
     parenthesis((lambda ~> variable) ~ (abstractionDot ~> term)) ^^ { LambdaFunc }
@@ -58,7 +83,10 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
     parenthesis(term ~ term) ^^ { LambdaApp }
 
   def term: Parser[LambdaTerm] =
-    variable | numericLiteral | characterLiteral | stringLiteralTerm | func | application
+    variable | literal | func | application
+
+  def literal: Parser[LambdaTerm] =
+    numericLiteral | characterLiteral | stringLiteralTerm | listLiteral
 
   def binding: Parser[MorganeyBinding] =
     (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
