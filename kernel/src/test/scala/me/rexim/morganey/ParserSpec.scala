@@ -1,6 +1,7 @@
 package me.rexim.morganey
 
 import me.rexim.morganey.ast.LambdaApp
+import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.syntax._
 import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._
@@ -107,6 +108,71 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
 
     LambdaParser.parseAll(LambdaParser.module, validModule).successful should be (true)
     LambdaParser.parseAll(LambdaParser.module, invalidModule).successful should be (false)
+  }
+
+  "Empty list literals" should "desugar into zero" in {
+    val res = LambdaParser.parseAll(LambdaParser.term, "[]")
+    res.successful should be (true)
+    res.get        should be (zero)
+  }
+
+  "Singleton list literals" should "desugar into a single pair" in {
+    val res1 = LambdaParser.parseAll(LambdaParser.term, "[0]")
+    res1.successful should be (true)
+    res1.get        should be (pair(zero, zero, "x"))
+
+    val res2 = LambdaParser.parseAll(LambdaParser.term, "['a']")
+    res2.successful should be (true)
+    res2.get        should be (pair(encodeNumber('a'), zero, "x"))
+  }
+
+  "Non empty list literals" should "desugar into nested pairs" in {
+    val res1 = LambdaParser.parseAll(LambdaParser.term, "[0, 1, 2]")
+    res1.successful should be (true)
+    res1.get        should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
+
+    val res2 = LambdaParser.parseAll(LambdaParser.term, "['a', 'b', 'c']")
+    res2.successful should be (true)
+    res2.get        should be (pair(encodeNumber('a'), pair(encodeNumber('b'), pair(encodeNumber('c'), zero, "x"), "x"), "x"))
+  }
+
+  "List literals constructed by ascending ranges" should "desugar into nested pairs" in {
+    val res1 = LambdaParser.parseAll(LambdaParser.term, "[0 .. 2]")
+    res1.successful should be (true)
+    res1.get        should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
+
+    val res2 = LambdaParser.parseAll(LambdaParser.term, "[0, 1 .. 2]")
+    res2.successful should be (true)
+    res2.get        should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
+
+    val res3 = LambdaParser.parseAll(LambdaParser.term, "[0, 2 .. 2]")
+    res3.successful should be (true)
+    res3.get        should be (pair(zero, pair(two, zero, "x"), "x"))
+  }
+
+  "List literals constructed by descending ranges" should "desugar into nested pairs" in {
+    val res1 = LambdaParser.parseAll(LambdaParser.term, "[2 .. 0]")
+    res1.successful should be (true)
+    // Empty, because 'step' was not given
+    res1.get        should be (zero)
+
+    val res2 = LambdaParser.parseAll(LambdaParser.term, "[2, 1 .. 0]")
+    res2.successful should be (true)
+    res2.get        should be (pair(two, pair(one, pair(zero, zero, "x"), "x"), "x"))
+
+    val res3 = LambdaParser.parseAll(LambdaParser.term, "[2, 0 .. 0]")
+    res3.successful should be (true)
+    res3.get        should be (pair(two, pair(zero, zero, "x"), "x"))
+  }
+
+  "Nested list literals" should "desugar also into nested pairs" in {
+    val res = LambdaParser.parseAll(LambdaParser.term, "[[1, 2], 'a', [1, []]]")
+    val fst = pair(one, pair(two, zero, "x"), "x")
+    val snd = encodeNumber('a')
+    val nil = zero
+    val trd = pair(one, pair(nil, zero, "x"), "x")
+    res.successful should be (true)
+    res.get        should be (pair(fst, pair(snd, pair(trd, zero, "x"), "x"), "x"))
   }
 
 }
