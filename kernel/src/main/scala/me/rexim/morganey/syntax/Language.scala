@@ -44,6 +44,6 @@ object Language {
 
   val rightBracket       = "]"
 
-  val dotDot             = ".."
+  val rangeOperator      = ".."
 
 }

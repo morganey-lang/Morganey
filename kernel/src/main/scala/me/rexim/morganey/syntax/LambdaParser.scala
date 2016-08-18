@@ -53,7 +53,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
   private def range[T](p: => Parser[T])(implicit ev: Integral[T]): Parser[LambdaTerm] = {
     val q = p
-    val parser = q ~ opt(comma ~> q) ~ (dotDot ~> q)
+    val parser = q ~ opt(comma ~> q) ~ (rangeOperator ~> q)
     parser ^^ { case start ~ next ~ exit =>
       val step  = next.map(ev.minus(_, start)).getOrElse(ev.one)
       val range = NumericRange.inclusive(start, exit, step).toList
