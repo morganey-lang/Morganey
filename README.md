@@ -19,24 +19,34 @@ To run the REPL just enter the following in the source code directory
 
 and start typing REPL commands there. The syntax of the REPL commands is
 
-    <repl-command> := <term> | <binding> | <loading>
+    <repl-command> := <term>
+                    | <binding>
+                    | <loading>
     <term> ::= <variable>
-             | <numeric-literal>
-             | <character-literal>
-             | <string-literal>
+             | <literal>
              | <function>
              | <application>
-    <binding> ::= <variable> := <term>
-    <loading> ::= load <module-path>
+    <binding> ::= <variable> ":=" <term>
+    <loading> ::= "load" <module-path>
     <module-path> := [a-zA-Z][a-zA-Z0-9.]*
 
+    <literal> ::= <numeric-literal>
+                | <character-literal>
+                | <string-literal>
+                | <list-literal>
     <numeric-literal> ::= [0-9]+
-    <character-literal> ::= '[\u0020-\u00B0]' | '\\[\\'"bfnrt]'
+    <character-literal> ::= '[\u0020-\u00B0]'
+                          | '\\[\\'"bfnrt]'
     <string-literal> ::= <java-string-literal>
+    <list-literal> ::= "[" [ term { "," term } ] "]"
+                     | "[" <numeric-literal> [ "," <numeric-literal> ] ".." <numeric-literal> "]"
+                     | "[" <character-literal> [ "," <character-literal> ] ".." <character-literal> "]"
+
     <variable> ::= [a-zA-Z][a-zA-Z0-9]*
-    <function> ::= ( <lambda-symbol> <variable> . <term> )
-    <application> ::= ( <term> <term> )
-    <lambda-symbol> ::= λ | \
+    <function> ::= "(" <lambda-symbol> <variable> "." <term> ")"
+    <application> ::= "(" <term> <term> ")"
+    <lambda-symbol> ::= "λ"
+                      | "\"
 
 The REPL will take the entered lambda term, beta-reduce it with the
 normal order reduction strategy and output the normal form of the

@@ -32,10 +32,18 @@ object Language {
 
   val abstractionDot     = "."
 
+  val comma              = ","
+
   val whiteSpacePattern  = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+"""
 
   val leftParenthesis    = "("
 
   val rightParenthesis   = ")"
+
+  val leftBracket        = "["
+
+  val rightBracket       = "]"
+
+  val rangeOperator      = ".."
 
 }
