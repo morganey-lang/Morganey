@@ -39,8 +39,9 @@ and start typing REPL commands there. The syntax of the REPL commands is
                           | '\\[\\'"bfnrt]'
     <string-literal> ::= <java-string-literal>
     <list-literal> ::= "[" [ term { "," term } ] "]"
-                     | "[" <numeric-literal> [ "," <numeric-literal> ] ".." <numeric-literal> "]"
-                     | "[" <character-literal> [ "," <character-literal> ] ".." <character-literal> "]"
+                     | "[" <number-or-character> [ "," <number-or-character> ] ".." <number-or-character> "]"
+    <number-or-character> ::= <numeric-literal>
+                            | <character-literal>
 
     <variable> ::= [a-zA-Z][a-zA-Z0-9]*
     <function> ::= "(" <lambda-symbol> <variable> "." <term> ")"

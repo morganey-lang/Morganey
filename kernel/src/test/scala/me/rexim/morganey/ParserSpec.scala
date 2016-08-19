@@ -136,7 +136,7 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     res2.get        should be (pair(encodeNumber('a'), pair(encodeNumber('b'), pair(encodeNumber('c'), zero, "x"), "x"), "x"))
   }
 
-  "List literals constructed by ascending ranges" should "desugar into nested pairs" in {
+  "List literals constructed by ascending ranges, whose bounds are literals" should "desugar into nested pairs" in {
     val res1 = LambdaParser.parseAll(LambdaParser.term, "[0 .. 2]")
     res1.successful should be (true)
     res1.get        should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
@@ -150,7 +150,7 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     res3.get        should be (pair(zero, pair(two, zero, "x"), "x"))
   }
 
-  "List literals constructed by descending ranges" should "desugar into nested pairs" in {
+  "List literals constructed by descending ranges, whose bounds are literals" should "desugar into nested pairs" in {
     val res1 = LambdaParser.parseAll(LambdaParser.term, "[2 .. 0]")
     res1.successful should be (true)
     // Empty, because 'step' was not given
@@ -173,6 +173,30 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     val trd = pair(one, pair(nil, zero, "x"), "x")
     res.successful should be (true)
     res.get        should be (pair(fst, pair(snd, pair(trd, zero, "x"), "x"), "x"))
+  }
+
+  "List literals constructed by ranges, whose bounds are literals" can "be defined with number-like values" in {
+    val a = encodeNumber('a')
+    val b = encodeNumber('b')
+    val c = encodeNumber('c')
+
+    val abc = pair(a, pair(b, pair(c, zero, "x"), "x"), "x")
+
+    val res1 = LambdaParser.parseAll(LambdaParser.term, "['a' .. 99]")
+    res1.successful should be (true)
+    res1.get        should be (abc)
+
+    val res2 = LambdaParser.parseAll(LambdaParser.term, "[97 .. 'c']")
+    res2.successful should be (true)
+    res2.get        should be (abc)
+
+    val res3 = LambdaParser.parseAll(LambdaParser.term, "[97, 98 .. 'c']")
+    res3.successful should be (true)
+    res3.get        should be (abc)
+
+    val res4 = LambdaParser.parseAll(LambdaParser.term, "[97, 'b' .. 'c']")
+    res4.successful should be (true)
+    res4.get        should be (abc)
   }
 
 }
