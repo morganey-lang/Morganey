@@ -51,21 +51,20 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
       ChurchPairConverter.encodeString(unquoteString(s))
     }
 
-  private def range[T](p: => Parser[T])(implicit ev: Integral[T]): Parser[LambdaTerm] = {
-    val q = p
-    val parser = q ~ opt(comma ~> q) ~ (rangeOperator ~> q)
+  private def rangeConstant: Parser[LambdaTerm] = {
+    val number = validNumberLiteral | validCharacterLiteral ^^ (_.toInt)
+    val parser = number ~ opt(comma ~> number) ~ (rangeOperator ~> number)
     parser ^^ { case start ~ next ~ exit =>
-      val step  = next.map(ev.minus(_, start)).getOrElse(ev.one)
+      val step  = next.map(_ - start).getOrElse(1)
       val range = NumericRange.inclusive(start, exit, step).toList
-      val nums  = range map ev.toInt map ChurchNumberConverter.encodeNumber
+      val nums  = range map ChurchNumberConverter.encodeNumber
       ChurchPairConverter.encodeList(nums)
     }
   }
 
   def listLiteral: Parser[LambdaTerm] = (
       brackets(repsep(term, comma)) ^^ ChurchPairConverter.encodeList
-    | brackets(range(validNumberLiteral))
-    | brackets(range(validCharacterLiteral))
+    | brackets(rangeConstant)
   )
 
   private def lambda = lambdaLetter | lambdaSlash
