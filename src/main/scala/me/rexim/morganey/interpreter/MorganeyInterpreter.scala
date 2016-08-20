@@ -32,8 +32,16 @@ object MorganeyInterpreter {
   }
 
   def loadFile(context: InterpreterContext)(file: File): Computation[MorganeyEval] = {
-    readNodes(file.getAbsolutePath()) match {
-      case Success(nodes) => evalNodesComputation(nodes)(context).last
+    readNodes(file.getAbsolutePath) match {
+      case Success(nodes) =>
+        val computations = evalNodesComputation(nodes)(context)
+
+        if (computations.isEmpty) {
+          Computation(MorganeyEval(context, None))
+        } else {
+          computations.last
+        }
+
       case Failure(e) => Computation.fromFuture(Future.failed(e))
     }
   }
@@ -61,11 +69,16 @@ object MorganeyInterpreter {
   }
 
   def evalNodesComputation(nodes: List[MorganeyNode])(context: InterpreterContext): Stream[Computation[MorganeyEval]] = {
-    lazy val computations: Stream[Computation[MorganeyEval]] =
-      evalOneNodeComputation(nodes.head)(context) #:: computations.zip(nodes.tail).map {
-        case (computation, node) => computation.flatMap(eval => evalOneNodeComputation(node)(eval.context))
-      }
-    computations
+    nodes match {
+      case headNode :: restNodes =>
+        lazy val computations: Stream[Computation[MorganeyEval]] =
+          evalOneNodeComputation(nodes.head)(context) #:: computations.zip(nodes.tail).map {
+            case (computation, node) => computation.flatMap(eval => evalOneNodeComputation(node)(eval.context))
+          }
+        computations
+
+      case _ => Stream.empty
+    }
   }
 
   def evalNodes(nodes: List[MorganeyNode])(context: InterpreterContext): MorganeyEval =
