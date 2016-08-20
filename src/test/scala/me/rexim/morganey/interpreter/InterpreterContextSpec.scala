@@ -1,13 +1,10 @@
 package me.rexim.morganey.interpreter
 
 import me.rexim.morganey.ast._
-import me.rexim.morganey.interpreter._
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.helpers.TestTerms
 
 import org.scalatest._
-
-import java.io.File
 
 class InterpreterContextSpec extends FlatSpec with Matchers with TestTerms {
   "Interpreter context" should "allow add bindings to it" in {
