@@ -22,11 +22,12 @@ object LambdaParser extends LambdaParser
 
 class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
-  /* comment-regex taken from: http://stackoverflow.com/a/5954831 */
   protected override val whiteSpace = whiteSpacePattern.r
 
-  def variable: Parser[LambdaVar] =
-    identifier.r ^^ { LambdaVar }
+  /* =================================== Literals =================================== */
+
+  def literal: Parser[LambdaTerm] =
+    numericLiteral | characterLiteral | stringLiteralTerm | listLiteral
 
   def validNumberLiteral: Parser[Int] =
     numberLiteral.r ^? ({
@@ -67,6 +68,46 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
     | brackets(rangeConstant)
   )
 
+  /* ============================== Core lambda terms =============================== */
+
+  def variable: Parser[LambdaVar] =
+    identifier.r ^^ { LambdaVar }
+
+  def func: Parser[LambdaFunc] =
+    lambda ~> rep1(variable <~ abstractionDot) ~ term ^^ {
+      case (init :+ last) ~ body => init.foldRight(LambdaFunc(last, body))(LambdaFunc)
+    }
+
+  def application: Parser[LambdaApp] =
+    termWithoutApp ~ termWithoutApp ~ rep(termWithoutApp) ^^ {
+      case fst ~ mid ~ rest => rest.foldLeft(LambdaApp(fst, mid))(LambdaApp)
+    }
+
+  def term: Parser[LambdaTerm] =
+    func | application | termWithoutApp
+
+  def termWithoutApp: Parser[LambdaTerm] =
+    func | variable | literal | parenthesis(term)
+
+  /* =========================== Morganey extension terms =========================== */
+
+  def binding: Parser[MorganeyBinding] =
+    (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
+
+  def loading: Parser[MorganeyLoading] =
+    loadKeyword ~> (modulePath.r ?) ^^ { MorganeyLoading }
+
+  def replCommand: Parser[MorganeyNode] =
+    withLnBreaks(loading | binding | term)
+
+  def script: Parser[List[MorganeyNode]] =
+    withLnBreaks(repsep(replCommand, newLines))
+
+  def module: Parser[List[MorganeyNode]] =
+    withLnBreaks(repsep(loading | binding, newLines))
+
+  /* ============================== Helper productions ============================== */
+
   private def lambda = lambdaLetter | lambdaSlash
 
   private def parenthesis[T](p: Parser[T]): Parser[T] =
@@ -75,27 +116,16 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   private def brackets[T](p: Parser[T]): Parser[T] =
     leftBracket ~> p <~ rightBracket
 
-  def func: Parser[LambdaFunc] =
-    parenthesis((lambda ~> variable) ~ (abstractionDot ~> term)) ^^ { LambdaFunc }
+  private def withLnBreaks[T](p: Parser[T]): Parser[T] =
+    optNewLines ~> p <~ optNewLines
 
-  def application: Parser[LambdaApp] =
-    parenthesis(term ~ term) ^^ { LambdaApp }
+  private def newLine: Parser[String] =
+    lineBreak.r
 
-  def term: Parser[LambdaTerm] =
-    variable | literal | func | application
+  private def optNewLines: Parser[List[String]] =
+    rep(newLine)
 
-  def literal: Parser[LambdaTerm] =
-    numericLiteral | characterLiteral | stringLiteralTerm | listLiteral
+  private def newLines: Parser[List[String]] =
+    rep1(newLine)
 
-  def binding: Parser[MorganeyBinding] =
-    (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
-
-  def loading: Parser[MorganeyLoading] =
-    loadKeyword ~> (modulePath.r ?) ^^ { MorganeyLoading }
-
-  def replCommand: Parser[MorganeyNode] = loading | binding | term
-
-  def script: Parser[List[MorganeyNode]] = rep(replCommand)
-
-  def module: Parser[List[MorganeyNode]] = rep(loading | binding)
 }
