@@ -1,6 +1,7 @@
 package me.rexim.morganey
 
-import me.rexim.morganey.ast.LambdaApp
+import me.rexim.morganey.ast._
+import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.syntax._
 import me.rexim.morganey.helpers.TestTerms
@@ -197,6 +198,63 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     val res4 = LambdaParser.parseAll(LambdaParser.term, "[97, 'b' .. 'c']")
     res4.successful should be (true)
     res4.get        should be (abc)
+  }
+
+  "The short notation for abstractions" should "be supported by the parser" in {
+    val res = LambdaParser.parseAll(LambdaParser.term, "\\a.b.c")
+    res.successful should be (true)
+    res.get        should be (lnested(List("a", "b"), lvar("c")))
+  }
+
+  "The short notation for abstractions" should "be backwards compatible with the old one" in {
+    val expected = lnested(List("a", "b", "c"), lvar("d"))
+    val old = LambdaParser.parseAll(LambdaParser.term, "(\\a . (\\b . (\\c . d)))")
+    old.successful should be (true)
+    old.get        should be (expected)
+
+    val new1 = LambdaParser.parseAll(LambdaParser.term, "\\a.\\b.\\c.d")
+    new1.successful should be (true)
+    new1.get        should be (expected)
+
+    val new2 = LambdaParser.parseAll(LambdaParser.term, "\\a.b.c.d")
+    new2.successful should be (true)
+    new2.get        should be (expected)
+  }
+
+  "The short notation for applications" should "be supported by the parser" in {
+    val res1 = LambdaParser.parseAll(LambdaParser.term, "a b c d")
+    res1.successful should be (true)
+    res1.get        should be (lapp(lapp(lapp(lvar("a"), lvar("b")), lvar("c")), lvar("d")))
+
+    val res2 = LambdaParser.parseAll(LambdaParser.term, "'a' 100 []")
+    res2.successful should be (true)
+    res2.get        should be (lapp(lapp(encodeNumber('a'), encodeNumber(100)), zero))
+  }
+
+  "The short notation for applications" should "be backwards compatible with the old one" in {
+    val expected = lapp(lapp(zero, one), two)
+    val old = LambdaParser.parseAll(LambdaParser.term, "((0 1) 2)")
+    old.successful should be (true)
+    old.get        should be (expected)
+
+    val new1 = LambdaParser.parseAll(LambdaParser.term, "(0 1 2)")
+    new1.successful should be (true)
+    new1.get        should be (expected)
+
+    val new2 = LambdaParser.parseAll(LambdaParser.term, "0 1 2")
+    new2.successful should be (true)
+    new2.get        should be (expected)
+  }
+
+  "The body of abstractions in the short notation" should "extend as far right as possible" in {
+    val one_ = LambdaParser.parseAll(LambdaParser.term, "\\f.x.f x")
+    one_.successful should be (true)
+    one_.get        should be (one)
+
+    val body = lapp(lapp(lvar("a"), lapp(lvar("b"), lvar("c"))), lvar("d"))
+    val func = LambdaParser.parseAll(LambdaParser.term, "\\a.b.c.d.a (b c) d")
+    func.successful should be (true)
+    func.get        should be (lnested(List("a", "b", "c", "d"), body))
   }
 
 }
