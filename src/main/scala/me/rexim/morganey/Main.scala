@@ -2,11 +2,9 @@ package me.rexim.morganey
 
 import jline.console.ConsoleReader
 import me.rexim.morganey.interpreter.MorganeyInterpreter._
-import me.rexim.morganey.interpreter.MorganeyEval
-import me.rexim.morganey.interpreter.InterpreterContext
-import me.rexim.morganey.interpreter.MorganeyExecutor
+import me.rexim.morganey.interpreter.{InterpreterContext, MorganeyEval, MorganeyExecutor, TermOutputHelper}
 import me.rexim.morganey.module.ModuleFinder
-import me.rexim.morganey.ReplHelper.smartShowTerm
+import me.rexim.morganey.interpreter.TermOutputHelper.smartShowTerm
 import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.syntax.LambdaParser
@@ -16,7 +14,6 @@ import sun.misc.{Signal, SignalHandler}
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
-
 import java.io.File
 
 import scala.io.Source
@@ -101,7 +98,7 @@ object Main extends SignalHandler {
       .map(_.norReduce())
 
     result match {
-      case Success(term) => println(ReplHelper.smartShowTerm(term))
+      case Success(term) => println(TermOutputHelper.smartShowTerm(term))
       case Failure(e) => println(e)
     }
   }

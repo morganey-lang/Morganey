@@ -1,11 +1,10 @@
-package me.rexim.morganey
+package me.rexim.morganey.interpreter
 
 import me.rexim.morganey.ast.LambdaTerm
-
-import me.rexim.morganey.church.ChurchPairConverter._
 import me.rexim.morganey.church.ChurchNumberConverter._
+import me.rexim.morganey.church.ChurchPairConverter._
 
-object ReplHelper {
+object TermOutputHelper {
 
   def isPrintableChar(code: Int): Boolean =
     32 <= code && code <= 176
