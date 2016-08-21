@@ -34,7 +34,10 @@ object Language {
 
   val comma              = ","
 
-  val whiteSpacePattern  = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+"""
+  /* comment-regex taken from: http://stackoverflow.com/a/5954831 */
+  val whiteSpacePattern  = """([ \t]|//.*|(?m)/\*(\*(?!/)|[^*]|[\n\r])*\*/)+"""
+
+  val lineBreak          = "[\n\r]"
 
   val leftParenthesis    = "("
 
