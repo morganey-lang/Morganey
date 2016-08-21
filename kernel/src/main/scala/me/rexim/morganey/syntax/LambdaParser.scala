@@ -98,7 +98,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
     loadKeyword ~> (modulePath.r ?) ^^ { MorganeyLoading }
 
   def replCommand: Parser[MorganeyNode] =
-    withLnBreaks(loading | binding | term)
+    loading | binding | term
 
   def script: Parser[List[MorganeyNode]] =
     withLnBreaks(repsep(replCommand, newLines))
