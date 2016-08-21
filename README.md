@@ -22,10 +22,11 @@ and start typing REPL commands there. The syntax of the REPL commands is
     <repl-command> := <term>
                     | <binding>
                     | <loading>
-    <term> ::= <variable>
-             | <literal>
-             | <function>
+    <term> ::= <function>
              | <application>
+             | <literal>
+             | <variable>
+             | "(" <term> ")"
     <binding> ::= <variable> ":=" <term>
     <loading> ::= "load" <module-path>
     <module-path> := [a-zA-Z][a-zA-Z0-9.]*
@@ -44,8 +45,8 @@ and start typing REPL commands there. The syntax of the REPL commands is
                             | <character-literal>
 
     <variable> ::= [a-zA-Z][a-zA-Z0-9]*
-    <function> ::= "(" <lambda-symbol> <variable> "." <term> ")"
-    <application> ::= "(" <term> <term> ")"
+    <function> ::= <lambda-symbol> <variable> "." { <variable> "." } <term>
+    <application> ::= <term> <term> { <term> }
     <lambda-symbol> ::= "λ"
                       | "\"
 
