@@ -4,7 +4,6 @@ import java.io.File
 
 import me.rexim.morganey.ast._
 import me.rexim.morganey.ast.LambdaTermHelpers._
-import me.rexim.morganey.interpreter.MorganeyExecutor
 import me.rexim.morganey.module.ModuleFinder
 import org.scalatest._
 

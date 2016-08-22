@@ -1,8 +1,10 @@
 package me.rexim.morganey.reduction
 
+import me.rexim.morganey.ast.LambdaInput
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.reduction.NormalOrder._
 import me.rexim.morganey.helpers.TestTerms
+import me.rexim.morganey.church.ChurchPairConverter._
 import org.scalatest._
 
 class NormalOrderSpec extends FlatSpec with Matchers with TestTerms {
@@ -34,5 +36,10 @@ class NormalOrderSpec extends FlatSpec with Matchers with TestTerms {
     val expectedTerm = lfunc("x", lapp(x, y))
 
     inputTerm.norReduce() should be (expectedTerm)
+  }
+
+  "Input term" should "full evaluated by the strategy" in {
+    val input = "abc"
+    decodeString(new LambdaInput(input.toStream).norReduce()) should be (Some(input))
   }
 }
