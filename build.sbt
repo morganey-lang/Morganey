@@ -9,7 +9,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.7",
   scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
   libraryDependencies ++= Seq(
-    "jline" % "jline" % "2.6",
+    "jline" % "jline" % "2.12.1",
     "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
   )
 )
