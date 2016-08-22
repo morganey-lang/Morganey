@@ -17,7 +17,7 @@ class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
   }
 
   "Lambda input" should "be lazily evaluated to a pair when substituted" in {
-    val forcedInput = decodePair(longInput.substitute(lvar("x") -> lvar("x")))
+    val forcedInput = decodePair(longInput.forceNextChar())
     forcedInput.isDefined should be (true)
 
     val firstChar = decodeChar(forcedInput.get._1)
@@ -25,6 +25,6 @@ class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
   }
 
   "Empty lambda input" should "should be evaluated to an empty list" in {
-    decodeList(emptyInput.substitute(lvar("x") -> lvar("x"))) should be (Some(List()))
+    decodeList(emptyInput.forceNextChar()) should be (Some(List()))
   }
 }

@@ -69,8 +69,15 @@ case class LambdaInput(input: Stream[Char]) extends LambdaTerm {
   override val freeVars: Set[String] = Set()
 
   override def substitute(substitution: (LambdaVar, LambdaTerm)): LambdaTerm =
+    forceNextChar().substitute(substitution)
+
+  /**
+    * Forces next character in the input to be Church encoded and
+    * put at the begining of the virtual input list
+    */
+  def forceNextChar(): LambdaTerm =
     input match {
-      case x #:: xs => encodePair((encodeNumber(x.toInt), LambdaInput(xs))).substitute(substitution)
+      case x #:: xs => encodePair((encodeNumber(x.toInt), LambdaInput(xs)))
       case _ => encodeList(List())
     }
 
