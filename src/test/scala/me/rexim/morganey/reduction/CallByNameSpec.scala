@@ -1,5 +1,8 @@
 package me.rexim.morganey.reduction
 
+import me.rexim.morganey.ast._
+import me.rexim.morganey.church.ChurchPairConverter._
+import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.helpers.TestTerms
 import me.rexim.morganey.reduction.CallByName._
@@ -44,5 +47,10 @@ class CallByNameSpec extends FlatSpec with Matchers with TestTerms {
 
   "Term with redices" should "be reduced until there are redices in head position" in {
     redex(redex(redex(funcWithRedexBody))).cbnReduce() should be (funcWithRedexBody)
+  }
+
+  "Input term" should "be evaluated once by the strategy" in {
+    val input = "abc"
+    decodePair(LambdaInput(input.toStream).cbnReduce()) should be (Some((encodeNumber('a'.toInt), LambdaInput(input.tail.toStream))))
   }
 }
