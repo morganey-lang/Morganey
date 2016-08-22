@@ -24,7 +24,7 @@ class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
     firstChar should be (Some('k'))
   }
 
-  "Empty lambda input" should "should be evaluated to an empty list" in {
+  "Empty lambda input" should "be evaluated to an empty list" in {
     decodeList(emptyInput.forceNextChar()) should be (Some(List()))
   }
 }
