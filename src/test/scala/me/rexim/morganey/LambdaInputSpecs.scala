@@ -10,6 +10,7 @@ import org.scalatest._
 class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
   val longInput = LambdaInput("khooy".toStream)
   val singleCharInput = LambdaInput("k".toStream)
+  val emptyInput = LambdaInput(Stream.empty)
 
   "Lambda input" should "have zero free vars by definition" in {
     longInput.freeVars.isEmpty should be (true)
@@ -23,14 +24,7 @@ class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
     firstChar should be (Some('k'))
   }
 
-  "Lambda input with single character" should "be evaluated to a single character" in {
-    val forcedInput = decodeChar(singleCharInput.substitute(lvar("x") -> lvar("x")))
-    forcedInput should be (Some('k'))
-  }
-
-  "Empty lambda input" should "stay unimplemented because of Morganey lists nature" in {
-    intercept[NotImplementedError] {
-      LambdaInput(Stream.empty).substitute(lvar("x") -> lvar("x"))
-    }
+  "Empty lambda input" should "should be evaluated to an empty list" in {
+    decodeList(emptyInput.substitute(lvar("x") -> lvar("x"))) should be (Some(List()))
   }
 }

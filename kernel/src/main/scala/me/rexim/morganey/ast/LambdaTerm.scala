@@ -70,9 +70,8 @@ case class LambdaInput(input: Stream[Char]) extends LambdaTerm {
 
   override def substitute(substitution: (LambdaVar, LambdaTerm)): LambdaTerm =
     input match {
-      case Stream(x) => encodeNumber(x.toInt)
       case x #:: xs => encodePair((encodeNumber(x.toInt), LambdaInput(xs))).substitute(substitution)
-      case _ => ???  // FIXME: This is just getting ridiculous! Please implement #62 already! :D
+      case _ => encodeList(List())
     }
 
   override val toString = "<input>"
