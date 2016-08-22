@@ -1,6 +1,6 @@
 package me.rexim.morganey.reduction
 
-import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaTerm}
+import me.rexim.morganey.ast._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -42,6 +42,7 @@ object NormalOrder {
       case LambdaApp(l, r) if !l.norIsFinished() => LambdaApp(l.norStepReduce(), r)
       case LambdaApp(l, r) if !r.norIsFinished() => LambdaApp(l, r.norStepReduce())
       case LambdaFunc(x, t) => LambdaFunc(x, t.norStepReduce())
+      case input: LambdaInput => input.forceNextChar()
       case other => other
     }
 
@@ -49,6 +50,7 @@ object NormalOrder {
       case LambdaApp(LambdaFunc(_, _), _) => false
       case LambdaApp(l, r) => l.norIsFinished() && r.norIsFinished()
       case LambdaFunc(_, t) => t.norIsFinished()
+      case _: LambdaInput => false
       case _ => true
     }
   }
