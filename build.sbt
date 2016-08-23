@@ -6,11 +6,11 @@ lazy val commonSettings = Seq(
   name := "morganey",
   organization := "me.rexim",
   version := "0.0.1-SNAPSHOT",
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.11.8",
   scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
   libraryDependencies ++= Seq(
-    "jline" % "jline" % "2.6",
-    "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
+    "jline" % "jline" % "2.12.1",
+    "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
   )
 )
 
