@@ -1,6 +1,7 @@
 package me.rexim.morganey.meta
 
-import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar}
+import me.rexim.morganey.ast._
+import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.helpers.TestTerms
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -63,6 +64,40 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
 
     val m"${list: List[Int]}" = zero
     list.isEmpty should be (true)
+  }
+
+  "Extraction of subtrees of applications" should "be supported by the unquotation macro" in {
+    val m"$wholeApp" = m"b c d"
+    wholeApp should be (lapp(lapp(b, c), d))
+
+    val m"$fstApp1 d" = m"b c d"
+    fstApp1 should be (lapp(b, c))
+
+    val m"$fstApp2 d" = m"c d"
+    fstApp2 should be (c)
+
+    val m"c $sndApp" = m"c d"
+    sndApp should be (d)
+  }
+
+  "Extraction of subtrees of abstractions" should "be supported by the unquotation macro" in {
+    val m"$wholeApp" = m"\\b.b"
+    wholeApp should be (I(b))
+
+    val m"\\$fstArg.c.d.1" = m"\\b.c.d.1"
+    fstArg should be (b)
+
+    val m"\\b.$sndArg.d.1" = m"\\b.c.d.1"
+    sndArg should be (c)
+
+    val m"\\b.c.$trdArg.1" = m"\\b.c.d.1"
+    trdArg should be (d)
+
+    val m"\\b.c.d.$body" = m"\\b.c.d.1"
+    body should be (one)
+
+    val m"\\b.c.$rest" = m"\\b.c.d.1"
+    rest should be (lfunc("d", one))
   }
 
 }
