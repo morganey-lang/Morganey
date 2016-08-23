@@ -74,16 +74,6 @@ private[meta] class QuotationMacro(val c: Context) {
     }
   }
 
-  private def hasSubpatterns(): Boolean = {
-    val patterns = c.internal.subpatterns(args.head).get
-    args.indices exists { idx =>
-      patterns(idx) match {
-        case pq"$_: $tpt" => true
-        case pq"$x @ _"   => false
-      }
-    }
-  }
-
   private def unquoteArg(i: Int): Tree = {
     val x = TermName(s"x$i")
     val subpattern = c.internal.subpatterns(args.head).get.apply(i)
@@ -134,23 +124,16 @@ private[meta] class QuotationMacro(val c: Context) {
         (q"_root_.scala.Some((..$ys))", q"_root_.scala.None")
     }
 
-    if (!hasSubpatterns() && ps.size == 1) {
-      q"""
-        new {
-          def unapply(input: $LambdaTermTpe) = Option(input)
-        }.unapply(..$args)
-      """
-    } else {
-      q"""
-        new {
-          def unapply(input: $LambdaTermTpe) = input match {
-            case $term => $ifp
-            case _     => $elp
-          }
-        }.unapply(..$args)
-      """
-    }
-
+    val identName = TermName(c.freshName())
+    q"""
+      new {
+        val $identName = true
+        def unapply(input: $LambdaTermTpe) = input match {
+          case $term if $identName => $ifp
+          case _                   => $elp
+        }
+      }.unapply(..$args)
+    """
   }
 
   private def expand() = transform(parse(buildProgram()))
