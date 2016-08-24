@@ -124,6 +124,10 @@ private[meta] class QuotationMacro(val c: Context) {
         (q"_root_.scala.Some((..$ys))", q"_root_.scala.None")
     }
 
+    /*
+     * Workaround to avoid the warning: patterns after a variable pattern cannot match (SLS 8.1.1)
+     * (See http://alvinalexander.com/scala/scala-unreachable-code-due-to-variable-pattern-message)
+     */
     val identName = TermName(c.freshName())
     q"""
       new {
