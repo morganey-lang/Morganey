@@ -44,6 +44,9 @@ trait DefaultUnliftableInstances {
         }
       }
     }
+
+  implicit val unliftId = Unliftable[LambdaTerm](Some(_))
+
 }
 
 object Unliftable {

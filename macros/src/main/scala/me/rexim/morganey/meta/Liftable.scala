@@ -31,6 +31,8 @@ trait DefaultLiftableInstances {
       encodeList(ys.toList)
     }
 
+  implicit val liftId = Liftable[LambdaTerm](identity)
+
 }
 
 object Liftable {
