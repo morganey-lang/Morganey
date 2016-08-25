@@ -1,24 +1,36 @@
 package me.rexim.morganey.interpreter
 
 import me.rexim.morganey.ast.LambdaTerm
-import me.rexim.morganey.church.ChurchNumberConverter._
-import me.rexim.morganey.church.ChurchPairConverter._
+import me.rexim.morganey.meta._
+
+import scala.annotation.tailrec
 
 object TermOutputHelper {
 
-  def isPrintableChar(code: Int): Boolean =
-    32 <= code && code <= 176
-
   def smartShowTerm(term: LambdaTerm): String = {
-    decodeNumber(term) match {
-      case Some(number) if isPrintableChar(number) => s"char: '${number.toChar}'"
-      case Some(number) => s"number: $number"
-      case None => decodeListOfNumbers(term) match {
-        case Some(numbers) if numbers.forall(isPrintableChar) =>
-          s"""string: \"${numbers.map(_.toChar).mkString}\""""
-        case Some(numbers) => s"numbers: [${numbers.mkString(",")}]"
-        case None => s"term: $term"
+    @tailrec
+    def decode(decoders: List[Decoder[_]]): String = decoders match {
+      case hd :: tl => hd(term) match {
+        case Some(result) => result
+        case None         => decode(tl)
       }
+      case Nil => idDecoder(term).get // `idDecoder` won't ever return `None`
     }
+    decode(decoders)
   }
+
+  private implicit val idDecoder = Decoder[LambdaTerm](t => s"term: $t")
+
+  private val decoders: List[Decoder[_]] =
+    List(
+      Decoder[Char]     (c  => s"char: '$c'"),
+      Decoder[Int]      (n  => s"number: $n"),
+      Decoder[String]   (s  => s"""string: \"$s\""""),
+      Decoder[Seq[Int]] (xs => s"numbers: ${xs.mkString("[", ",", "]")}")
+    )
+
+  private case class Decoder[T](transform: T => String)(implicit unT: Unliftable[T]) {
+    def apply(term: LambdaTerm): Option[String] = unT.unapply(term).map(transform)
+  }
+
 }
