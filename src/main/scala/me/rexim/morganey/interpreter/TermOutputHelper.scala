@@ -7,29 +7,34 @@ import scala.annotation.tailrec
 
 object TermOutputHelper {
 
-  def smartShowTerm(term: LambdaTerm): String = {
+  def smartShowTerm(term: LambdaTerm, noPrefix: Boolean = false): String = {
     @tailrec
     def decode(decoders: List[Decoder[_]]): String = decoders match {
       case hd :: tl => hd(term) match {
-        case Some(result) => result
+        case Some(result) => if (noPrefix) result else s"${hd.prefix}: $result"
         case None         => decode(tl)
       }
-      case Nil => idDecoder(term).get // `idDecoder` won't ever return `None`
+      case Nil =>
+        // `idDecoder` won't ever return `None`
+        val result = idDecoder(term).get
+        if (noPrefix) result else s"${idDecoder.prefix}: $result"
     }
     decode(decoders)
   }
 
-  private implicit val idDecoder = Decoder[LambdaTerm](t => s"term: $t")
+  private implicit val idDecoder = Decoder[LambdaTerm]("term", _.toString)
 
   private val decoders: List[Decoder[_]] =
     List(
-      Decoder[Char]     (c  => s"char: '$c'"),
-      Decoder[Int]      (n  => s"number: $n"),
-      Decoder[String]   (s  => s"""string: \"$s\""""),
-      Decoder[Seq[Int]] (xs => s"numbers: ${xs.mkString("[", ",", "]")}")
+      Decoder[Char]                     ("char", c => s"'$c'"),
+      Decoder[Int]                      ("number", _.toString),
+      Decoder[String]                   ("string", s => s"""\"$s\""""),
+      Decoder[Seq[Int]]                 ("numbers", _.mkString("[", ",", "]")),
+      Decoder[Seq[LambdaTerm]]          ("elements", _.map(smartShowTerm(_, true)).mkString("[", ",", "]")),
+      Decoder[(LambdaTerm, LambdaTerm)] ("pair", { case (a, b) => s"(${smartShowTerm(a, true)}, ${smartShowTerm(b, true)})" })
     )
 
-  private case class Decoder[T](transform: T => String)(implicit unT: Unliftable[T]) {
+  private case class Decoder[T](prefix: String, transform: T => String)(implicit unT: Unliftable[T]) {
     def apply(term: LambdaTerm): Option[String] = unT.unapply(term).map(transform)
   }
 
