@@ -22,7 +22,7 @@ object TermOutputHelper {
     decode(decoders)
   }
 
-  private implicit val idDecoder = Decoder[LambdaTerm]("term", _.toString)
+  private val idDecoder = Decoder[LambdaTerm]("term", _.toString)
 
   private val decoders: List[Decoder[_]] =
     List(
