@@ -3,6 +3,8 @@ package me.rexim.morganey
 import me.rexim.morganey.ast._
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.helpers.TestTerms
+import me.rexim.morganey.syntax.LambdaParser
+import me.rexim.morganey.util._
 import org.scalatest._
 
 class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
@@ -67,5 +69,34 @@ class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
   "A lazy sequence of characters" should "be rendered to \"<input>\"" in {
     LambdaInput(Stream.empty[Char]).toString should be ("<input>")
     LambdaInput("foo bar".toStream).toString should be ("<input>")
+  }
+
+  "Parsing a term, and reparsing the result of the pretty-printer" should "always succeed" in {
+    def parse(x: String) = LambdaParser.parseWith(x, _.term)
+
+    val terms = Seq(
+      "a", "xs", "foo",
+      "a b", "a b c", "a b c d",
+      "λx.y.z.x",
+      "λx.y.z.x y",
+      "λx.y.z.x y z",
+      "(λa.b.c) z",
+      "(λa.b) z",
+      "(λa.b.c) λa.b.c",
+      "a (b c) d",
+      "a (b c d)",
+      "a (b c d) e",
+      "a (b c) (d e)"
+    )
+
+    for (term <- terms) {
+      val result1 = parse(term)
+      result1.isSuccess should be (true)
+      val pretty  = result1.get.toString
+      val result2 = parse(pretty)
+      result2.isSuccess should be (true)
+      term              should be (pretty)
+      result1.get       should be (result2.get)
+    }
   }
 }
