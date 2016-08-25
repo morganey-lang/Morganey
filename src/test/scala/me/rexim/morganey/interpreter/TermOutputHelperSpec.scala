@@ -6,9 +6,9 @@ import org.scalatest._
 
 class TermOutputHelperSpec extends FlatSpec with Matchers {
   val testData = List[(LambdaTerm, String)](
-    m"(\\x . x)" -> "term: (λ x . x)",
+    m"(\\x . x)" -> "term: λx.x",
     m"khooy" -> "term: khooy",
-    m"(a b)" -> "term: (a b)",
+    m"(a b)" -> "term: a b",
     m"5" -> "number: 5",
     m"[1, 2, 3]" -> "numbers: [1,2,3]",
     m"'x'" -> "char: 'x'",
