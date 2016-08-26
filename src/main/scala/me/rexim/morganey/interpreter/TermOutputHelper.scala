@@ -30,8 +30,7 @@ object TermOutputHelper {
       Decoder[Int]                      ("number", _.toString),
       Decoder[String]                   ("string", s => s"""\"$s\""""),
       Decoder[Seq[Int]]                 ("numbers", _.mkString("[", ",", "]")),
-      Decoder[Seq[LambdaTerm]]          ("elements", _.map(smartShowTerm(_, true)).mkString("[", ",", "]")),
-      Decoder[(LambdaTerm, LambdaTerm)] ("pair", { case (a, b) => s"(${smartShowTerm(a, true)}, ${smartShowTerm(b, true)})" })
+      Decoder[Seq[LambdaTerm]]          ("elements", _.map(smartShowTerm(_, true)).mkString("[", ",", "]"))
     )
 
   private case class Decoder[T](prefix: String, transform: T => String)(implicit unT: Unliftable[T]) {
