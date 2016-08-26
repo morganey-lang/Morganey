@@ -12,7 +12,15 @@ class TermOutputHelperSpec extends FlatSpec with Matchers {
     m"5" -> "number: 5",
     m"[1, 2, 3]" -> "numbers: [1,2,3]",
     m"'x'" -> "char: 'x'",
-    m""""khooy"""" -> "string: \"khooy\""
+    m""""khooy"""" -> "string: \"khooy\"",
+    m"['a' .. 'f']" -> "string: \"abcdef\"",
+    m"['a','c' .. 'm']" -> "string: \"acegikm\"",
+    m"""["abc", "def"]""" -> "elements: [\"abc\",\"def\"]",
+    m"""[["abc", "def"]]""" -> "elements: [[\"abc\",\"def\"]]",
+    m"""[[1, 2, 3, 'a']]""" -> "elements: [[1,2,3,97]]",
+    m"""['A', [1, 2], 1]""" -> "elements: ['A',[1,2],1]",
+    m"""['A', ""]""" -> "numbers: [65,0]",
+    m"[[1, 'A'], []]" -> "elements: [[1,65],0]"
   )
 
   "A term" should "be correctly identified and showed" in {
