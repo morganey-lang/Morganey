@@ -1,24 +1,33 @@
 package me.rexim.morganey.interpreter
 
 import me.rexim.morganey.ast.LambdaTerm
-import me.rexim.morganey.church.ChurchNumberConverter._
-import me.rexim.morganey.church.ChurchPairConverter._
+import me.rexim.morganey.meta._
 
 object TermOutputHelper {
 
-  def isPrintableChar(code: Int): Boolean =
-    32 <= code && code <= 176
-
   def smartShowTerm(term: LambdaTerm): String = {
-    decodeNumber(term) match {
-      case Some(number) if isPrintableChar(number) => s"char: '${number.toChar}'"
-      case Some(number) => s"number: $number"
-      case None => decodeListOfNumbers(term) match {
-        case Some(numbers) if numbers.forall(isPrintableChar) =>
-          s"""string: \"${numbers.map(_.toChar).mkString}\""""
-        case Some(numbers) => s"numbers: [${numbers.mkString(",")}]"
-        case None => s"term: $term"
-      }
-    }
+    val (prefix, value) = decode(term)
+    s"$prefix: $value"
   }
+
+  private def decode(term: LambdaTerm): (String, String) =
+    decoders
+      .map(_(term))
+      .find(_.isDefined)
+      .flatten
+      .getOrElse(("term", term.toString))
+
+  private val decoders: Stream[Decoder[_]] =
+    Stream(
+      Decoder[Char]            ("char", c => s"'$c'"),
+      Decoder[Int]             ("number", _.toString),
+      Decoder[String]          ("string", s => s"""\"$s\""""),
+      Decoder[Seq[Int]]        ("numbers", _.mkString("[", ",", "]")),
+      Decoder[Seq[LambdaTerm]] ("elements", _.map(decode(_)._2).mkString("[", ",", "]"))
+    )
+
+  private case class Decoder[T](prefix: String, transform: T => String)(implicit unT: Unliftable[T]) {
+    def apply(term: LambdaTerm): Option[(String, String)] = unT.unapply(term).map(transform).map((prefix, _))
+  }
+
 }
