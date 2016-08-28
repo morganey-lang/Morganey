@@ -1,2 +1,2 @@
-true := (\a . (\b . a))
-false := 0
+true := \a.b. a
+false := \a.b. b
