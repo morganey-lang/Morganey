@@ -75,6 +75,7 @@ object Main extends SignalHandler {
       case Some("")     => ()
       case Some("exit") => exitRepl()
       case Some("reset") =>
+        con.println("Cleared all the bindings")
         globalContext = globalContext.reset()
       case Some(line)   => evalLine(globalContext, line) foreach { context =>
         globalContext = context
