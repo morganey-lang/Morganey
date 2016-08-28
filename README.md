@@ -33,7 +33,7 @@ To quit the REPL just `^C` it.
 
 ### Script ###
 
-TBD
+TBD ([#151](https://github.com/rexim/Morganey/issues/151))
 
 ### Execution ###
 
