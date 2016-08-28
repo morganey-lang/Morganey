@@ -3,8 +3,8 @@
 
 # Morganey [![Status Ventis](https://img.shields.io/badge/status-ventis-yellow.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
 
-It's the [Lambda Calculus][wiki-lambda-calculus] Interpreter and it
-interprets lambda terms! \o/
+[Lambda Calculus][wiki-lambda-calculus] based programming language
+that recognises Church encoded structures.
 
 ## Usage ##
 
@@ -17,11 +17,44 @@ To run the REPL just enter the following in the source code directory
 
     $ sbt run
 
-and start typing REPL commands there. The syntax of the REPL commands is
+and start entring REPL commands there. You can enter
 
-    <repl-command> := <term>
-                    | <binding>
-                    | <loading>
+- `<term>` (see [Language](Language))
+- `<binding>` (see [Language](Language))
+- `<loading>` (see [Language](Language))
+- `exit` - exits the REPL
+- `reset` - clears the current context
+
+The REPL will take the entered lambda term, beta-reduce it with the
+normal order reduction strategy and output the normal form of the
+entered lambda term.
+
+To quit the REPL just `^C` it.
+
+### Script ###
+
+TBD
+
+### Execution ###
+
+TBD
+
+### Unit Tests ###
+
+To run the Unit Tests enter the following in the source code directory
+
+    $ sbt clean coverage test
+    $ sbt coverageReport
+    $ sbt coverageAggregate
+
+And after that you can take a look at the Unit Test coverage
+results. Just open `target/scala-2.11/scoverage-report/index.html`
+with your favorite browser.
+
+## Language ##
+
+### BNF ###
+
     <term> ::= <function>
              | <application>
              | <literal>
@@ -50,31 +83,11 @@ and start typing REPL commands there. The syntax of the REPL commands is
     <lambda-symbol> ::= "λ"
                       | "\"
 
-The REPL will take the entered lambda term, beta-reduce it with the
-normal order reduction strategy and output the normal form of the
-entered lambda term.
-
-To quit the REPL just `^C` it.
-
 ### Comments ###
 
 In Morganey there are two types of comments: single-line (starting
 with double slash `//`, extending to the end of the line) and
 multi-line comments (any text, surrounded by `/*` and `*/`).
-
-### Unit Tests ###
-
-To run the Unit Tests enter the following in the source code directory
-
-    $ sbt clean coverage test
-    $ sbt coverageReport
-    $ sbt coverageAggregate
-
-And after that you can take a look at the Unit Test coverage
-results. Just open `target/scala-2.11/scoverage-report/index.html`
-with your favorite browser.
-
-Enjoy!
 
 ## License ##
 
