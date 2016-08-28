@@ -3,6 +3,7 @@ package me.rexim.morganey.ast
 import me.rexim.morganey.ast.LambdaTerm._
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.church.ChurchPairConverter._
+import me.rexim.morganey.util._
 
 import scala.annotation.tailrec
 
@@ -46,6 +47,30 @@ sealed trait LambdaTerm extends MorganeyNode {
       case (MorganeyBinding(variable, value), acc) =>
         LambdaApp(LambdaFunc(variable, acc), value)
     }
+
+  def addDependentBindings(context: Seq[MorganeyBinding],
+                           currentVars: Set[String] = Set()): Either[String, LambdaTerm] = {
+    val conflictedVars = freeVars & currentVars
+
+    if (conflictedVars.isEmpty) {
+      val bindings: List[Either[String, MorganeyBinding]] = freeVars.toList.map { x =>
+        context
+          .find(_.variable.name == x)
+          .toRight(s"Unexisting binding: $x")
+          .right
+          .flatMap { case MorganeyBinding(variable, term) =>
+              term
+              .addDependentBindings(context, currentVars + x)
+              .right
+              .map(MorganeyBinding(variable, _))
+          }
+      }
+
+      sequenceRight(bindings).right.map(this.addBindings(_))
+    } else {
+      Left(s"Conflicting vars: [${conflictedVars.mkString(",")}]")
+    }
+  }
 }
 
 case class LambdaVar(name: String) extends LambdaTerm {

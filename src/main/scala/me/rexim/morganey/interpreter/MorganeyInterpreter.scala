@@ -52,8 +52,13 @@ object MorganeyInterpreter {
         Computation(MorganeyEval(context.addBinding(binding), None))
 
       case term: LambdaTerm =>
-        term.addBindings(context.bindings).norReduceComputation().map { resultTerm =>
-          MorganeyEval(context, Some(resultTerm))
+        term.addDependentBindings(context.bindings).right.map { t =>
+          t.norReduceComputation().map { resultTerm =>
+            MorganeyEval(context, Some(resultTerm))
+          }
+        } match {
+          case Right(result) => result
+          case Left(message) => Computation.failed(new IllegalArgumentException(message))
         }
 
       case MorganeyLoading(optionalModulePath) => {

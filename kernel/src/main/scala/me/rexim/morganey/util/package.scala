@@ -22,6 +22,11 @@ package object util {
       case (ele, acc) => acc.flatMap(lst => ele.map(_ :: lst))
     }
 
+  def sequenceRight[L, R](lst: List[Either[L, R]]): Either[L, List[R]] =
+    lst.foldRight[Either[L, List[R]]](Right(List.empty[R])) {
+      case (ele, acc) => acc.right.flatMap(lst => ele.right.map(_ :: lst))
+    }
+
   def unquoteString(s: String): String =
     if (s.isEmpty) s else s(0) match {
       case '"' => unquoteString(s.tail)
