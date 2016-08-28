@@ -37,7 +37,7 @@ TBD ([#151](https://github.com/rexim/Morganey/issues/151))
 
 ### Execution ###
 
-TBD
+TBD ([#152](https://github.com/rexim/Morganey/issues/152))
 
 ### Unit Tests ###
 
