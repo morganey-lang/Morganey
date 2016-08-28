@@ -1,3 +1,3 @@
-SUCC := (λn.(λf.(λx.(f ((n f) x)))))
-PLUS := (λm.(λn.(λf.(λx.((m f) ((n f) x))))))
-MULT := (λm.(λn.(λf.(m (n f)))))
+succ := λn.f.x. f (n f x)
+plus := λm.n.f.x. (m f) (n f x)
+mult := λm.n.f. m (n f)
