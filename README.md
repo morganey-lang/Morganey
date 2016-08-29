@@ -4,7 +4,7 @@
 # Morganey [![Status Ventis](https://img.shields.io/badge/status-ventis-yellow.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
 
 [Lambda Calculus][wiki-lambda-calculus] based programming language
-that recognises Church encoded structures.
+that recognizes Church encoded structures.
 
 ## Usage ##
 
