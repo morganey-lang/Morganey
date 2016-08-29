@@ -19,9 +19,9 @@ To run the REPL just enter the following in the source code directory
 
 and start entring REPL commands there. You can enter
 
-- `<term>` (see [Language](Language))
-- `<binding>` (see [Language](Language))
-- `<loading>` (see [Language](Language))
+- `<term>` (see [Language](#language))
+- `<binding>` (see [Language](#language))
+- `<loading>` (see [Language](#language))
 - `exit` - exits the REPL
 - `reset` - clears the current context
 
