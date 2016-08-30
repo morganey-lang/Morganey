@@ -4,6 +4,7 @@ import java.io.File
 import java.util.{List => Jlist}
 
 import jline.console.completer.Completer
+import me.rexim.morganey.Commands._
 import me.rexim.morganey.ast._
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.InterpreterContext
@@ -27,6 +28,8 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
     }
 
     beforeCursor match {
+      // if a command was typed in
+      case IsCommand(cmds)                   => autoCompleteWith(cmds map (":" + _))
       // if a load statement was typed in (potential partially)
       case LoadStatement(parts, endsWithDot) =>
         val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot)
@@ -125,6 +128,18 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
       val parseResult = LambdaParser.parseWith(line, _.loading).toOption
       parseResult.map(handleLoading)
     }
+  }
+
+  private object IsCommand {
+
+    def unapply(line: String): Option[List[String]] = {
+      val potentialCommand = parseCommand(line).map(_._1)
+      val matchingCommands = potentialCommand map { p =>
+        commands.keySet filter (_ startsWith p)
+      }
+      matchingCommands.map(_.toList)
+    }
+
   }
 
   private def matchingDefinitions(line: String, knownVariableNames: List[String]): List[String] =

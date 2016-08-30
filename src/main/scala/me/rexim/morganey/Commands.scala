@@ -6,21 +6,24 @@ object Commands {
 
   final type Command = InterpreterContext => (InterpreterContext, Option[String])
 
-  val commandPattern  = ":([a-zA-Z]+)".r
-  val commandWithArgs = ":([a-zA-Z]+) (.*)".r
+  val commandPattern  = ":([a-zA-Z]*)".r
+  val commandWithArgs = ":([a-zA-Z]*) (.*)".r
 
-  private val commands =
+  val commands =
     Map[String, String => Command](
       "reset" -> resetBindings,
       "exit" -> exitREPL
     ) withDefault unknownCommand
 
-  def unapply(line: String): Option[Command] =
-    (line match {
+  def parseCommand(line: String): Option[(String, String)] =
+    line match {
       case commandPattern(cmd)        => Some((cmd, ""))
       case commandWithArgs(cmd, args) => Some((cmd, args))
       case _                          => None
-    }).map {
+    }
+
+  def unapply(line: String): Option[Command] =
+    parseCommand(line).map {
       case (cmd, args) => commands(cmd)(args)
     }
 
