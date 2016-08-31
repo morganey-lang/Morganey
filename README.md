@@ -23,6 +23,7 @@ and start entring REPL commands there. You can enter
 - `<binding>` (see [Language](#language))
 - `<loading>` (see [Language](#language))
 - `:exit` - exits the REPL
+- `:raw` - prints the representation of the term
 - `:reset` - clears the current context
 
 The REPL will take the entered lambda term, beta-reduce it with the
