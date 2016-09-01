@@ -51,19 +51,22 @@ object Commands {
   private def resetBindings(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
     if (args.isEmpty) {
       (context.reset(), Some("Cleared all the bindings"))
-    } else {
-      val (newContext, removedBindings) = context.partitionBindings(b => !(b.variable.name matches args))
+    } else validRegex(args) match {
+      case None =>
+        (context, Some(s"'$args' is not a valid regular expression!"))
+      case Some(matcher) =>
+        val (newContext, removedBindings) = context.partitionBindings(b => !matcher(b.variable.name))
 
-      val removed = removedBindings.map(_.variable.name)
-      val message = removed match {
-        case Nil       => "No bindings were removed!"
-        case hd :: Nil => s"Binding '$hd' was removed!"
-        case in :+ ls  =>
-          val bindingEnumeration = in.map(b => s"'$b'").mkString(", ") + s" and '$ls'"
-          s"Bindings $bindingEnumeration were removed!"
-      }
+        val removed = removedBindings.map(_.variable.name)
+        val message = removed match {
+          case Nil       => "No bindings were removed!"
+          case hd :: Nil => s"Binding '$hd' was removed!"
+          case in :+ ls  =>
+            val bindingEnumeration = in.map(b => s"'$b'").mkString(", ") + s" and '$ls'"
+            s"Bindings $bindingEnumeration were removed!"
+        }
 
-      (newContext, Option(message))
+        (newContext, Option(message))
     }
 
 }
