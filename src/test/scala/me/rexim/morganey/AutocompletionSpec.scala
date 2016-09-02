@@ -16,7 +16,7 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
   def autocomplete(line: String, cursor: Int, knownNames: List[String]): Set[CharSequence] = {
     val id = I(lvar("x"))
     val fakeBindings = knownNames.map(name => MorganeyBinding(lvar(name), id))
-    val moduleFinder = new ModuleFinder(List(new File("./std/")))
+    val moduleFinder = new ModuleFinder(List(new File("./test-data/load-autocomplete/")))
     val autocompleter = new ReplAutocompletion(() => InterpreterContext(fakeBindings, moduleFinder))
     val jlist = new java.util.ArrayList[CharSequence]()
     autocompleter.complete(line, cursor, jlist)
