@@ -1,5 +1,6 @@
 package me.rexim.morganey
 
+import me.rexim.morganey.ast.MorganeyBinding
 import me.rexim.morganey.interpreter.InterpreterContext
 import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.util._
@@ -29,7 +30,7 @@ object Commands {
 
   def unapply(line: String): Option[Command] =
     parseCommand(line).map {
-      case (cmd, args) => commands(cmd)(args)
+      case (cmd, args) => commands(cmd)(args.trim)
     }
 
   private def unknownCommand(command: String)(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
@@ -48,6 +49,24 @@ object Commands {
   }
 
   private def resetBindings(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
-    (context.reset(), Some("Cleared all the bindings"))
+    if (args.isEmpty) {
+      (context.reset(), Some("Cleared all the bindings"))
+    } else validRegex(args) match {
+      case None =>
+        (context, Some(s"'$args' is not a valid regular expression!"))
+      case Some(matcher) =>
+        val (newContext, removedBindings) = context.partitionBindings(b => !matcher(b.variable.name))
+
+        val removed = removedBindings.map(_.variable.name)
+        val message = removed match {
+          case Nil       => "No bindings were removed!"
+          case hd :: Nil => s"Binding '$hd' was removed!"
+          case in :+ ls  =>
+            val bindingEnumeration = in.map(b => s"'$b'").mkString(", ") + s" and '$ls'"
+            s"Bindings $bindingEnumeration were removed!"
+        }
+
+        (newContext, Option(message))
+    }
 
 }
