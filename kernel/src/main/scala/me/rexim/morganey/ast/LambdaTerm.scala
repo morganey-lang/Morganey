@@ -1,40 +1,9 @@
 package me.rexim.morganey.ast
 
-import me.rexim.morganey.ast.LambdaTerm._
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.church.ChurchPairConverter._
 
 import scala.annotation.tailrec
-
-object LambdaTerm {
-
-  private[ast] def nestedApplications(app: LambdaApp): (LambdaTerm, List[LambdaTerm]) = {
-    @tailrec
-    def go(app: LambdaApp, acc: List[LambdaTerm]): (LambdaTerm, List[LambdaTerm]) =
-      app match {
-        case LambdaApp(l: LambdaApp, r) => go(l, r :: acc)
-        case LambdaApp(l, r)            => (l, r :: acc)
-      }
-    go(app, Nil)
-  }
-
-  private[ast] def nestedFunctions(func: LambdaFunc): (List[LambdaVar], LambdaTerm) = {
-    @tailrec
-    def go(func: LambdaFunc, acc: List[LambdaVar]): (List[LambdaVar], LambdaTerm) =
-      func match {
-        case LambdaFunc(v, f: LambdaFunc) => go(f, v :: acc)
-        case LambdaFunc(v, b)             => ((v :: acc).reverse, b)
-      }
-    go(func, Nil)
-  }
-
-  private[ast] def hasAppAsBody(func: LambdaFunc): Boolean =
-    nestedFunctions(func) match {
-      case (_, _: LambdaApp) => true
-      case _                 => false
-    }
-
-}
 
 sealed trait LambdaTerm extends MorganeyNode {
   val freeVars: Set[String]
@@ -82,8 +51,24 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
 
   override val freeVars: Set[String] = body.freeVars - parameter.name
 
+  private[ast] def nestedFunctions(): (List[LambdaVar], LambdaTerm) = {
+    @tailrec
+    def go(func: LambdaFunc, acc: List[LambdaVar]): (List[LambdaVar], LambdaTerm) =
+      func match {
+        case LambdaFunc(v, f: LambdaFunc) => go(f, v :: acc)
+        case LambdaFunc(v, b)             => ((v :: acc).reverse, b)
+      }
+    go(this, Nil)
+  }
+
+  private[ast] def hasAppAsBody: Boolean =
+    nestedFunctions() match {
+      case (_, _: LambdaApp) => true
+      case _                 => false
+    }
+
   override def toString: String = {
-    val (vars, body) = nestedFunctions(this)
+    val (vars, body) = nestedFunctions()
     val variables = vars.map(t => s"$t.").mkString("")
     s"λ$variables$body"
   }
@@ -99,12 +84,22 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
 
   override val freeVars: Set[String] = leftTerm.freeVars ++ rightTerm.freeVars
 
+  private[ast] def nestedApplications(app: LambdaApp): (LambdaTerm, List[LambdaTerm]) = {
+    @tailrec
+    def go(app: LambdaApp, acc: List[LambdaTerm]): (LambdaTerm, List[LambdaTerm]) =
+      app match {
+        case LambdaApp(l: LambdaApp, r) => go(l, r :: acc)
+        case LambdaApp(l, r)            => (l, r :: acc)
+      }
+    go(app, Nil)
+  }
+
   override def toString: String = {
     val (deep, nest) = nestedApplications(this)
     val nested = nest.map {
-      case a: LambdaApp                     => s"($a)"
-      case f: LambdaFunc if hasAppAsBody(f) => s"($f)"
-      case t                                => t.toString
+      case a: LambdaApp                    => s"($a)"
+      case f: LambdaFunc if f.hasAppAsBody => s"($f)"
+      case t                               => t.toString
     }.mkString(" ")
     val rest = deep match {
       case f: LambdaFunc => s"($f)"
