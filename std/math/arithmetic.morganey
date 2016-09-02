@@ -1,3 +1,7 @@
 succ := \n.f.x. f (n f x)
+pred := \n.f.x. n (\g.h. h (g f)) (\u. x) (\u. u)
+
 plus := \m.n.f.x. (m f) (n f x)
 mult := \m.n.f. m (n f)
+
+iszero := λn.n (λx.a.b.b) (\a.b.a)
