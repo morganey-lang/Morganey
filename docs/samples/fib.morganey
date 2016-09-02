@@ -1,8 +1,4 @@
-pair := \x.y.z. z x y
-pred := λn.λf.λx.n (λg.λh.h (g f)) (λu.x) (λu.u)
-plus := \m.n.f.x. m f (n f x)
-iszero := λn.n (λx.a.b.b) (\a.b.a)
-Y := \f . (\x. f (x x)) (\x . f (x x))
+load prelude
 
 main := pair 0 (Y (\fib.n.a.b. iszero n 0 (pair a (fib (pred n) b (plus a b)))) 15 0 1)
 
