@@ -1,6 +1,7 @@
 package me.rexim.morganey.ast
 
 import me.rexim.morganey.ast.LambdaTerm._
+import me.rexim.morganey.ast.error.{BindingError, BindingLoop, NonExistingBinding}
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.church.ChurchPairConverter._
 import me.rexim.morganey.util._
@@ -49,12 +50,12 @@ sealed trait LambdaTerm extends MorganeyNode {
     }
 
   def addDependentBindings(context: Seq[MorganeyBinding],
-                           currentVars: List[String] = List()): Either[String, LambdaTerm] = {
-      val bindings: List[Either[String, MorganeyBinding]] = freeVars.toList.map { x =>
+                           currentVars: List[String] = List()): Either[BindingError, LambdaTerm] = {
+      val bindings = freeVars.toList.map { x =>
         if (!currentVars.contains(x)) {
           context
             .find(_.variable.name == x)
-            .toRight(s"Non-existing binding: $x")
+            .toRight(NonExistingBinding(x))
             .right
             .flatMap { case MorganeyBinding(variable, term) =>
               term
@@ -63,10 +64,7 @@ sealed trait LambdaTerm extends MorganeyNode {
                 .map(MorganeyBinding(variable, _))
             }
         } else {
-          Left(
-            s"""|Binding loop detected: ${currentVars.reverse.mkString(" -> ")} -> $x
-                |Please use Y-combinator if you want recursion
-             """.stripMargin)
+          Left(BindingLoop((x :: currentVars).reverse))
         }
       }
 
