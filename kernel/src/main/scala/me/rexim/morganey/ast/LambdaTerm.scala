@@ -49,27 +49,28 @@ sealed trait LambdaTerm extends MorganeyNode {
     }
 
   def addDependentBindings(context: Seq[MorganeyBinding],
-                           currentVars: Set[String] = Set()): Either[String, LambdaTerm] = {
-    val conflictingVars = freeVars & currentVars
-
-    if (conflictingVars.isEmpty) {
+                           currentVars: List[String] = List()): Either[String, LambdaTerm] = {
       val bindings: List[Either[String, MorganeyBinding]] = freeVars.toList.map { x =>
-        context
-          .find(_.variable.name == x)
-          .toRight(s"Non-existing binding: $x")
-          .right
-          .flatMap { case MorganeyBinding(variable, term) =>
+        if (!currentVars.contains(x)) {
+          context
+            .find(_.variable.name == x)
+            .toRight(s"Non-existing binding: $x")
+            .right
+            .flatMap { case MorganeyBinding(variable, term) =>
               term
-              .addDependentBindings(context, currentVars + x)
-              .right
-              .map(MorganeyBinding(variable, _))
-          }
+                .addDependentBindings(context, x :: currentVars)
+                .right
+                .map(MorganeyBinding(variable, _))
+            }
+        } else {
+          Left(
+            s"""|Binding loop detected: ${currentVars.reverse.mkString(" -> ")} -> $x
+                |Please use Y-combinator if you want recursion
+             """.stripMargin)
+        }
       }
 
       sequenceRight(bindings).right.map(this.addBindings(_))
-    } else {
-      Left(s"Conflicting vars: [${conflictingVars.mkString(",")}]")
-    }
   }
 }
 
