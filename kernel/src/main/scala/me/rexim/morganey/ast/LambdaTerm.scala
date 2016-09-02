@@ -56,7 +56,7 @@ sealed trait LambdaTerm extends MorganeyNode {
       val bindings: List[Either[String, MorganeyBinding]] = freeVars.toList.map { x =>
         context
           .find(_.variable.name == x)
-          .toRight(s"Unexisting binding: $x")
+          .toRight(s"Non-existing binding: $x")
           .right
           .flatMap { case MorganeyBinding(variable, term) =>
               term
