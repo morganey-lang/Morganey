@@ -71,10 +71,13 @@ object Main extends SignalHandler {
     val evalLine = handleLine(con) _
 
     while (running) line() match {
-      case None         => exitRepl() // eof
-      case Some("")     => ()
-      case Some("exit") => exitRepl()
-      case Some(line)   => evalLine(globalContext, line) foreach { context =>
+      case None                => exitRepl() // eof
+      case Some("")            => ()
+      case Some(Commands(cmd)) =>
+        val (newContext, output) = cmd(globalContext)
+        globalContext = newContext
+        output.foreach(con.println)
+      case Some(line)          => evalLine(globalContext, line) foreach { context =>
         globalContext = context
       }
     }

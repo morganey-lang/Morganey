@@ -1,7 +1,8 @@
 package me.rexim.morganey
 
-import java.io.{FileInputStream, InputStreamReader, Reader, File}
+import java.io.{File, FileInputStream, InputStreamReader, Reader}
 import java.nio.charset.StandardCharsets.UTF_8
+import java.util.regex.Pattern
 
 import scala.util._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
@@ -26,6 +27,12 @@ package object util {
     lst.foldRight[Either[L, List[R]]](Right(List.empty[R])) {
       case (ele, acc) => acc.right.flatMap(lst => ele.right.map(_ :: lst))
     }
+
+  def validRegex(regex: String): Option[String => Boolean] =
+    Try {
+      val pattern = Pattern.compile(regex)
+      s: String => pattern.matcher(s).matches()
+    }.toOption
 
   def unquoteString(s: String): String =
     if (s.isEmpty) s else s(0) match {

@@ -50,7 +50,10 @@ build := {
 
 lazy val morganey = (project in file("."))
   .settings(commonSettings :_*)
-  .settings(mainClass := Some("me.rexim.morganey.Main"))
+  .settings(
+    mainClass := Some("me.rexim.morganey.Main"),
+    initialCommands in console := "import me.rexim.morganey.meta._"
+  )
   .aggregate(macros, kernel)
   .dependsOn(
     macros % dependencySettings,

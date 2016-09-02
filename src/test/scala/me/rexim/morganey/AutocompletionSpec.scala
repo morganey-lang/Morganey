@@ -86,4 +86,12 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     autocomplete("load math.ar", 12, List()) should be (Set("math.arithmetic") map addLoad)
   }
 
+  it should "autocomplete commands" in {
+    def addColon(s: String): String = ":" + s
+
+    autocomplete(":exi", 4, List())  should be (Set("exit") map addColon)
+    autocomplete(":rese", 4, List()) should be (Set("reset") map addColon)
+    autocomplete(":", 1, List())     should be (Commands.commands.keySet map addColon)
+  }
+
 }
