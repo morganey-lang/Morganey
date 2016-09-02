@@ -5,6 +5,7 @@ import java.io.File
 import me.rexim.morganey.ast._
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.meta._
 import org.scalatest._
 
 import scala.util.Success
@@ -13,19 +14,21 @@ class MorganeyExecutorSpecs extends FlatSpec with Matchers {
   val moduleFinder = new ModuleFinder(List(new File("./std/")))
 
   val programBindings = List(
-    MorganeyBinding(lvar("x"), lvar("x")),
-    MorganeyBinding(lvar("y"), lvar("y")),
-    MorganeyBinding(lvar("z"), lvar("z"))
+    MorganeyBinding(m"x", m"\\x. x"),
+    MorganeyBinding(m"y", m"\\y. y"),
+    MorganeyBinding(m"z", m"\\z. z")
   )
 
-  val programEntry = MorganeyBinding(lvar("main"), lvar("main"))
+  val programBody = m"x"
+
+  val programEntry = MorganeyBinding(lvar("main"), programBody)
 
   val rawProgram = programEntry :: programBindings
 
   val programInput = "khooy".toStream
 
   "Executor" should "compile a correct program to a reducible term" in {
-    val expectedProgram = lapp(lvar("main"), LambdaInput(programInput)).addBindings(programBindings)
+    val Right(expectedProgram) = lapp(programBody, LambdaInput(programInput)).addDependentBindings(programBindings)
     MorganeyExecutor.compileProgram(programInput)(rawProgram) should be (Success(expectedProgram))
   }
 
