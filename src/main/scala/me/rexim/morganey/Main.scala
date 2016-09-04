@@ -38,11 +38,11 @@ object Main extends SignalHandler {
     System.exit(0)
   }
 
-  def handleLine(con: ConsoleReader)(globalContext: InterpreterContext, line: String): Option[InterpreterContext] = {
+  def handleLine(con: ConsoleReader)(globalContext: ReplContext, line: String): Option[ReplContext] = {
     val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
 
     val evaluationResult = nodeParseResult flatMap { node =>
-      val computation = MorganeyRepl.evalNode(globalContext, node)//evalOneNodeComputation(node)(globalContext)
+      val computation = MorganeyRepl.evalNode(globalContext, node)
       awaitComputationResult(computation)
     }
 
@@ -56,7 +56,7 @@ object Main extends SignalHandler {
     }
   }
 
-  def startRepl(context: InterpreterContext) = {
+  def startRepl(context: ReplContext) = {
     Signal.handle(new Signal("INT"), this)
 
     val running = true
@@ -82,7 +82,7 @@ object Main extends SignalHandler {
     }
   }
 
-  def executeProgram(context: InterpreterContext, programFile: String) = {
+  def executeProgram(context: ReplContext, programFile: String) = {
     import MorganeyExecutor._
     import me.rexim.morganey.reduction.NormalOrder._
 
@@ -98,7 +98,7 @@ object Main extends SignalHandler {
 
   def main(args: Array[String]) = {
     val context =
-      InterpreterContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/"))))
+      ReplContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/"))))
 
     args.toList match {
       case Nil => startRepl(context)
