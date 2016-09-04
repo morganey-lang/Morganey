@@ -29,7 +29,7 @@ class InterpreterContextSpec extends FlatSpec with Matchers with TestTerms {
     val knownBindings = List(zero, one, two, three)
     val context = InterpreterContext(knownBindings, new ModuleFinder(List()))
 
-    val (satisfyCtx, notSatisfy) = context.partitionBindings(_.variable.name endsWith "o")
+    val (satisfyCtx, notSatisfy) = context.removeBindings(_.variable.name endsWith "o")
     val InterpreterContext(satisfy, _) = satisfyCtx
     satisfy    should be (List(zero, two))
     notSatisfy should be (List(one, three))
