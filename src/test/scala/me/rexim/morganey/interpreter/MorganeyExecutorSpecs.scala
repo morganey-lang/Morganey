@@ -37,11 +37,11 @@ class MorganeyExecutorSpecs extends FlatSpec with Matchers {
   }
 
   "Executor" should "not interpret empty loading nodes and just ignore them" in {
-    MorganeyExecutor.interpretNode(MorganeyLoading(None), moduleFinder) should be (Success(List()))
+    MorganeyExecutor.interpretNode(MorganeyLoading(None), moduleFinder, Set()) should be (Success(List()))
   }
 
   "Executor" should "should returns bindings as is during their interpretation as a node" in {
     val binding = MorganeyBinding(lvar("khooy"), lvar("khooy"))
-    MorganeyExecutor.interpretNode(binding, moduleFinder) should be (Success(List(binding)))
+    MorganeyExecutor.interpretNode(binding, moduleFinder, Set()) should be (Success(List(binding)))
   }
 }

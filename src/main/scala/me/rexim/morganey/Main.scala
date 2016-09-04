@@ -96,7 +96,7 @@ object Main extends SignalHandler {
     import MorganeyExecutor._
     import me.rexim.morganey.reduction.NormalOrder._
 
-    val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder)
+    val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder, Set())
       .flatMap(compileProgram(Source.stdin.toStream))
       .map(_.norReduce())
 
