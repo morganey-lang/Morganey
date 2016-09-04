@@ -1,8 +1,3 @@
-succ := \n.f.x.f (n f x)
-pair := \x.y.z. z x y
-first := \n.n (\a.b.a)
-second := \n.n (\a.b.b)
-isnil := \l.l (\h.t.d. (\a.b.b)) (\a.b.a)
-Y := \f . (\x. f (x x)) (\x . f (x x))
+load prelude
 
 main := Y (\map.xs. (isnil xs) 0 (pair (succ (first xs)) (map (second xs))))

@@ -1,7 +1,9 @@
 package me.rexim.morganey.ast
 
+import me.rexim.morganey.ast.error._
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.church.ChurchPairConverter._
+import me.rexim.morganey.util._
 
 import scala.annotation.tailrec
 
@@ -10,11 +12,36 @@ sealed trait LambdaTerm extends MorganeyNode {
 
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
 
-  def addBindings(context: Seq[MorganeyBinding]): LambdaTerm =
+  private def wrapBindings(context: Seq[MorganeyBinding]): LambdaTerm =
     context.foldRight(this) {
       case (MorganeyBinding(variable, value), acc) =>
         LambdaApp(LambdaFunc(variable, acc), value)
     }
+
+  private def addBindingsImpl(context: Seq[MorganeyBinding],
+                      currentVars: List[String]): Either[BindingError, LambdaTerm] = {
+      val bindings = freeVars.toList.map { x =>
+        if (!currentVars.contains(x)) {
+          context
+            .find(_.variable.name == x)
+            .toRight(NonExistingBinding(x))
+            .right
+            .flatMap { case MorganeyBinding(variable, term) =>
+              term
+                .addBindingsImpl(context, x :: currentVars)
+                .right
+                .map(MorganeyBinding(variable, _))
+            }
+        } else {
+          Left(BindingLoop((x :: currentVars).reverse))
+        }
+      }
+
+      sequenceRight(bindings).right.map(this.wrapBindings(_))
+  }
+
+  def addBindings(context: Seq[MorganeyBinding]): Either[BindingError, LambdaTerm] =
+    addBindingsImpl(context, List())
 }
 
 case class LambdaVar(name: String) extends LambdaTerm {
