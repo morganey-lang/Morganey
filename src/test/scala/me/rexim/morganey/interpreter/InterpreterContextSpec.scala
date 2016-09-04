@@ -17,7 +17,7 @@ class InterpreterContextSpec extends FlatSpec with Matchers with TestTerms {
   "Interpreter context" should "clear bindings on reset command" in {
     val bindings = List(MorganeyBinding(m"x", m"\\x.x"))
     val context = InterpreterContext(bindings, new ModuleFinder(List()))
-    context.reset().bindings.isEmpty should be (true)
+    context.clear().bindings.isEmpty should be (true)
   }
 
   it should "partition all known bindings" in {
