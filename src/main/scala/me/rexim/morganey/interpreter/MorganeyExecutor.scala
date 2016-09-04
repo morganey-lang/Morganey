@@ -36,7 +36,7 @@ object MorganeyExecutor {
   def compileProgram(input: Stream[Char])(rawProgram: List[MorganeyBinding]): Try[LambdaTerm] = {
     rawProgram.partition(_.variable.name == "main") match {
       case (List(MorganeyBinding(LambdaVar("main"), program)), bindings) =>
-        LambdaApp(program, LambdaInput(input)).addDependentBindings(bindings) match {
+        LambdaApp(program, LambdaInput(input)).addBindings(bindings) match {
           case Right(compiledProgram) => Success(compiledProgram)
 
           case Left(NonExistingBinding(name)) =>

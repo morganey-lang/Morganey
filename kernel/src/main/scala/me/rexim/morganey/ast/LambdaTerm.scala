@@ -12,14 +12,14 @@ sealed trait LambdaTerm extends MorganeyNode {
 
   def substitute(substitution : (LambdaVar, LambdaTerm)): LambdaTerm
 
-  def addBindings(context: Seq[MorganeyBinding]): LambdaTerm =
+  private def wrapBindings(context: Seq[MorganeyBinding]): LambdaTerm =
     context.foldRight(this) {
       case (MorganeyBinding(variable, value), acc) =>
         LambdaApp(LambdaFunc(variable, acc), value)
     }
 
-  def addDependentBindings(context: Seq[MorganeyBinding],
-                           currentVars: List[String] = List()): Either[BindingError, LambdaTerm] = {
+  private def addBindingsImpl(context: Seq[MorganeyBinding],
+                      currentVars: List[String]): Either[BindingError, LambdaTerm] = {
       val bindings = freeVars.toList.map { x =>
         if (!currentVars.contains(x)) {
           context
@@ -28,7 +28,7 @@ sealed trait LambdaTerm extends MorganeyNode {
             .right
             .flatMap { case MorganeyBinding(variable, term) =>
               term
-                .addDependentBindings(context, x :: currentVars)
+                .addBindingsImpl(context, x :: currentVars)
                 .right
                 .map(MorganeyBinding(variable, _))
             }
@@ -37,8 +37,11 @@ sealed trait LambdaTerm extends MorganeyNode {
         }
       }
 
-      sequenceRight(bindings).right.map(this.addBindings(_))
+      sequenceRight(bindings).right.map(this.wrapBindings(_))
   }
+
+  def addBindings(context: Seq[MorganeyBinding]): Either[BindingError, LambdaTerm] =
+    addBindingsImpl(context, List())
 }
 
 case class LambdaVar(name: String) extends LambdaTerm {

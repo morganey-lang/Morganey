@@ -53,7 +53,7 @@ object MorganeyInterpreter {
         Computation(MorganeyEval(context.addBinding(binding), None))
 
       case term: LambdaTerm =>
-        term.addDependentBindings(context.bindings).right.map { t =>
+        term.addBindings(context.bindings).right.map { t =>
           t.norReduceComputation().map { resultTerm =>
             MorganeyEval(context, Some(resultTerm))
           }

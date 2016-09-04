@@ -28,7 +28,7 @@ class MorganeyExecutorSpecs extends FlatSpec with Matchers {
   val programInput = "khooy".toStream
 
   "Executor" should "compile a correct program to a reducible term" in {
-    val Right(expectedProgram) = lapp(programBody, LambdaInput(programInput)).addDependentBindings(programBindings)
+    val Right(expectedProgram) = lapp(programBody, LambdaInput(programInput)).addBindings(programBindings)
     MorganeyExecutor.compileProgram(programInput)(rawProgram) should be (Success(expectedProgram))
   }
 
