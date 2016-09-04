@@ -16,9 +16,9 @@ object Commands {
 
   val commands =
     Map[String, String => Command](
-      "exit"  -> exitREPL,
-      "raw"   -> rawPrintTerm,
-      "reset" -> resetBindings
+      "exit"   -> exitREPL,
+      "raw"    -> rawPrintTerm,
+      "unbind" -> unbindBindings
     ) withDefault unknownCommand
 
   def parseCommand(line: String): Option[(String, String)] =
@@ -48,9 +48,9 @@ object Commands {
     (context, Option(output))
   }
 
-  private def resetBindings(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
+  private def unbindBindings(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
     if (args.isEmpty) {
-      (context.reset(), Some("Cleared all the bindings"))
+      (context.clear(), Some("Cleared all the bindings"))
     } else validRegex(args) match {
       case None =>
         (context, Some(s"'$args' is not a valid regular expression!"))
