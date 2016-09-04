@@ -1,8 +1,7 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.interpreter.MorganeyInterpreter._
-import me.rexim.morganey.interpreter.{InterpreterContext, MorganeyEval, MorganeyExecutor, TermOutputHelper}
+import me.rexim.morganey.interpreter._
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.TermOutputHelper.smartShowTerm
 import me.rexim.morganey.ast._
@@ -43,7 +42,7 @@ object Main extends SignalHandler {
     val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
 
     val evaluationResult = nodeParseResult flatMap { node =>
-      val computation = evalOneNodeComputation(node)(globalContext)
+      val computation = MorganeyRepl.evalNode(globalContext, node)//evalOneNodeComputation(node)(globalContext)
       awaitComputationResult(computation)
     }
 

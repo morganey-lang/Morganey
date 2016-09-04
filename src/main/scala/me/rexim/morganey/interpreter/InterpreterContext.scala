@@ -7,6 +7,9 @@ case class InterpreterContext(bindings: List[MorganeyBinding], moduleFinder: Mod
   def addBinding(binding: MorganeyBinding): InterpreterContext =
     InterpreterContext(binding :: bindings, moduleFinder)
 
+  def addBindings(newBindings: List[MorganeyBinding]): InterpreterContext =
+    InterpreterContext(bindings ++ newBindings, moduleFinder)
+
   def clear(): InterpreterContext = InterpreterContext(List(), moduleFinder)
 
   def removeBindings(predicate: MorganeyBinding => Boolean): (InterpreterContext, List[MorganeyBinding])= {
