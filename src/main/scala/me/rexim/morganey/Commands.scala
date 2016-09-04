@@ -55,7 +55,7 @@ object Commands {
       case None =>
         (context, Some(s"'$args' is not a valid regular expression!"))
       case Some(matcher) =>
-        val (newContext, removedBindings) = context.partitionBindings(b => !matcher(b.variable.name))
+        val (newContext, removedBindings) = context.removeBindings(b => !matcher(b.variable.name))
 
         val removed = removedBindings.map(_.variable.name)
         val message = removed match {

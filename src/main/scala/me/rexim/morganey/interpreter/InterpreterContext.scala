@@ -9,8 +9,8 @@ case class InterpreterContext(bindings: List[MorganeyBinding], moduleFinder: Mod
 
   def clear(): InterpreterContext = InterpreterContext(List(), moduleFinder)
 
-  def partitionBindings(f: MorganeyBinding => Boolean): (InterpreterContext, List[MorganeyBinding])= {
-    val (satisfyF, notSatisfyF) = bindings.partition(f)
+  def removeBindings(predicate: MorganeyBinding => Boolean): (InterpreterContext, List[MorganeyBinding])= {
+    val (satisfyF, notSatisfyF) = bindings.partition(predicate)
     (InterpreterContext(satisfyF, moduleFinder), notSatisfyF)
   }
 }
