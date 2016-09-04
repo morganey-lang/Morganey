@@ -90,7 +90,7 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     def addColon(s: String): String = ":" + s
 
     autocomplete(":exi", 4, List())  should be (Set("exit") map addColon)
-    autocomplete(":rese", 4, List()) should be (Set("reset") map addColon)
+    autocomplete(":unbi", 4, List()) should be (Set("unbind") map addColon)
     autocomplete(":", 1, List())     should be (Commands.commands.keySet map addColon)
   }
 
