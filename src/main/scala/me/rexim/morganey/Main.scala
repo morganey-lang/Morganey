@@ -83,15 +83,6 @@ object Main extends SignalHandler {
     }
   }
 
-  def startProgram(context: InterpreterContext, args: Array[String]) = {
-    val result = args.toStream.foldLeft[Try[MorganeyEval]](Success(MorganeyEval(context, None))) { (evalTry, fileName) =>
-      evalTry.flatMap(evalFile(fileName))
-    } match {
-      case Failure(e) => println(s"[ERROR] ${e.getMessage}")
-      case Success(eval) => eval.result.foreach(t => println(smartShowTerm(t)))
-    }
-  }
-
   def executeProgram(context: InterpreterContext, programFile: String) = {
     import MorganeyExecutor._
     import me.rexim.morganey.reduction.NormalOrder._
@@ -112,8 +103,7 @@ object Main extends SignalHandler {
 
     args.toList match {
       case Nil => startRepl(context)
-      case "exe" :: programFile :: rest => executeProgram(context, programFile)
-      case _ => startProgram(context, args)
+      case programFile :: _ => executeProgram(context, programFile)
     }
   }
 }
