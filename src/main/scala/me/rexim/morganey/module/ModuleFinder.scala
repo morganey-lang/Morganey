@@ -5,7 +5,7 @@ import java.io.File
 import ModuleFinder._
 
 object ModuleFinder {
-  val fileExtension = "morganey"
+  val fileExtension = "mgn"
 
   def loadPathToRelativeFile(modulePath: String): String =
     modulePath.replace('.', File.separatorChar)
