@@ -63,7 +63,7 @@ object Commands {
           case bindings if bindings.size > unbindCountThreshold =>
             s"${bindings.size} bindings were removed!"
           case in :+ ls  =>
-            val bindingEnumeration = in.map(b => s"'$b'").mkString(", ") + s" and '$ls'"
+            val bindingEnumeration = in.map(b => s"'$b'").mkString(", ") + s", and '$ls'"
             s"Bindings $bindingEnumeration were removed!"
         }
 
