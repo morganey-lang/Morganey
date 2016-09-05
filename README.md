@@ -32,13 +32,20 @@ entered lambda term.
 
 To quit the REPL just `^C` it.
 
-### Script ###
+### Program Execution ###
 
-TBD ([#151](https://github.com/rexim/Morganey/issues/151))
+To execute a program written in Morganey do the following:
 
-### Execution ###
+    $ sbt "run main.mgn"
 
-TBD ([#152](https://github.com/rexim/Morganey/issues/152))
+Where `main.mgn` is the name of the file that contains the
+program. The program should provide an entry point. An entry point is
+a binding with the name `main` which is bound to function of one
+argument:
+
+    main := \input . ...
+
+For more information see [Execution Semantic][execution-semantic]
 
 ### Unit Tests ###
 
@@ -115,3 +122,4 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [wiki-lambda-calculus]: https://en.wikipedia.org/wiki/Lambda_calculus
 [scala-sbt]: http://www.scala-sbt.org/
+[execution-semantic]: https://github.com/rexim/Morganey/wiki/Execution-Mode-Semantic
