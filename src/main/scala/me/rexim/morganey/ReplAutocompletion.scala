@@ -12,7 +12,6 @@ import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.syntax.Language.identifier
 import me.rexim.morganey.util._
 
-import scala.annotation.tailrec
 import scala.util.Try
 
 class ReplAutocompletion(globalContext: () => InterpreterContext) extends Completer {
@@ -20,7 +19,7 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
   override def complete(buffer: String, cursor: Int, candidates: Jlist[CharSequence]): Int = {
     val knownVariableNames = globalContext().bindings.map(_.variable.name)
     val (beforeCursor, _) = buffer splitAt cursor
-    lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames)
+    lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames, cursor)
 
     def autoCompleteWith(xs: List[String]) = {
       for (elem <- xs) candidates.add(elem)
@@ -142,50 +141,33 @@ class ReplAutocompletion(globalContext: () => InterpreterContext) extends Comple
 
   }
 
-  private def matchingDefinitions(line: String, knownVariableNames: List[String]): List[String] =
-    for {
-      name <- knownVariableNames
-      matchLength = countPrefixMatch(line, name)
-      if matchLength > 0
-      prefix = line dropRight matchLength
-    } yield prefix + name
+  private def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
+    lazy val globalPrefix = line take cursor
+    lazy val allNames     = knownVariableNames map (globalPrefix + _)
+    val lastName = lastNameInLine(line)
 
-  private def countPrefixMatch(line: String, definition: String): Int = {
-    @tailrec
-    def countMatchingLetters(xs: List[Char], ys: List[Char], acc: Int): Int = (xs, ys) match {
-      case (xh :: xt, yh :: yt) if xh == yh => countMatchingLetters(xt, yt, acc + 1)
-      case _                                => acc
+    def matches(definition: String, name: String) =
+      definition.toLowerCase startsWith name.toLowerCase
+
+    val filtered = lastName map { case (off, lname) =>
+      val names  = knownVariableNames filter (matches(_, lname))
+      val prefix = line take off
+      names map (prefix + _)
     }
 
-    def normalize(s: String) = s.toLowerCase.toList
-    val lineLowerCase = line.toLowerCase
-
-    /**
-      * Only autocomplete:
-      * - If the user typed in a single incomplete name: autocomplete if the name,
-      *    which was typed into the repl is a prefix of the name of a definition
-      * - If the user typed in a single name, which is part of a complex term
-      */
-    def keepNamesAndComplexTerms(nameInLine: String): Boolean = nameInLine match {
-      // input of repl is exactly `nameInLine`
-      case s if s == lineLowerCase     => definition startsWith lineLowerCase
-      // REPL has a complex term as input
-      case s if s.length < line.length => true
-      case _                           => false
-    }
-
-    lastNameInLine(line)
-      .filter(keepNamesAndComplexTerms)
-      .map(ln => countMatchingLetters(normalize(definition), normalize(ln), 0))
-      .getOrElse(0)
+    // if no names match, autocomplete with all known names
+    // e.g.: (|
+    filtered.getOrElse(allNames)
   }
 
-  private def lastNameInLine(line: String): Option[String] = {
-    def stringMatches(n: Int): Option[String] =
-      Option(line takeRight n).filter(_.matches(identifier))
+  private def lastNameInLine(line: String): Option[(Int, String)] = {
+    def stringMatches(n: Int): Option[(Int, String)] =
+      Option(line takeRight n)
+        .filter(_.matches(identifier))
+        .map(id => (line.length - n) -> id)
 
-    def size(str: Option[String]): Int =
-      str.map(_.length).getOrElse(Int.MinValue)
+    def size(str: Option[(Int, String)]): Int =
+      str.map { case (_, s) => s.length }.getOrElse(Int.MinValue)
 
     val lengths = (0 to line.length).toStream
     lengths.map(stringMatches).maxBy(size)
