@@ -94,4 +94,11 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     autocomplete(":", 1, List())     should be (Commands.commands.keySet map addColon)
   }
 
+  it should "not remove a part of the text, which was typed in, during autocompletion" in {
+    val bindings = List("isa", "isb")
+    autocomplete("(isa", 4, bindings) should be (Set("(isa"))
+    autocomplete("(isb", 4, bindings) should be (Set("(isb"))
+    autocomplete("(is", 3, bindings)  should be (Set("(isa", "(isb"))
+  }
+
 }
