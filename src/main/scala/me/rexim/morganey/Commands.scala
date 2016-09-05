@@ -13,6 +13,7 @@ object Commands {
 
   val commandPattern  = ":([a-zA-Z]*)".r
   val commandWithArgs = ":([a-zA-Z]*) (.*)".r
+  val unbindCountThreshold = 10
 
   val commands =
     Map[String, String => Command](
@@ -59,8 +60,10 @@ object Commands {
         val message = removed match {
           case Nil       => "No bindings were removed!"
           case hd :: Nil => s"Binding '$hd' was removed!"
+          case bindings if bindings.size > unbindCountThreshold =>
+            s"${bindings.size} bindings were removed!"
           case in :+ ls  =>
-            val bindingEnumeration = in.map(b => s"'$b'").mkString(", ") + s" and '$ls'"
+            val bindingEnumeration = in.map(b => s"'$b'").mkString(", ") + s", and '$ls'"
             s"Bindings $bindingEnumeration were removed!"
         }
 
