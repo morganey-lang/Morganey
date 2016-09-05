@@ -11,26 +11,36 @@ import me.rexim.morganey.ast.error.{BindingLoop, NonExistingBinding}
 
 object MorganeyExecutor {
 
-  def interpretNode(node: MorganeyNode, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] =
+  def interpretNode(node: MorganeyNode,
+                    moduleFinder: ModuleFinder,
+                    loadedModules: Set[String]): Try[List[MorganeyBinding]] =
     node match {
       case binding: MorganeyBinding => Success(List(binding))
-      case MorganeyLoading(Some(modulePath)) => loadModule(modulePath, moduleFinder)
+      case MorganeyLoading(Some(modulePath)) => loadModule(modulePath, moduleFinder, loadedModules)
       case MorganeyLoading(None) => Success(List())
     }
 
-  def loadModuleFromReader(reader: Reader, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] =
+  def loadModuleFromReader(reader: Reader,
+                           moduleFinder: ModuleFinder,
+                           loadedModules: Set[String]): Try[List[MorganeyBinding]] =
     LambdaParser.parseWith(reader, _.module).flatMap {
-      nodes => sequence(nodes.map(interpretNode(_, moduleFinder))).map(_.flatten)
+      nodes => sequence(nodes.map(interpretNode(_, moduleFinder, loadedModules))).map(_.flatten)
     }
 
-  def loadModule(modulePath: String, moduleFinder: ModuleFinder): Try[List[MorganeyBinding]] = {
+  def loadModule(modulePath: String,
+                 moduleFinder: ModuleFinder,
+                 loadedModules: Set[String]): Try[List[MorganeyBinding]] = {
     lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$modulePath module was not found"))
 
-    moduleFinder
-      .findModuleFile(modulePath)
-      .map(Success(_))
-      .getOrElse(moduleNotFound)
-      .flatMap(withReader(_)(loadModuleFromReader(_, moduleFinder)))
+    if (loadedModules.contains(modulePath)) {
+      Success(List())
+    } else {
+      moduleFinder
+        .findModuleFile(modulePath)
+        .map(Success(_))
+        .getOrElse(moduleNotFound)
+        .flatMap(withReader(_)(loadModuleFromReader(_, moduleFinder, loadedModules + modulePath)))
+    }
   }
 
   def compileProgram(input: Stream[Char])(rawProgram: List[MorganeyBinding]): Try[LambdaTerm] = {

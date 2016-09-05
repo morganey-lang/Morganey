@@ -1,8 +1,7 @@
 package me.rexim.morganey
 
 import jline.console.ConsoleReader
-import me.rexim.morganey.interpreter.MorganeyInterpreter._
-import me.rexim.morganey.interpreter.{InterpreterContext, MorganeyEval, MorganeyExecutor, TermOutputHelper}
+import me.rexim.morganey.interpreter._
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.TermOutputHelper.smartShowTerm
 import me.rexim.morganey.ast._
@@ -39,11 +38,11 @@ object Main extends SignalHandler {
     System.exit(0)
   }
 
-  def handleLine(con: ConsoleReader)(globalContext: InterpreterContext, line: String): Option[InterpreterContext] = {
+  def handleLine(con: ConsoleReader)(globalContext: ReplContext, line: String): Option[ReplContext] = {
     val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
 
     val evaluationResult = nodeParseResult flatMap { node =>
-      val computation = evalOneNodeComputation(node)(globalContext)
+      val computation = MorganeyRepl.evalNode(globalContext, node)
       awaitComputationResult(computation)
     }
 
@@ -57,7 +56,7 @@ object Main extends SignalHandler {
     }
   }
 
-  def startRepl(context: InterpreterContext) = {
+  def startRepl(context: ReplContext) = {
     Signal.handle(new Signal("INT"), this)
 
     val running = true
@@ -83,20 +82,11 @@ object Main extends SignalHandler {
     }
   }
 
-  def startProgram(context: InterpreterContext, args: Array[String]) = {
-    val result = args.toStream.foldLeft[Try[MorganeyEval]](Success(MorganeyEval(context, None))) { (evalTry, fileName) =>
-      evalTry.flatMap(evalFile(fileName))
-    } match {
-      case Failure(e) => println(s"[ERROR] ${e.getMessage}")
-      case Success(eval) => eval.result.foreach(t => println(smartShowTerm(t)))
-    }
-  }
-
-  def executeProgram(context: InterpreterContext, programFile: String) = {
+  def executeProgram(context: ReplContext, programFile: String) = {
     import MorganeyExecutor._
     import me.rexim.morganey.reduction.NormalOrder._
 
-    val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder)
+    val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder, Set())
       .flatMap(compileProgram(Source.stdin.toStream))
       .map(_.norReduce())
 
@@ -108,12 +98,11 @@ object Main extends SignalHandler {
 
   def main(args: Array[String]) = {
     val context =
-      InterpreterContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/"))))
+      ReplContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/"))))
 
     args.toList match {
       case Nil => startRepl(context)
-      case "exe" :: programFile :: rest => executeProgram(context, programFile)
-      case _ => startProgram(context, args)
+      case programFile :: _ => executeProgram(context, programFile)
     }
   }
 }

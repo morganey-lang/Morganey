@@ -7,16 +7,16 @@ import me.rexim.morganey.meta._
 
 import org.scalatest._
 
-class InterpreterContextSpec extends FlatSpec with Matchers with TestTerms {
-  "Interpreter context" should "allow add bindings to it" in {
+class ReplContextSpecs extends FlatSpec with Matchers with TestTerms {
+  "REPL context" should "allow add bindings to it" in {
     val binding = MorganeyBinding(x, I(x))
-    val context = InterpreterContext(List(), new ModuleFinder(List())).addBinding(binding)
+    val context = ReplContext(List(), new ModuleFinder(List())).addBinding(binding)
     context.bindings should be (List(binding))
   }
 
-  "Interpreter context" should "clear bindings on reset command" in {
+  "REPL context" should "clear bindings on reset command" in {
     val bindings = List(MorganeyBinding(m"x", m"\\x.x"))
-    val context = InterpreterContext(bindings, new ModuleFinder(List()))
+    val context = ReplContext(bindings, new ModuleFinder(List()))
     context.clear().bindings.isEmpty should be (true)
   }
 
@@ -27,10 +27,10 @@ class InterpreterContextSpec extends FlatSpec with Matchers with TestTerms {
     val three = MorganeyBinding(m"three", m"3")
 
     val knownBindings = List(zero, one, two, three)
-    val context = InterpreterContext(knownBindings, new ModuleFinder(List()))
+    val context = ReplContext(knownBindings, new ModuleFinder(List()))
 
     val (satisfyCtx, notSatisfy) = context.removeBindings(_.variable.name endsWith "o")
-    val InterpreterContext(satisfy, _) = satisfyCtx
+    val ReplContext(satisfy, _) = satisfyCtx
     satisfy    should be (List(zero, two))
     notSatisfy should be (List(one, three))
   }
