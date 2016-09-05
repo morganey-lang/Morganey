@@ -1,7 +1,7 @@
 package me.rexim.morganey
 
 import me.rexim.morganey.ast.MorganeyBinding
-import me.rexim.morganey.interpreter.InterpreterContext
+import me.rexim.morganey.interpreter.ReplContext
 import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.util._
 
@@ -9,7 +9,7 @@ import scala.util.{Failure, Success}
 
 object Commands {
 
-  final type Command = InterpreterContext => (InterpreterContext, Option[String])
+  final type Command = ReplContext => (ReplContext, Option[String])
 
   val commandPattern  = ":([a-zA-Z]*)".r
   val commandWithArgs = ":([a-zA-Z]*) (.*)".r
@@ -34,13 +34,13 @@ object Commands {
       case (cmd, args) => commands(cmd)(args.trim)
     }
 
-  private def unknownCommand(command: String)(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
+  private def unknownCommand(command: String)(args: String)(context: ReplContext): (ReplContext, Option[String]) =
     (context, Some(s"Unknown command '$command'!"))
 
-  private def exitREPL(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
+  private def exitREPL(args: String)(context: ReplContext): (ReplContext, Option[String]) =
     sys.exit(0)
 
-  private def rawPrintTerm(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) = {
+  private def rawPrintTerm(args: String)(context: ReplContext): (ReplContext, Option[String]) = {
     val parseResult = LambdaParser.parseWith(args, _.term)
     val output = parseResult match {
       case Success(term) => term.toString
@@ -49,7 +49,7 @@ object Commands {
     (context, Option(output))
   }
 
-  private def unbindBindings(args: String)(context: InterpreterContext): (InterpreterContext, Option[String]) =
+  private def unbindBindings(args: String)(context: ReplContext): (ReplContext, Option[String]) =
     validRegex(args) match {
       case None =>
         (context, Some(s"'$args' is not a valid regular expression!"))

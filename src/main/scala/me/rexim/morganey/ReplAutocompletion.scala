@@ -7,7 +7,7 @@ import jline.console.completer.Completer
 import me.rexim.morganey.Commands._
 import me.rexim.morganey.ast._
 import me.rexim.morganey.module.ModuleFinder
-import me.rexim.morganey.interpreter.InterpreterContext
+import me.rexim.morganey.interpreter.ReplContext
 import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.syntax.Language.identifier
 import me.rexim.morganey.util._
@@ -15,7 +15,7 @@ import me.rexim.morganey.util._
 import scala.annotation.tailrec
 import scala.util.Try
 
-class ReplAutocompletion(globalContext: () => InterpreterContext) extends Completer {
+class ReplAutocompletion(globalContext: () => ReplContext) extends Completer {
 
   override def complete(buffer: String, cursor: Int, candidates: Jlist[CharSequence]): Int = {
     val knownVariableNames = globalContext().bindings.map(_.variable.name)
