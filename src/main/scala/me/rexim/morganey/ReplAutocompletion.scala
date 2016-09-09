@@ -41,7 +41,7 @@ class ReplAutocompletion(globalContext: () => ReplContext) extends Completer {
       case _ if buffer.trim.isEmpty          => autoCompleteWith(knownVariableNames)
       // if something was typed into the repl, autocomplete with all names starting with the input text
       case _                                 =>
-        autoCompleteWith(knownVariableNames filter (_.toLowerCase startsWith beforeCursor.toLowerCase))
+        autoCompleteWith(knownVariableNames filter (matches(_, beforeCursor)))
     }
   }
 
@@ -99,7 +99,7 @@ class ReplAutocompletion(globalContext: () => ReplContext) extends Completer {
       // load |
       case (Nil, false)      => topLevelDefinitions().map(moduleName)
       // load math.ari|
-      case (xs :+ x, false)  => everythingIn(xs, _.toLowerCase startsWith x.toLowerCase)
+      case (xs :+ x, false)  => everythingIn(xs, matches(_, x))
     }
   }
 
@@ -141,13 +141,13 @@ class ReplAutocompletion(globalContext: () => ReplContext) extends Completer {
 
   }
 
+  private def matches(definition: String, name: String) =
+    definition.toLowerCase startsWith name.toLowerCase
+
   private def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
     lazy val globalPrefix = line take cursor
     lazy val allNames     = knownVariableNames map (globalPrefix + _)
     val lastName = lastNameInLine(line)
-
-    def matches(definition: String, name: String) =
-      definition.toLowerCase startsWith name.toLowerCase
 
     val filtered = lastName map { case (off, lname) =>
       val names  = knownVariableNames filter (matches(_, lname))
