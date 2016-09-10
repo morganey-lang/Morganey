@@ -44,6 +44,9 @@ build := {
   IO.copyFile(kernelFile, targetDir / kernelFile.getName())
 }
 
+addCommandAlias("rebuild", ";clean;build")
+addCommandAlias("retest", ";rebuild;test")
+
 /*
  * =================================== projects ===================================
  */
