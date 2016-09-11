@@ -73,7 +73,7 @@ object Main extends SignalHandler {
       case None                => exitRepl() // eof
       case Some("")            => ()
       case Some(Commands(cmd)) =>
-        val (newContext, output) = cmd(globalContext)
+        val ReplResult(newContext, output) = cmd(globalContext)
         globalContext = newContext
         output.foreach(con.println)
       case Some(line)          => evalLine(globalContext, line) foreach { context =>
