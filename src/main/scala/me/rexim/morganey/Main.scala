@@ -23,9 +23,9 @@ object Main extends SignalHandler {
     currentComputation.foreach(_.cancel())
   }
 
-  var currentComputation: Option[Computation[ReplResult]] = None
+  var currentComputation: Option[Computation[ReplResult[LambdaTerm]]] = None
 
-  def awaitComputationResult(computation: Computation[ReplResult]): Try[ReplResult] = {
+  def awaitComputationResult(computation: Computation[ReplResult[LambdaTerm]]): Try[ReplResult[LambdaTerm]] = {
     try {
       currentComputation = Some(computation)
       Try(Await.result(computation.future, Duration.Inf))

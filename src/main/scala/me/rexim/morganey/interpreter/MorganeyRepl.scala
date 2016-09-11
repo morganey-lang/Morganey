@@ -8,7 +8,7 @@ import me.rexim.morganey.reduction.Computation
 import scala.util.{Failure, Success}
 
 object MorganeyRepl {
-  def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult] = {
+  def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
     node match {
       case MorganeyLoading(Some(module)) => {
         MorganeyExecutor.loadModule(module, context.moduleFinder, Set()) match {
