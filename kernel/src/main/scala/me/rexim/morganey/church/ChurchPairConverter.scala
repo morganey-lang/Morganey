@@ -16,10 +16,10 @@ object ChurchPairConverter {
       case _ => None
     }
 
-  def encodePair(p: (LambdaTerm, LambdaTerm), cons: String = "x"): LambdaTerm = {
-    val (car, cdr) = p
-    LambdaFunc(LambdaVar(cons),
-      LambdaApp(LambdaApp(LambdaVar(cons), car), cdr)
+  def encodePair(pair: (LambdaTerm, LambdaTerm)): LambdaTerm = {
+    val (first, second) = pair
+    LambdaFunc(LambdaVar("x"),
+      LambdaApp(LambdaApp(LambdaVar("x"), first), second)
     )
   }
 
