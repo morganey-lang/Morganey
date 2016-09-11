@@ -4,8 +4,9 @@ import me.rexim.morganey.ast._
 import me.rexim.morganey.module.ModuleFinder
 
 case class ReplContext(bindings: List[MorganeyBinding], moduleFinder: ModuleFinder) {
-  def addBinding(binding: MorganeyBinding): ReplContext =
+  def addBinding(binding: MorganeyBinding): ReplContext = {
     ReplContext(binding :: bindings, moduleFinder)
+  }
 
   def addBindings(newBindings: List[MorganeyBinding]): ReplContext =
     ReplContext(bindings ++ newBindings, moduleFinder)

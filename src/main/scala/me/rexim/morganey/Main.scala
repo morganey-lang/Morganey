@@ -23,9 +23,9 @@ object Main extends SignalHandler {
     currentComputation.foreach(_.cancel())
   }
 
-  var currentComputation: Option[Computation[MorganeyEval]] = None
+  var currentComputation: Option[Computation[ReplResult]] = None
 
-  def awaitComputationResult(computation: Computation[MorganeyEval]): Try[MorganeyEval] = {
+  def awaitComputationResult(computation: Computation[ReplResult]): Try[ReplResult] = {
     try {
       currentComputation = Some(computation)
       Try(Await.result(computation.future, Duration.Inf))
@@ -47,7 +47,7 @@ object Main extends SignalHandler {
     }
 
     evaluationResult match {
-      case Success(MorganeyEval(context, result)) =>
+      case Success(ReplResult(context, result)) =>
         result.foreach(t => con.println(smartShowTerm(t)))
         Some(context)
       case Failure(e) =>
