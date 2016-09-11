@@ -18,9 +18,14 @@ object ChurchPairConverter {
 
   def encodePair(pair: (LambdaTerm, LambdaTerm)): LambdaTerm = {
     val (first, second) = pair
-    LambdaFunc(LambdaVar("x"),
-      LambdaApp(LambdaApp(LambdaVar("x"), first), second)
-    )
+    val x = LambdaVar("x")
+    val y = LambdaVar("y")
+    val z = LambdaVar("z")
+
+    LambdaFunc(z,
+      LambdaApp(LambdaApp(z, x), y))
+      .substitute(x -> first)
+      .substitute(y -> second)
   }
 
   def decodeList(list: LambdaTerm): Option[List[LambdaTerm]] = {
