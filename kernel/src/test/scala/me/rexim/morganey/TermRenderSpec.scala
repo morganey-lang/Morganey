@@ -27,11 +27,11 @@ class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
     abcd.toString should be ("a b c d")
   }
 
-  "An abstraction as the left-hand-side of an application" should "be rendered in parenthesis, if the body of the function is an abstraction" in {
+  "An abstraction in an application" should "be rendered in parenthesis" in {
     val abs = lfunc("a", x)
     lapp(abs, z).toString   should be ("(λa.x) z")
-    lapp(abs, abs).toString should be ("(λa.x) λa.x")
-    lapp(z, abs).toString   should be ("z λa.x")
+    lapp(abs, abs).toString should be ("(λa.x) (λa.x)")
+    lapp(z, abs).toString   should be ("z (λa.x)")
   }
 
   "Applications, which do exist in nested applications" should "be rendered in parenthesis, if they are the deepest left-hand-side" in {
@@ -82,7 +82,7 @@ class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
       "λx.y.z.x y z",
       "(λa.b.c) z",
       "(λa.b) z",
-      "(λa.b.c) λa.b.c",
+      "(λa.b.c) (λa.b.c)",
       "a (b c) d",
       "a (b c d)",
       "a (b c d) e",
