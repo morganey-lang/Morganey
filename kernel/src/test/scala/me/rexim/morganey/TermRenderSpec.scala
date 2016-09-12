@@ -59,7 +59,7 @@ class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
     lnested(List("a", "b", "c", "d"), lvar("x")).toString should be ("λa.b.c.d.x")
   }
 
-  "A abstraction by itself" should "always be rendered without parenthesis" in {
+  "An abstraction by itself" should "always be rendered without parenthesis" in {
     lfunc("a", x).toString                     should be ("λa.x")
     lnested(List("a", "b"), ab).toString       should be ("λa.b.a b")
     lnested(List("a", "b", "c"), abc).toString should be ("λa.b.c.a b c")
