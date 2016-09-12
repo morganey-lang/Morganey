@@ -86,7 +86,9 @@ class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
       "a (b c) d",
       "a (b c d)",
       "a (b c d) e",
-      "a (b c) (d e)"
+      "a (b c) (d e)",
+      "λx.x (λf.x.x) (λf.x.x)",
+      "λx.x (λf.x.x (λf.x.x))"
     )
 
     for (term <- terms) {
