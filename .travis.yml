@@ -2,7 +2,9 @@ language: scala
 jdk: oraclejdk7
 sudo: false
 scala:
-  - 2.11.7
+  - 2.11.8
+script:
+  - sbt retest
 notifications:
   email:
     - reximkut@gmail.com
