@@ -88,12 +88,6 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
     go(this, Nil)
   }
 
-  private[ast] def hasAppAsBody: Boolean =
-    nestedFunctions() match {
-      case (_, _: LambdaApp) => true
-      case _                 => false
-    }
-
   override def toString: String = {
     val (vars, body) = nestedFunctions()
     val variables = vars.map(t => s"$t.").mkString("")
@@ -124,9 +118,9 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
   override def toString: String = {
     val (deep, nest) = nestedApplications()
     val nested = nest.map {
-      case a: LambdaApp                    => s"($a)"
-      case f: LambdaFunc if f.hasAppAsBody => s"($f)"
-      case t                               => t.toString
+      case a: LambdaApp  => s"($a)"
+      case f: LambdaFunc => s"($f)"
+      case t             => t.toString
     }.mkString(" ")
     val rest = deep match {
       case f: LambdaFunc => s"($f)"
