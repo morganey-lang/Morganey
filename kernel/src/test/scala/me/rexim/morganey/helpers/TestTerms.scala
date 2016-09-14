@@ -18,10 +18,10 @@ trait TestTerms {
 
   def I(v : LambdaVar) = LambdaFunc(v, v)
 
-  def pair(first: LambdaTerm, second: LambdaTerm, variable: String = "z") =
-    lfunc(variable,
+  def pair(first: LambdaTerm, second: LambdaTerm, consName: String = "z") =
+    lfunc(consName,
       lapp(
-        lapp(lvar(variable), first),
+        lapp(lvar(consName), first),
         second))
 
   val random = scala.util.Random
