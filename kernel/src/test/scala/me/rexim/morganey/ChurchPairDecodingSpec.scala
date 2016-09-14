@@ -7,7 +7,7 @@ import me.rexim.morganey.helpers.TestTerms
 import me.rexim.morganey.syntax.LambdaParser
 import org.scalatest._
 
-class ChurchPairConverterSpec extends FlatSpec with Matchers with TestTerms {
+class ChurchPairDecodingSpec extends FlatSpec with Matchers with TestTerms {
   "An identity function" should "be converted to None" in {
     decodePair(I(x)) should be (None)
   }
