@@ -16,11 +16,23 @@ object ChurchPairConverter {
       case _ => None
     }
 
-  def encodePair(p: (LambdaTerm, LambdaTerm), cons: String = "x"): LambdaTerm = {
-    val (car, cdr) = p
-    LambdaFunc(LambdaVar(cons),
-      LambdaApp(LambdaApp(LambdaVar(cons), car), cdr)
-    )
+  def encodePair(pair: (LambdaTerm, LambdaTerm)): LambdaTerm = {
+    val (first, second) = pair
+    val x = LambdaVar("x")
+
+    val pairFunc = {
+      val y = LambdaVar("y")
+      val z = LambdaVar("z")
+
+      LambdaFunc(y,
+        LambdaFunc(z,
+          LambdaApp(LambdaApp(z, x), y)))
+    }
+
+    pairFunc.substitute(x -> first) match {
+      case LambdaFunc(y, body) => body.substitute(y -> second)
+      case _ => throw new IllegalArgumentException("Capture free substitution produced unexpected result")
+    }
   }
 
   def decodeList(list: LambdaTerm): Option[List[LambdaTerm]] = {

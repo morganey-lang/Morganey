@@ -120,35 +120,35 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
   "Singleton list literals" should "desugar into a single pair" in {
     val res1 = LambdaParser.parseAll(LambdaParser.term, "[0]")
     res1.successful should be (true)
-    res1.get        should be (pair(zero, zero, "x"))
+    res1.get        should be (pair(zero, zero, "z"))
 
     val res2 = LambdaParser.parseAll(LambdaParser.term, "['a']")
     res2.successful should be (true)
-    res2.get        should be (pair(encodeNumber('a'), zero, "x"))
+    res2.get        should be (pair(encodeNumber('a'), zero, "z"))
   }
 
   "Non empty list literals" should "desugar into nested pairs" in {
     val res1 = LambdaParser.parseAll(LambdaParser.term, "[0, 1, 2]")
     res1.successful should be (true)
-    res1.get        should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
+    res1.get        should be (pair(zero, pair(one, pair(two, zero, "z"), "z"), "z"))
 
     val res2 = LambdaParser.parseAll(LambdaParser.term, "['a', 'b', 'c']")
     res2.successful should be (true)
-    res2.get        should be (pair(encodeNumber('a'), pair(encodeNumber('b'), pair(encodeNumber('c'), zero, "x"), "x"), "x"))
+    res2.get        should be (pair(encodeNumber('a'), pair(encodeNumber('b'), pair(encodeNumber('c'), zero, "z"), "z"), "z"))
   }
 
   "List literals constructed by ascending ranges, whose bounds are literals" should "desugar into nested pairs" in {
     val res1 = LambdaParser.parseAll(LambdaParser.term, "[0 .. 2]")
     res1.successful should be (true)
-    res1.get        should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
+    res1.get        should be (pair(zero, pair(one, pair(two, zero, "z"), "z"), "z"))
 
     val res2 = LambdaParser.parseAll(LambdaParser.term, "[0, 1 .. 2]")
     res2.successful should be (true)
-    res2.get        should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
+    res2.get        should be (pair(zero, pair(one, pair(two, zero, "z"), "z"), "z"))
 
     val res3 = LambdaParser.parseAll(LambdaParser.term, "[0, 2 .. 2]")
     res3.successful should be (true)
-    res3.get        should be (pair(zero, pair(two, zero, "x"), "x"))
+    res3.get        should be (pair(zero, pair(two, zero, "z"), "z"))
   }
 
   "List literals constructed by descending ranges, whose bounds are literals" should "desugar into nested pairs" in {
@@ -159,21 +159,21 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
 
     val res2 = LambdaParser.parseAll(LambdaParser.term, "[2, 1 .. 0]")
     res2.successful should be (true)
-    res2.get        should be (pair(two, pair(one, pair(zero, zero, "x"), "x"), "x"))
+    res2.get        should be (pair(two, pair(one, pair(zero, zero, "z"), "z"), "z"))
 
     val res3 = LambdaParser.parseAll(LambdaParser.term, "[2, 0 .. 0]")
     res3.successful should be (true)
-    res3.get        should be (pair(two, pair(zero, zero, "x"), "x"))
+    res3.get        should be (pair(two, pair(zero, zero, "z"), "z"))
   }
 
   "Nested list literals" should "desugar also into nested pairs" in {
     val res = LambdaParser.parseAll(LambdaParser.term, "[[1, 2], 'a', [1, []]]")
-    val fst = pair(one, pair(two, zero, "x"), "x")
+    val fst = pair(one, pair(two, zero, "z"), "z")
     val snd = encodeNumber('a')
     val nil = zero
-    val trd = pair(one, pair(nil, zero, "x"), "x")
+    val trd = pair(one, pair(nil, zero, "z"), "z")
     res.successful should be (true)
-    res.get        should be (pair(fst, pair(snd, pair(trd, zero, "x"), "x"), "x"))
+    res.get        should be (pair(fst, pair(snd, pair(trd, zero, "z"), "z"), "z"))
   }
 
   "List literals constructed by ranges, whose bounds are literals" can "be defined with number-like values" in {
@@ -181,7 +181,7 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     val b = encodeNumber('b')
     val c = encodeNumber('c')
 
-    val abc = pair(a, pair(b, pair(c, zero, "x"), "x"), "x")
+    val abc = pair(a, pair(b, pair(c, zero, "z"), "z"), "z")
 
     val res1 = LambdaParser.parseAll(LambdaParser.term, "['a' .. 99]")
     res1.successful should be (true)
