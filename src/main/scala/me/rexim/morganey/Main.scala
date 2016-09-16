@@ -41,6 +41,7 @@ object Main extends SignalHandler {
   def handleLine(con: ConsoleReader)(globalContext: ReplContext, line: String): Option[ReplContext] = {
     val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
 
+    // TODO(#197): discriminate bindings from the rest of the nodes here and inform the user if the binding was redefined
     val evaluationResult = nodeParseResult flatMap { node =>
       val computation = MorganeyRepl.evalNode(globalContext, node)
       awaitComputationResult(computation)
