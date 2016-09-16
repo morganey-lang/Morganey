@@ -5,6 +5,7 @@ import me.rexim.morganey.module.ModuleFinder
 
 case class ReplContext(bindings: List[MorganeyBinding], moduleFinder: ModuleFinder) {
   def addBinding(binding: MorganeyBinding): ReplContext = {
+    // TODO(#198): Binding redefinition mechanism for REPL context
     ReplContext(binding :: bindings, moduleFinder)
   }
 
