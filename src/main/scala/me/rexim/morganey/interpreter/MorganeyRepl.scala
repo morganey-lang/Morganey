@@ -20,6 +20,7 @@ object MorganeyRepl {
       case MorganeyLoading(None) =>
         Computation.failed(new IllegalArgumentException("Module path was not specified!"))
 
+      // TODO(#197): separate bindings evaluation from MorganeyRepl.evalNode
       case binding: MorganeyBinding => {
         Computation(ReplResult(context.addBinding(binding), None))
       }
