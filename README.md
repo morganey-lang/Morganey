@@ -123,3 +123,5 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [wiki-lambda-calculus]: https://en.wikipedia.org/wiki/Lambda_calculus
 [scala-sbt]: http://www.scala-sbt.org/
 [execution-semantic]: https://github.com/rexim/Morganey/wiki/Execution-Mode-Semantic
+
+<!-- ForNeVeR ate all of my waffles again -->

@@ -46,7 +46,7 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
     m"$nTwo" should be (two)
 
     val numbers = List(0, 1, 2)
-    m"$numbers" should be (pair(zero, pair(one, pair(two, zero, "x"), "x"), "x"))
+    m"$numbers" should be (pair(zero, pair(one, pair(two, zero, "z"), "z"), "z"))
   }
 
   "Lambda terms" should "be converted back to Scala values during unlifting" in {
