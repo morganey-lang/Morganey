@@ -8,11 +8,11 @@ import me.rexim.morganey.reduction.Computation
 import scala.util.{Failure, Success}
 
 object MorganeyRepl {
-  def evalNode(context: ReplContext, node: MorganeyNode): Computation[MorganeyEval] = {
+  def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
     node match {
       case MorganeyLoading(Some(module)) => {
         MorganeyExecutor.loadModule(module, context.moduleFinder, Set()) match {
-          case Success(bindings) => Computation(MorganeyEval(context.addBindings(bindings), None))
+          case Success(bindings) => Computation(ReplResult(context.addBindings(bindings), None))
           case Failure(e) => Computation.failed(e)
         }
       }
@@ -20,13 +20,15 @@ object MorganeyRepl {
       case MorganeyLoading(None) =>
         Computation.failed(new IllegalArgumentException("Module path was not specified!"))
 
-      case binding: MorganeyBinding =>
-        Computation(MorganeyEval(context.addBinding(binding), None))
+      // TODO(#197): separate bindings evaluation from MorganeyRepl.evalNode
+      case binding: MorganeyBinding => {
+        Computation(ReplResult(context.addBinding(binding), None))
+      }
 
       case term: LambdaTerm =>
         term.addBindings(context.bindings).right.map { t =>
           t.norReduceComputation().map { resultTerm =>
-            MorganeyEval(context, Some(resultTerm))
+            ReplResult(context, Some(resultTerm))
           }
         } match {
           case Right(result) => result

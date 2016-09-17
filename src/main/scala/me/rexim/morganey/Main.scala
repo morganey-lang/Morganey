@@ -23,9 +23,9 @@ object Main extends SignalHandler {
     currentComputation.foreach(_.cancel())
   }
 
-  var currentComputation: Option[Computation[MorganeyEval]] = None
+  var currentComputation: Option[Computation[ReplResult[LambdaTerm]]] = None
 
-  def awaitComputationResult(computation: Computation[MorganeyEval]): Try[MorganeyEval] = {
+  def awaitComputationResult(computation: Computation[ReplResult[LambdaTerm]]): Try[ReplResult[LambdaTerm]] = {
     try {
       currentComputation = Some(computation)
       Try(Await.result(computation.future, Duration.Inf))
@@ -41,13 +41,14 @@ object Main extends SignalHandler {
   def handleLine(con: ConsoleReader)(globalContext: ReplContext, line: String): Option[ReplContext] = {
     val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
 
+    // TODO(#197): discriminate bindings from the rest of the nodes here and inform the user if the binding was redefined
     val evaluationResult = nodeParseResult flatMap { node =>
       val computation = MorganeyRepl.evalNode(globalContext, node)
       awaitComputationResult(computation)
     }
 
     evaluationResult match {
-      case Success(MorganeyEval(context, result)) =>
+      case Success(ReplResult(context, result)) =>
         result.foreach(t => con.println(smartShowTerm(t)))
         Some(context)
       case Failure(e) =>
@@ -73,7 +74,7 @@ object Main extends SignalHandler {
       case None                => exitRepl() // eof
       case Some("")            => ()
       case Some(Commands(cmd)) =>
-        val (newContext, output) = cmd(globalContext)
+        val ReplResult(newContext, output) = cmd(globalContext)
         globalContext = newContext
         output.foreach(con.println)
       case Some(line)          => evalLine(globalContext, line) foreach { context =>
