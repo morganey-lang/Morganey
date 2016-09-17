@@ -59,7 +59,7 @@ object Main extends SignalHandler {
     while (running) line() match {
       case None                => exitRepl() // eof
       case Some(line)          =>
-        val computation = MorganeyRepl.evalLine(context, line)
+        val computation = MorganeyRepl.evalLine(globalContext, line)
         awaitComputationResult(computation) match {
           case Success(ReplResult(newContext, message)) =>
             globalContext = newContext
