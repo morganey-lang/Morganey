@@ -1,13 +1,37 @@
 package me.rexim.morganey.interpreter
 
+import me.rexim.morganey.Commands
 import me.rexim.morganey.ast.error.{BindingLoop, NonExistingBinding}
 import me.rexim.morganey.reduction.NormalOrder._
 import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyLoading, MorganeyNode}
 import me.rexim.morganey.reduction.Computation
+import me.rexim.morganey.interpreter.TermOutputHelper._
+import me.rexim.morganey.syntax.LambdaParser
+import me.rexim.morganey.util._
 
 import scala.util.{Failure, Success}
 
 object MorganeyRepl {
+
+  def evalLine(context: ReplContext, line: String): Computation[ReplResult[String]] =
+    line.trim match {
+      case ""            => Computation(ReplResult(context))
+      case Commands(cmd) => Computation(cmd(context))
+      case input         => parseAndEval(context, line)
+    }
+
+  private def parseAndEval(context: ReplContext, line: String): Computation[ReplResult[String]] = {
+    val parseResult = Computation(LambdaParser.parseWith(line, _.replCommand))
+
+    // TODO(#197): discriminate bindings from the rest of the nodes here and inform the user if the binding was redefined
+    val evaluation = parseResult flatMap {
+      case Success(node) => evalNode(context, node)
+      case Failure(e)    => Computation.failed(e)
+    }
+
+    evaluation map (_ map smartShowTerm)
+  }
+
   def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
     node match {
       case MorganeyLoading(Some(module)) => {
