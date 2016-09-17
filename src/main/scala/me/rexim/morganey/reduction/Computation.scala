@@ -3,7 +3,7 @@ package me.rexim.morganey.reduction
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait Computation[T] { self =>
+trait Computation[+T] { self =>
   def future: Future[T]
   def cancel(): Unit
 
