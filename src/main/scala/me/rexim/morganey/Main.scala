@@ -15,6 +15,8 @@ import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
 import java.io.File
 
+import jline.console.completer.Completer
+
 import scala.io.Source
 
 object Main extends SignalHandler {
@@ -57,6 +59,14 @@ object Main extends SignalHandler {
     }
   }
 
+  private class TerminalReplAutocompletion(context: () => ReplContext) extends Completer {
+    override def complete(buffer: String, cursor: Int, candidates: java.util.List[CharSequence]): Int = {
+      val suggestions = ReplAutocompletion.complete(buffer, cursor, context())
+      for (elem <- suggestions) candidates.add(elem)
+      if (candidates.isEmpty) -1 else 0
+    }
+  }
+
   def startRepl(context: ReplContext) = {
     Signal.handle(new Signal("INT"), this)
 
@@ -64,7 +74,7 @@ object Main extends SignalHandler {
     var globalContext = context
     val con = new ConsoleReader()
     con.setPrompt("λ> ")
-    con.addCompleter(new ReplAutocompletion(() => globalContext))
+    con.addCompleter(new TerminalReplAutocompletion(() => globalContext))
 
     def line() = Option(con.readLine()).map(_.trim)
 
