@@ -3,17 +3,16 @@ package me.rexim.morganey
 import jline.console.ConsoleReader
 import me.rexim.morganey.interpreter._
 import me.rexim.morganey.module.ModuleFinder
-import me.rexim.morganey.interpreter.TermOutputHelper.smartShowTerm
 import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.Computation
-import me.rexim.morganey.syntax.LambdaParser
-import me.rexim.morganey.util._
 import sun.misc.{Signal, SignalHandler}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
 import java.io.File
+
+import jline.console.completer.Completer
 
 import scala.io.Source
 
@@ -23,9 +22,9 @@ object Main extends SignalHandler {
     currentComputation.foreach(_.cancel())
   }
 
-  var currentComputation: Option[Computation[ReplResult[LambdaTerm]]] = None
+  var currentComputation: Option[Computation[ReplResult[String]]] = None
 
-  def awaitComputationResult(computation: Computation[ReplResult[LambdaTerm]]): Try[ReplResult[LambdaTerm]] = {
+  def awaitComputationResult(computation: Computation[ReplResult[String]]): Try[ReplResult[String]] = {
     try {
       currentComputation = Some(computation)
       Try(Await.result(computation.future, Duration.Inf))
@@ -38,22 +37,11 @@ object Main extends SignalHandler {
     System.exit(0)
   }
 
-  def handleLine(con: ConsoleReader)(globalContext: ReplContext, line: String): Option[ReplContext] = {
-    val nodeParseResult = LambdaParser.parseWith(line, _.replCommand)
-
-    // TODO(#197): discriminate bindings from the rest of the nodes here and inform the user if the binding was redefined
-    val evaluationResult = nodeParseResult flatMap { node =>
-      val computation = MorganeyRepl.evalNode(globalContext, node)
-      awaitComputationResult(computation)
-    }
-
-    evaluationResult match {
-      case Success(ReplResult(context, result)) =>
-        result.foreach(t => con.println(smartShowTerm(t)))
-        Some(context)
-      case Failure(e) =>
-        con.println(e.getMessage)
-        None
+  private class TerminalReplAutocompletion(context: () => ReplContext) extends Completer {
+    override def complete(buffer: String, cursor: Int, candidates: java.util.List[CharSequence]): Int = {
+      val suggestions = ReplAutocompletion.complete(buffer, cursor, context())
+      for (elem <- suggestions) candidates.add(elem)
+      if (candidates.isEmpty) -1 else 0
     }
   }
 
@@ -64,22 +52,21 @@ object Main extends SignalHandler {
     var globalContext = context
     val con = new ConsoleReader()
     con.setPrompt("λ> ")
-    con.addCompleter(new ReplAutocompletion(() => globalContext))
+    con.addCompleter(new TerminalReplAutocompletion(() => globalContext))
 
     def line() = Option(con.readLine()).map(_.trim)
 
-    val evalLine = handleLine(con) _
-
     while (running) line() match {
       case None                => exitRepl() // eof
-      case Some("")            => ()
-      case Some(Commands(cmd)) =>
-        val ReplResult(newContext, output) = cmd(globalContext)
-        globalContext = newContext
-        output.foreach(con.println)
-      case Some(line)          => evalLine(globalContext, line) foreach { context =>
-        globalContext = context
-      }
+      case Some(line)          =>
+        val computation = MorganeyRepl.evalLine(globalContext, line)
+        awaitComputationResult(computation) match {
+          case Success(ReplResult(newContext, message)) =>
+            globalContext = newContext
+            message.foreach(con.println)
+          case Failure(e)                               =>
+            con.println(e.getMessage)
+        }
     }
   }
 

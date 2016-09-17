@@ -8,19 +8,16 @@ import me.rexim.morganey.helpers.TestTerms
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.ReplContext
 
-import scala.collection.JavaConversions._
 import org.scalatest._
 
 class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
 
-  def autocomplete(line: String, cursor: Int, knownNames: List[String]): Set[CharSequence] = {
+  def autocomplete(line: String, cursor: Int, knownNames: List[String]): Set[String] = {
     val id = I(lvar("x"))
     val fakeBindings = knownNames.map(name => MorganeyBinding(lvar(name), id))
     val moduleFinder = new ModuleFinder(List(new File("./src/test/resources/load-autocomplete/")))
-    val autocompleter = new ReplAutocompletion(() => ReplContext(fakeBindings, moduleFinder))
-    val jlist = new java.util.ArrayList[CharSequence]()
-    autocompleter.complete(line, cursor, jlist)
-    jlist.toSet
+    val context = ReplContext(fakeBindings, moduleFinder)
+    ReplAutocompletion.complete(line, cursor, context).toSet
   }
 
   private val manyBindings            = List("SUCC", "PRED", "MULT", "PLUS")

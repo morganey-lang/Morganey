@@ -1,9 +1,7 @@
 package me.rexim.morganey
 
 import java.io.File
-import java.util.{List => Jlist}
 
-import jline.console.completer.Completer
 import me.rexim.morganey.Commands._
 import me.rexim.morganey.ast._
 import me.rexim.morganey.module.ModuleFinder
@@ -14,41 +12,39 @@ import me.rexim.morganey.util._
 
 import scala.util.Try
 
-class ReplAutocompletion(globalContext: () => ReplContext) extends Completer {
+object ReplAutocompletion {
 
-  override def complete(buffer: String, cursor: Int, candidates: Jlist[CharSequence]): Int = {
-    val knownVariableNames = globalContext().bindings.map(_.variable.name)
+  def complete(buffer: String, context: ReplContext): List[String] =
+    complete(buffer, buffer.length, context)
+
+  def complete(buffer: String, cursor: Int, context: ReplContext): List[String] = {
+    val knownVariableNames = context.bindings.map(_.variable.name)
     val (beforeCursor, _) = buffer splitAt cursor
     lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames, cursor)
 
-    def autoCompleteWith(xs: List[String]) = {
-      for (elem <- xs) candidates.add(elem)
-      if (candidates.isEmpty) -1 else 0
-    }
-
     beforeCursor match {
       // if a command was typed in
-      case IsCommand(cmds)                   => autoCompleteWith(cmds map (":" + _))
+      case IsCommand(cmds)                   => cmds map (":" + _)
       // if a load statement was typed in (potential partially)
       case LoadStatement(parts, endsWithDot) =>
-        val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot)
-        autoCompleteWith(autocompletedModules map (m => s"load $m"))
+        val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot, context)
+        autocompletedModules map (m => s"load $m")
       // if there are no names, REPL can't autocomplete
-      case _ if knownVariableNames.isEmpty   => -1
+      case _ if knownVariableNames.isEmpty   => Nil
       // if there are definitions matching the users input, use them for completion
-      case _ if definitions.nonEmpty         => autoCompleteWith(definitions)
+      case _ if definitions.nonEmpty         => definitions
       // if nothing was typed into the repl, autocomplete with all known names
-      case _ if buffer.trim.isEmpty          => autoCompleteWith(knownVariableNames)
+      case _ if buffer.trim.isEmpty          => knownVariableNames
       // if something was typed into the repl, autocomplete with all names starting with the input text
       case _                                 =>
-        autoCompleteWith(knownVariableNames filter (matches(_, beforeCursor)))
+        knownVariableNames filter (matches(_, beforeCursor))
     }
   }
 
-  private def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean): List[String] = {
+  private def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean, context: ReplContext): List[String] = {
     import ModuleFinder._
 
-    val moduleFinder = this.globalContext().moduleFinder
+    val moduleFinder = context.moduleFinder
 
     def validMorganeyElement(f: File) =
       f.isDirectory || isMorganeyModule(f)
