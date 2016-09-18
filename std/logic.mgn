@@ -11,7 +11,21 @@ or  := \p.q. p p p
 not := \p. p false true
 
 iszero := \n. n (\x. false) true
-leq    := \m.n. iszero (minus m n)
-geq    := \m.n. leq n m
-eq     := \m.n. and (leq m n) (leq n m)
-neq    := \m.n. not (eq m n)
+
+// less or equals
+le := \m.n. iszero (minus m n)
+
+// less than
+lt := \m.n. and (le m n) (not (eq m n))
+
+// greater or equals
+ge := \m.n. leq n m
+
+// greater than
+gt := \m.n. and (ge m n) (not (eq m n))
+
+// equals
+eq := \m.n. and (leq m n) (leq n m)
+
+// not equals
+ne := \m.n. not (eq m n)
