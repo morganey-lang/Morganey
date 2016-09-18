@@ -12,4 +12,5 @@ not := \p. p false true
 
 iszero := \n. n (\x. false) true
 leq    := \m.n. iszero (minus m n)
+geq    := \m.n. leq n m
 eq     := \m.n. and (leq m n) (leq n m)
