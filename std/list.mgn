@@ -1,6 +1,8 @@
 nil := \a.b. b
 isnil := \l.l (\h.t.d. (\a.b.b)) (\a.b.a)
 
+cons := \hd.tl. pair hd tl
+
 pair := \x.y.z. z x y
 first := \n.n (\a.b.a)
 second := \n.n (\a.b.b)
