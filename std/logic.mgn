@@ -19,13 +19,13 @@ le := \m.n. iszero (minus m n)
 lt := \m.n. and (le m n) (not (eq m n))
 
 // greater or equals
-ge := \m.n. leq n m
+ge := \m.n. le n m
 
 // greater than
 gt := \m.n. and (ge m n) (not (eq m n))
 
 // equals
-eq := \m.n. and (leq m n) (leq n m)
+eq := \m.n. and (le m n) (le n m)
 
 // not equals
 ne := \m.n. not (eq m n)
