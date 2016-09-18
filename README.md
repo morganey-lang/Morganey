@@ -59,6 +59,10 @@ And after that you can take a look at the Unit Test coverage
 results. Just open `target/scala-2.11/scoverage-report/index.html`
 with your favorite browser.
 
+### Functional Tests ###
+
+    $ sbt funtests
+
 ## Language ##
 
 ### BNF ###
