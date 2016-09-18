@@ -1,2 +1,15 @@
+load math.arithmetic
+
 true := \a.b. a
 false := \a.b. b
+
+if := \e.t.f. e t f
+else := \a.a
+
+and := \p.q. p q p
+or  := \p.q. p p p
+not := \p. p false true
+
+iszero := \n. n (\x. false) true
+leq    := \m.n. iszero (minus m n)
+eq     := \m.n. and (leq m n) (leq n m)
