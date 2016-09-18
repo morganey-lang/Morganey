@@ -11,7 +11,8 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "jline" % "jline" % "2.12.1",
     "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
-  )
+  ),
+  test in assembly := {}
 )
 
 lazy val macroSettings = Seq(
