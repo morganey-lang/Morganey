@@ -5,6 +5,7 @@ scala:
   - 2.11.8
 script:
   - sbt retest
+  - sbt funtests
 notifications:
   email:
     - reximkut@gmail.com

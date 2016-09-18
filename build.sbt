@@ -12,7 +12,8 @@ lazy val commonSettings = Seq(
     "jline" % "jline" % "2.12.1",
     "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
   ),
-  test in assembly := {}
+  test in assembly := {},
+  assemblyJarName := "morganey.jar"
 )
 
 lazy val macroSettings = Seq(
@@ -23,6 +24,10 @@ lazy val macroSettings = Seq(
 lazy val kernelSettings = Seq(
   name := "morganey-kernel",
   libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+)
+
+lazy val funtestsSettings = Seq(
+  name := "morganey-funtests"
 )
 
 lazy val dependencySettings =
@@ -45,6 +50,7 @@ build := {
   IO.copyFile(kernelFile, targetDir / kernelFile.getName())
 }
 
+addCommandAlias("funtests", ";assembly;funtests/test")
 addCommandAlias("rebuild", ";clean;build")
 addCommandAlias("retest", ";rebuild;test")
 
@@ -72,3 +78,7 @@ lazy val macros = (project in file("macros"))
 lazy val kernel = (project in file("kernel"))
   .settings(commonSettings :_*)
   .settings(kernelSettings :_*)
+
+lazy val funtests = (project in file("funtests"))
+  .settings(commonSettings :_*)
+  .settings(funtestsSettings :_*)
