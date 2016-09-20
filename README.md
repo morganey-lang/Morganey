@@ -59,9 +59,13 @@ And after that you can take a look at the Unit Test coverage
 results. Just open `target/scala-2.11/scoverage-report/index.html`
 with your favorite browser.
 
-### Build an uber jar ###
+### Build an überjar ###
+
+To build an übérjàr run the following command
 
     $ sbt assembly
+
+After that find the ûbərjär at `target/scala-2.11/morganey-assembly-<version>.jar`
 
 ## Language ##
 
