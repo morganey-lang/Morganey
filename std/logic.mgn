@@ -1,0 +1,31 @@
+load math.arithmetic
+
+true := \a.b. a
+false := \a.b. b
+
+if := \e.t.f. e t f
+else := \a.a
+
+and := \p.q. p q p
+or  := \p.q. p p p
+not := \p. p false true
+
+iszero := \n. n (\x. false) true
+
+// less or equals
+le := \m.n. iszero (minus m n)
+
+// less than
+lt := \m.n. and (le m n) (not (eq m n))
+
+// greater or equals
+ge := \m.n. le n m
+
+// greater than
+gt := \m.n. and (ge m n) (not (eq m n))
+
+// equals
+eq := \m.n. and (le m n) (le n m)
+
+// not equals
+ne := \m.n. not (eq m n)
