@@ -16,7 +16,7 @@ object MorganeyRepl {
   def evalLine(context: ReplContext, line: String): Computation[ReplResult[String]] =
     line.trim match {
       case ""            => Computation(ReplResult(context))
-      case Commands(cmd) => Computation(cmd(context))
+      case Commands(cmd) => cmd(context)
       case input         => parseAndEval(context, line)
     }
 
