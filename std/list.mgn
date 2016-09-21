@@ -29,7 +29,7 @@ rangeWithStep := Y (\rec.start.step.end. (le start end) (cons start (rec (plus s
 
 /* Maps function `f` over the elements of list `xs`
  */
-map := \xs.f. Y (\mapRec.xs.f. (isnil xs) [] (cons (f (head xs)) (mapRec (tail xs) f))) xs f
+map := \f.xs. Y (\mapRec.xs. (isnil xs) [] (cons (f (head xs)) (mapRec (tail xs)))) xs
 
 /* Creates a list containing `n` times `x`
  */
