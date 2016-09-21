@@ -7,4 +7,4 @@ compose := \f.g.x. f (g x)
 
 /* Applies `f` `n` times to `x`
  */
-applyN := \f.n.x. foldl (replicate f n) x (\acc.ele. ele acc)
+applyN := \f.n.x. foldl (\acc.ele. ele acc) x (replicate n f)

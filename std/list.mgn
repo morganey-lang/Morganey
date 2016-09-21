@@ -35,13 +35,13 @@ map := \f.xs. Y (\mapRec.xs. (isnil xs) [] (cons (f (head xs)) (mapRec (tail xs)
  */
 replicate := \n.x. Y (\replicateRec.i. (lt i n) (cons x (replicateRec (succ i))) []) 0
 
-foldl := \xs.zero.op. Y (\foldlRec.xs.acc.op. (isnil xs) acc (foldlRec (tail xs) (op acc (head xs)) op)) xs zero op
+foldl := \op.zero.xs. Y (\foldlRec.xs.acc. (isnil xs) acc (foldlRec (tail xs) (op acc (head xs)))) xs zero
 
-foldr := \xs.zero.op. foldl (reverse xs) zero (\a.b. op b a)
+foldr := \op.zero.xs. foldl (\a.b. op b a) zero (reverse xs)
 
-sum := \xs. foldl xs 0 plus
+sum := \xs. foldl plus 0 xs
 
-last := \xs. foldl xs [] (\a.b.b)
+last := \xs. foldl (\a.b.b) [] xs
 
 pair := \x.y.z. z x y
 first := \n.n (\a.b.a)
