@@ -1,4 +1,6 @@
+load functions
 load logic
+load math.arithmetic
 
 nil := \a.b. b
 isnil := \l.l (\h.t.d. (\a.b.b)) (\a.b.a)
@@ -24,6 +26,22 @@ rangeWithNext := \start.next.end. rangeWithStep start (minus next start) end
  * require: start <= end
  */
 rangeWithStep := Y (\rec.start.step.end. (le start end) (cons start (rec (plus start step) step end)) nil)
+
+/* Maps function `f` over the elements of list `xs`
+ */
+map := \xs.f. Y (\mapRec.xs.f. (isnil xs) [] (cons (f (head xs)) (mapRec (tail xs) f))) xs f
+
+/* Creates a list containing `n` times `x`
+ */
+replicate := \x.n. Y (\replicateRec.n.x.i. (lt i n) (cons x (replicateRec n x (succ i))) []) n x 0
+
+foldl := \xs.zero.op. Y (\foldlRec.xs.acc.op. (isnil xs) acc (foldlRec (tail xs) (op acc (head xs)) op)) xs zero op
+
+foldr := \xs.zero.op. foldl (reverse xs) zero (\a.b. op b a)
+
+sum := \xs. foldl xs 0 plus
+
+last := \xs. foldl xs [] (\a.b.b)
 
 pair := \x.y.z. z x y
 first := \n.n (\a.b.a)

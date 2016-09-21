@@ -1,0 +1,10 @@
+load list
+
+id := \x. x
+
+andThen := \f.g.x. g (f x)
+compose := \f.g.x. f (g x)
+
+/* Applies `f` `n` times to `x`
+ */
+applyN := \f.n.x. foldl (replicate f n) x (\acc.ele. ele acc)
