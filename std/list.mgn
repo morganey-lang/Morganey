@@ -33,7 +33,7 @@ map := \f.xs. Y (\mapRec.xs. (isnil xs) [] (cons (f (head xs)) (mapRec (tail xs)
 
 /* Creates a list containing `n` times `x`
  */
-replicate := \x.n. Y (\replicateRec.n.x.i. (lt i n) (cons x (replicateRec n x (succ i))) []) n x 0
+replicate := \n.x. Y (\replicateRec.i. (lt i n) (cons x (replicateRec (succ i))) []) 0
 
 foldl := \xs.zero.op. Y (\foldlRec.xs.acc.op. (isnil xs) acc (foldlRec (tail xs) (op acc (head xs)) op)) xs zero op
 
