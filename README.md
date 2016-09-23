@@ -63,6 +63,14 @@ with your favorite browser.
 
     $ sbt funtests
 
+### Build an uberjar ###
+
+To build an uberjar run the following command
+
+    $ sbt assembly
+
+After that find the uberjar at `target/scala-2.11/morganey.jar`
+
 ## Language ##
 
 ### BNF ###
