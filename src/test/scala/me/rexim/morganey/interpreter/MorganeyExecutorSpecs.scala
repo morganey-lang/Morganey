@@ -28,12 +28,12 @@ class MorganeyExecutorSpecs extends FlatSpec with Matchers {
   val programInput = "khooy".toStream
 
   "Executor" should "compile a correct program to a reducible term" in {
-    val Right(expectedProgram) = lapp(programBody, LambdaInput(programInput)).addBindings(programBindings)
-    MorganeyExecutor.compileProgram(programInput)(rawProgram) should be (Success(expectedProgram))
+    val Right(expectedProgram) = lapp(programBody, LambdaInput(() => programInput)).addBindings(programBindings)
+    MorganeyExecutor.compileProgram(() => programInput)(rawProgram) should be (Success(expectedProgram))
   }
 
   "Executor" should "fail an incorrect program" in {
-    MorganeyExecutor.compileProgram(programInput)(programBindings).isFailure should be (true)
+    MorganeyExecutor.compileProgram(() =>programInput)(programBindings).isFailure should be (true)
   }
 
   "Executor" should "not interpret empty loading nodes and just ignore them" in {

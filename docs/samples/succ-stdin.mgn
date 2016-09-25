@@ -1,3 +1,3 @@
 load prelude
 
-main := Y (\map.xs. (isnil xs) 0 (pair (succ (first xs)) (map (second xs))))
+main := Y (\map.xs. (isnil xs) 0 (pair (succ (first xs)) (map (second xs)))) input

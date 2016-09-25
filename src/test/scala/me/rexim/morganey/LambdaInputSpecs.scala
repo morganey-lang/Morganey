@@ -8,9 +8,9 @@ import me.rexim.morganey.helpers.TestTerms
 import org.scalatest._
 
 class LambdaInputSpecs extends FlatSpec with Matchers with TestTerms {
-  val longInput = LambdaInput("khooy".toStream)
-  val singleCharInput = LambdaInput("k".toStream)
-  val emptyInput = LambdaInput(Stream.empty)
+  val longInput = LambdaInput(() => "khooy".toStream)
+  val singleCharInput = LambdaInput(() => "k".toStream)
+  val emptyInput = LambdaInput(() => Stream.empty)
 
   "Lambda input" should "have zero free vars by definition" in {
     longInput.freeVars.isEmpty should be (true)

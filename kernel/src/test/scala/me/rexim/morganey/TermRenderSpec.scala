@@ -67,8 +67,8 @@ class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
 
 
   "A lazy sequence of characters" should "be rendered to \"<input>\"" in {
-    LambdaInput(Stream.empty[Char]).toString should be ("<input>")
-    LambdaInput("foo bar".toStream).toString should be ("<input>")
+    LambdaInput(() => Stream.empty[Char]).toString should be ("<input>")
+    LambdaInput(() => "foo bar".toStream).toString should be ("<input>")
   }
 
   "Parsing a term, and reparsing the result of the pretty-printer" should "always succeed" in {

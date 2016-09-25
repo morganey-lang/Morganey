@@ -51,6 +51,6 @@ class CallByNameSpec extends FlatSpec with Matchers with TestTerms {
 
   "Input term" should "be evaluated once by the strategy" in {
     val input = "abc"
-    decodePair(LambdaInput(input.toStream).cbnReduce()) should be (Some((encodeNumber('a'.toInt), LambdaInput(input.tail.toStream))))
+    decodePair(LambdaInput(() => input.toStream).cbnReduce()) should be (Some((encodeNumber('a'.toInt), LambdaInput(() => input.tail.toStream))))
   }
 }

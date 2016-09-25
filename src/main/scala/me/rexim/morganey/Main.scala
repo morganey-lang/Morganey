@@ -75,7 +75,7 @@ object Main extends SignalHandler {
     import me.rexim.morganey.reduction.NormalOrder._
 
     val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder, Set())
-      .flatMap(compileProgram(Source.stdin.toStream))
+      .flatMap(compileProgram(() => Source.stdin.toStream))
       .map(_.norReduce())
 
     result match {
