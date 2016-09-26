@@ -40,6 +40,6 @@ class NormalOrderSpec extends FlatSpec with Matchers with TestTerms {
 
   "Input term" should "full evaluated by the strategy" in {
     val input = "abc"
-    decodeString(new LambdaInput(input.toStream).norReduce()) should be (Some(input))
+    decodeString(new LambdaInput(() => input.toStream).norReduce()) should be (Some(input))
   }
 }

@@ -130,7 +130,7 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
   }
 }
 
-case class LambdaInput(input: Stream[Char]) extends LambdaTerm {
+case class LambdaInput(input: () => Stream[Char]) extends LambdaTerm {
   override val freeVars: Set[String] = Set()
 
   override def substitute(substitution: (LambdaVar, LambdaTerm)): LambdaTerm =
@@ -141,8 +141,8 @@ case class LambdaInput(input: Stream[Char]) extends LambdaTerm {
     * put at the begining of the virtual input list
     */
   def forceNextChar(): LambdaTerm =
-    input match {
-      case x #:: xs => encodePair((encodeNumber(x.toInt), LambdaInput(xs)))
+    input() match {
+      case x #:: xs => encodePair((encodeNumber(x.toInt), LambdaInput(() => xs)))
       case _ => encodeList(List())
     }
 
