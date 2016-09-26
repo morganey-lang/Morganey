@@ -68,6 +68,14 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
     | brackets(rangeConstant)
   )
 
+  private def pair: Parser[LambdaTerm] =
+    parenthesis((term <~ comma) ~ term) ^^ {
+      case first ~ second => LambdaApp(
+        LambdaApp(LambdaVar("pair"), first),
+        second
+      )
+    }
+
   /* ============================== Core lambda terms =============================== */
 
   def variable: Parser[LambdaVar] =
@@ -87,7 +95,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
     func | application | termWithoutApp
 
   def termWithoutApp: Parser[LambdaTerm] =
-    func | variable | literal | parenthesis(term)
+    func | variable | literal | pair | parenthesis(term)
 
   /* =========================== Morganey extension terms =========================== */
 
