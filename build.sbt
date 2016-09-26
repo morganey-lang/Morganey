@@ -51,7 +51,8 @@ packStdLib := {
     base.toURI.relativize(f.toURI).getPath
 
   val stdLibJar = filesIn(rootDir / "std").map(f => f -> relativeTo(rootDir, f))
-  val stdLibJarFile = targetDir / s"${name.value}-stdlib_2.11-${version.value}.jar"
+  val scalaMajorV = scalaVersion.value.split("\\.").init.mkString(".")
+  val stdLibJarFile = targetDir / s"${name.value}-stdlib_$scalaMajorV-${version.value}.jar"
 
   IO.jar(stdLibJar, stdLibJarFile, new java.util.jar.Manifest())
   stdLibJarFile
