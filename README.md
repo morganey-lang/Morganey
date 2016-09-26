@@ -89,7 +89,7 @@ After that find the uberjar at `target/scala-2.11/morganey-assembly-<version>.ja
                           | '\\[\\'"bfnrt]'
     <string-literal> ::= <java-string-literal>
     <list-literal> ::= "[" [ term { "," term } ] "]"
-                     | "[" <number-or-character> [ "," <number-or-character> ] ".." <number-or-character> "]"
+                     | "[" <term> [ "," <term> ] ".." <term> "]"
     <number-or-character> ::= <numeric-literal>
                             | <character-literal>
 
