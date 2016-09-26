@@ -63,6 +63,7 @@ build := {
   val (_, coreFile) = packagedArtifact.in(Compile, packageBin).value
   val (_, macroFile) = packagedArtifact.in(macros).in(Compile, packageBin).value
   val (_, kernelFile) = packagedArtifact.in(kernel).in(Compile, packageBin).value
+  val _ = packStdLib.value
 
   val targetDir = coreFile.getParentFile()
 
