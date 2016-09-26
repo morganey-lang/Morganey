@@ -1,4 +1,5 @@
 load common
+load functions
 load math.arithmetic
 load list
 load logic
