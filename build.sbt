@@ -51,7 +51,7 @@ packStdLib := {
     base.toURI.relativize(f.toURI).getPath
 
   val stdLibJar = filesIn(rootDir / "std").map(f => f -> relativeTo(rootDir, f))
-  val stdLibJarFile = targetDir / s"${name.value}_2.11-${version.value}-stdlib.jar"
+  val stdLibJarFile = targetDir / s"${name.value}-stdlib_2.11-${version.value}.jar"
 
   IO.jar(stdLibJar, stdLibJarFile, new java.util.jar.Manifest())
   stdLibJarFile
