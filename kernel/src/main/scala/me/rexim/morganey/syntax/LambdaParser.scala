@@ -52,10 +52,14 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
       ChurchPairConverter.encodeString(unquoteString(s))
     }
 
+  private def rangeParser[T](q: => Parser[T]): Parser[T ~ Option[T] ~ T] = {
+    val p = q
+    p ~ opt(comma ~> p) ~ (rangeOperator ~> p)
+  }
+
   private def rangeConstant: Parser[LambdaTerm] = {
     val number = validNumberLiteral | validCharacterLiteral ^^ (_.toInt)
-    val parser = number ~ opt(comma ~> number) ~ (rangeOperator ~> number)
-    parser ^^ { case start ~ next ~ exit =>
+    rangeParser(number) ^^ { case start ~ next ~ exit =>
       val step  = next.map(_ - start).getOrElse(1)
       val range = NumericRange.inclusive(start, exit, step).toList
       val nums  = range map ChurchNumberConverter.encodeNumber
@@ -66,6 +70,16 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   def listLiteral: Parser[LambdaTerm] = (
       brackets(repsep(term, comma)) ^^ ChurchPairConverter.encodeList
     | brackets(rangeConstant)
+    | brackets {
+        rangeParser(term) ^^ { case start ~ next ~ exit =>
+          val range         = LambdaVar("range")
+          val rangeWithNext = LambdaVar("rangeWithNext")
+          next match {
+            case None      => LambdaApp(LambdaApp(range, start), exit)
+            case Some(nxt) => LambdaApp(LambdaApp(LambdaApp(rangeWithNext, start), nxt), exit)
+          }
+        }
+      }
   )
 
   private def pair: Parser[LambdaTerm] =
