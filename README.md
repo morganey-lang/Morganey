@@ -75,6 +75,7 @@ After that find the uberjar at `target/scala-2.11/morganey-assembly-<version>.ja
              | <application>
              | <literal>
              | <variable>
+             | "(" <term> "," <term> ")"
              | "(" <term> ")"
     <binding> ::= <variable> ":=" <term>
     <loading> ::= "load" <module-path>
