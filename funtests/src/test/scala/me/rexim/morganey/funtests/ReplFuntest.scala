@@ -8,7 +8,7 @@ import org.scalatest._
 import scala.sys.process._
 
 class ReplFuntest extends FlatSpec with Matchers with MorganeyProcess {
-  // TODO: REPL funtests support
+  // TODO(#232): REPL funtests support
   ignore should "be evaluated to 9" in {
     val input = new ByteArrayInputStream("2 3\n".getBytes("UTF-8"))
     val actualOutput = (morganey() #< input).lineStream_!
