@@ -59,13 +59,17 @@ And after that you can take a look at the Unit Test coverage
 results. Just open `target/scala-2.11/scoverage-report/index.html`
 with your favorite browser.
 
+### Functional Tests ###
+
+    $ sbt funtests
+
 ### Build an uberjar ###
 
 To build an uberjar run the following command
 
     $ sbt assembly
 
-After that find the uberjar at `target/scala-2.11/morganey-assembly-<version>.jar`
+After that find the uberjar at `target/scala-2.11/morganey.jar`
 
 ## Language ##
 
