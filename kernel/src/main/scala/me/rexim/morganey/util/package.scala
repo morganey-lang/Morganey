@@ -6,6 +6,7 @@ import java.util.regex.Pattern
 
 import scala.util._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
+import hiddenargs._
 
 import scala.annotation.tailrec
 
@@ -36,8 +37,9 @@ package object util {
       s: String => pattern.matcher(s).matches()
     }.toOption
 
+  @hiddenargs
   @tailrec
-  def unquoteString(s: String, acc: String = ""): String =
+  def unquoteString(s: String, @hidden acc: String = ""): String =
     if (s.isEmpty) s else s(0) match {
       case '"' => unquoteString(s.tail, acc)
       case '\\' => s(1) match {
