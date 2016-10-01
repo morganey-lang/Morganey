@@ -20,13 +20,13 @@ object ChurchNumberConverter {
       case _ => None
     }
 
+  @hiddenargs
   @tailrec
-  private def wrapNumber(number: Int, acc: LambdaTerm = LambdaVar("x")): LambdaTerm = {
+  private def wrapNumber(number: Int, @hidden acc: LambdaTerm = LambdaVar("x")): LambdaTerm =
     if (number <= 0)
       acc
     else
       wrapNumber(number - 1, LambdaApp(LambdaVar("f"), acc))
-  }
 
   def decodeNumber(term: LambdaTerm): Option[Int] = term match {
     case LambdaFunc(LambdaVar(f), LambdaFunc(LambdaVar(x), number)) =>
