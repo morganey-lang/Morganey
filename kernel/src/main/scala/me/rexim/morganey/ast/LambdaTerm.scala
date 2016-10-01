@@ -4,6 +4,7 @@ import me.rexim.morganey.ast.error._
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.church.ChurchPairConverter._
 import me.rexim.morganey.util._
+import hiddenargs._
 
 import scala.annotation.tailrec
 
@@ -78,15 +79,14 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
 
   override val freeVars: Set[String] = body.freeVars - parameter.name
 
-  private[ast] def nestedFunctions(): (List[LambdaVar], LambdaTerm) = {
-    @tailrec
-    def go(func: LambdaFunc, acc: List[LambdaVar]): (List[LambdaVar], LambdaTerm) =
-      func match {
-        case LambdaFunc(v, f: LambdaFunc) => go(f, v :: acc)
-        case LambdaFunc(v, b)             => ((v :: acc).reverse, b)
-      }
-    go(this, Nil)
-  }
+  @hiddenargs
+  @tailrec
+  private[ast] def nestedFunctions(@hidden func: LambdaFunc     = this,
+                                   @hidden acc: List[LambdaVar] = Nil): (List[LambdaVar], LambdaTerm) =
+    func match {
+      case LambdaFunc(v, f: LambdaFunc) => nestedFunctions(f, v :: acc)
+      case LambdaFunc(v, b)             => ((v :: acc).reverse, b)
+    }
 
   override def toString: String = {
     val (vars, body) = nestedFunctions()
