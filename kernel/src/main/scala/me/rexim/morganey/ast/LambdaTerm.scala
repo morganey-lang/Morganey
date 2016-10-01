@@ -105,15 +105,14 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
 
   override val freeVars: Set[String] = leftTerm.freeVars ++ rightTerm.freeVars
 
-  private[ast] def nestedApplications(): (LambdaTerm, List[LambdaTerm]) = {
-    @tailrec
-    def go(app: LambdaApp, acc: List[LambdaTerm]): (LambdaTerm, List[LambdaTerm]) =
-      app match {
-        case LambdaApp(l: LambdaApp, r) => go(l, r :: acc)
-        case LambdaApp(l, r)            => (l, r :: acc)
-      }
-    go(this, Nil)
-  }
+  @hiddenargs
+  @tailrec
+  private[ast] def nestedApplications(@hidden app: LambdaApp        = this,
+                                      @hidden acc: List[LambdaTerm] = Nil): (LambdaTerm, List[LambdaTerm]) =
+    app match {
+      case LambdaApp(l: LambdaApp, r) => nestedApplications(l, r :: acc)
+      case LambdaApp(l, r)            => (l, r :: acc)
+    }
 
   override def toString: String = {
     val (deep, nest) = nestedApplications()
