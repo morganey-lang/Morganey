@@ -40,7 +40,7 @@ package object util {
   @hiddenargs
   @tailrec
   def unquoteString(s: String, @hidden acc: String = ""): String =
-    if (s.isEmpty) s else s(0) match {
+    if (s.isEmpty) acc else s(0) match {
       case '"' => unquoteString(s.tail, acc)
       case '\\' => s(1) match {
         case 'b' => unquoteString(s.drop(2), acc + "\b")
@@ -52,7 +52,7 @@ package object util {
         case 'u' => unquoteString(s.drop(6), acc + Integer.parseInt(s.slice(2, 6), 16).toChar.toString)
         case c   => unquoteString(s.drop(2), acc + c.toString)
       }
-      case c => unquoteString(s.drop(2), acc + c.toString)
+      case c => unquoteString(s.tail, acc + c.toString)
     }
 
   def reader(path: String): Try[Reader] = reader(new File(path))
