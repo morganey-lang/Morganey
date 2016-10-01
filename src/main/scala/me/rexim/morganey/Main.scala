@@ -50,8 +50,7 @@ object Main extends SignalHandler {
 
     val running = true
     var globalContext = context
-    val con = new ConsoleReader()
-    con.setPrompt("λ> ")
+    val con = initializeConsoleReader()
     con.addCompleter(new TerminalReplAutocompletion(() => globalContext))
 
     def line() = Option(con.readLine()).map(_.trim)
@@ -92,5 +91,22 @@ object Main extends SignalHandler {
       case Nil => startRepl(context)
       case programFile :: _ => executeProgram(context, programFile)
     }
+  }
+
+  private def initializeConsoleReader(): ConsoleReader = {
+    lazy val isInputRedirected = System.console == null
+    lazy val isWindows =
+      Option(System.getProperty("os.name"))
+        .exists(_.toLowerCase.contains("windows"))
+
+    if (isWindows && isInputRedirected) {
+      // Need to disable native console usage in Windows with redirected
+      // input, otherwise JLine just hangs when trying to read it.
+      System.setProperty("jline.WindowsTerminal.directConsole", "false")
+    }
+
+    val con = new ConsoleReader()
+    con.setPrompt("λ> ")
+    con
   }
 }
