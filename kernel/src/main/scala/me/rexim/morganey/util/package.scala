@@ -7,6 +7,8 @@ import java.util.regex.Pattern
 import scala.util._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
 
+import scala.annotation.tailrec
+
 package object util {
 
   /**
@@ -34,20 +36,21 @@ package object util {
       s: String => pattern.matcher(s).matches()
     }.toOption
 
-  def unquoteString(s: String): String =
+  @tailrec
+  def unquoteString(s: String, acc: String = ""): String =
     if (s.isEmpty) s else s(0) match {
-      case '"' => unquoteString(s.tail)
+      case '"' => unquoteString(s.tail, acc)
       case '\\' => s(1) match {
-        case 'b' => '\b' + unquoteString(s.drop(2))
-        case 'f' => '\f' + unquoteString(s.drop(2))
-        case 'n' => '\n' + unquoteString(s.drop(2))
-        case 'r' => '\r' + unquoteString(s.drop(2))
-        case 't' => '\t' + unquoteString(s.drop(2))
-        case '"' => '"'  + unquoteString(s.drop(2))
-        case 'u' => Integer.parseInt(s.drop(2).take(4), 16).toChar + unquoteString(s.drop(6))
-        case c => c + unquoteString(s.drop(2))
+        case 'b' => unquoteString(s.drop(2), acc + "\b")
+        case 'f' => unquoteString(s.drop(2), acc + "\f")
+        case 'n' => unquoteString(s.drop(2), acc + "\n")
+        case 'r' => unquoteString(s.drop(2), acc + "\r")
+        case 't' => unquoteString(s.drop(2), acc + "\t")
+        case '"' => unquoteString(s.drop(2), acc + "\"")
+        case 'u' => unquoteString(s.drop(6), acc + Integer.parseInt(s.slice(2, 6), 16).toChar.toString)
+        case c   => unquoteString(s.drop(2), acc + c.toString)
       }
-      case c => c + unquoteString(s.tail)
+      case c => unquoteString(s.drop(2), acc + c.toString)
     }
 
   def reader(path: String): Try[Reader] = reader(new File(path))
