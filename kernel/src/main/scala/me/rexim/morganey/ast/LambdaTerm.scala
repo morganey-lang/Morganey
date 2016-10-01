@@ -79,13 +79,11 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
 
   override val freeVars: Set[String] = body.freeVars - parameter.name
 
-  @hiddenargs
   @tailrec
-  private[ast] def nestedFunctions(@hidden func: LambdaFunc     = this,
-                                   @hidden acc: List[LambdaVar] = Nil): (List[LambdaVar], LambdaTerm) =
-    func match {
-      case LambdaFunc(v, f: LambdaFunc) => nestedFunctions(f, v :: acc)
-      case LambdaFunc(v, b)             => ((v :: acc).reverse, b)
+  private[ast] final def nestedFunctions(acc: List[LambdaVar] = Nil): (List[LambdaVar], LambdaTerm) =
+    body match {
+      case f: LambdaFunc => f.nestedFunctions(parameter :: acc)
+      case _             => ((parameter :: acc).reverse, body)
     }
 
   override def toString: String = {
@@ -105,13 +103,11 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
 
   override val freeVars: Set[String] = leftTerm.freeVars ++ rightTerm.freeVars
 
-  @hiddenargs
   @tailrec
-  private[ast] def nestedApplications(@hidden app: LambdaApp        = this,
-                                      @hidden acc: List[LambdaTerm] = Nil): (LambdaTerm, List[LambdaTerm]) =
-    app match {
-      case LambdaApp(l: LambdaApp, r) => nestedApplications(l, r :: acc)
-      case LambdaApp(l, r)            => (l, r :: acc)
+  private[ast] final def nestedApplications(acc: List[LambdaTerm] = Nil): (LambdaTerm, List[LambdaTerm]) =
+    leftTerm match {
+      case l: LambdaApp => l.nestedApplications(rightTerm :: acc)
+      case _            => (leftTerm, rightTerm :: acc)
     }
 
   override def toString: String = {
