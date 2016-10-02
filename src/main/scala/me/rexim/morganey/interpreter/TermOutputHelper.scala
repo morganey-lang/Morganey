@@ -24,7 +24,7 @@ object TermOutputHelper {
       Decoder[String]                   ("string", s => s"""\"$s\""""),
       Decoder[Seq[Int]]                 ("numbers", _.mkString("[", ",", "]")),
       Decoder[Seq[LambdaTerm]]          ("elements", _.map(decode(_)._2).mkString("[", ",", "]")),
-      Decoder[(LambdaTerm, LambdaTerm)] ("pair", p => s"(${decode(p._1)._2}, ${decode(p._2)._2})")
+      Decoder[(LambdaTerm, LambdaTerm)] ("pair", p => s"(${decode(p._1)._2},${decode(p._2)._2})")
     )
 
   private case class Decoder[T](prefix: String, transform: T => String)(implicit unT: Unliftable[T]) {
