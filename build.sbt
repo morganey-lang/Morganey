@@ -12,6 +12,7 @@ lazy val commonSettings = Seq(
     "jline" % "jline" % "2.12.1",
     "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
   ),
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   test in assembly := {},
   assemblyJarName := "morganey.jar"
 )
@@ -95,18 +96,26 @@ lazy val morganey = (project in file("."))
   .aggregate(macros, kernel)
   .dependsOn(
     macros % dependencySettings,
-    kernel % dependencySettings
+    kernel % dependencySettings,
+    hiddenArgs
   )
 
 lazy val macros = (project in file("macros"))
   .settings(commonSettings :_*)
   .settings(macroSettings :_*)
-  .dependsOn(kernel % dependencySettings)
+  .dependsOn(
+    kernel % dependencySettings,
+    hiddenArgs
+  )
 
 lazy val kernel = (project in file("kernel"))
   .settings(commonSettings :_*)
   .settings(kernelSettings :_*)
+  .dependsOn(hiddenArgs)
 
 lazy val funtests = (project in file("funtests"))
   .settings(commonSettings :_*)
   .settings(funtestsSettings :_*)
+  .dependsOn(hiddenArgs)
+
+lazy val hiddenArgs = ProjectRef(uri("https://github.com/keddelzz/hidden-args.git"), "hiddenargs")

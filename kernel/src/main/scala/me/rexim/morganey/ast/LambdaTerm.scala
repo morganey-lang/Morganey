@@ -4,6 +4,7 @@ import me.rexim.morganey.ast.error._
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.church.ChurchPairConverter._
 import me.rexim.morganey.util._
+import hiddenargs._
 
 import scala.annotation.tailrec
 
@@ -78,15 +79,12 @@ case class LambdaFunc(parameter: LambdaVar, body: LambdaTerm) extends LambdaTerm
 
   override val freeVars: Set[String] = body.freeVars - parameter.name
 
-  private[ast] def nestedFunctions(): (List[LambdaVar], LambdaTerm) = {
-    @tailrec
-    def go(func: LambdaFunc, acc: List[LambdaVar]): (List[LambdaVar], LambdaTerm) =
-      func match {
-        case LambdaFunc(v, f: LambdaFunc) => go(f, v :: acc)
-        case LambdaFunc(v, b)             => ((v :: acc).reverse, b)
-      }
-    go(this, Nil)
-  }
+  @tailrec
+  private[ast] final def nestedFunctions(acc: List[LambdaVar] = Nil): (List[LambdaVar], LambdaTerm) =
+    body match {
+      case f: LambdaFunc => f.nestedFunctions(parameter :: acc)
+      case _             => ((parameter :: acc).reverse, body)
+    }
 
   override def toString: String = {
     val (vars, body) = nestedFunctions()
@@ -105,15 +103,12 @@ case class LambdaApp(leftTerm: LambdaTerm, rightTerm: LambdaTerm) extends Lambda
 
   override val freeVars: Set[String] = leftTerm.freeVars ++ rightTerm.freeVars
 
-  private[ast] def nestedApplications(): (LambdaTerm, List[LambdaTerm]) = {
-    @tailrec
-    def go(app: LambdaApp, acc: List[LambdaTerm]): (LambdaTerm, List[LambdaTerm]) =
-      app match {
-        case LambdaApp(l: LambdaApp, r) => go(l, r :: acc)
-        case LambdaApp(l, r)            => (l, r :: acc)
-      }
-    go(this, Nil)
-  }
+  @tailrec
+  private[ast] final def nestedApplications(acc: List[LambdaTerm] = Nil): (LambdaTerm, List[LambdaTerm]) =
+    leftTerm match {
+      case l: LambdaApp => l.nestedApplications(rightTerm :: acc)
+      case _            => (leftTerm, rightTerm :: acc)
+    }
 
   override def toString: String = {
     val (deep, nest) = nestedApplications()
