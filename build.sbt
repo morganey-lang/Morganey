@@ -5,7 +5,7 @@
 lazy val commonSettings = Seq(
   name := "morganey",
   organization := "me.rexim",
-  version := "0.0.1-SNAPSHOT",
+  version := "0.0.1",
   scalaVersion := "2.11.8",
   scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
   libraryDependencies ++= Seq(
