@@ -20,7 +20,8 @@ class TermOutputHelperSpec extends FlatSpec with Matchers {
     m"""[[1, 2, 3, 'a']]""" -> "elements: [[1,2,3,97]]",
     m"""['A', [1, 2], 1]""" -> "elements: ['A',[1,2],1]",
     m"""['A', ""]""" -> "numbers: [65,0]",
-    m"[[1, 'A'], []]" -> "elements: [[1,65],0]"
+    m"[[1, 'A'], []]" -> "elements: [[1,65],0]",
+    m"(1, 2)" -> "pair: (1,2)"
   )
 
   "A term" should "be correctly identified and showed" in {

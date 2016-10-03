@@ -84,10 +84,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
   private def pair: Parser[LambdaTerm] =
     parenthesis((term <~ comma) ~ term) ^^ {
-      case first ~ second => LambdaApp(
-        LambdaApp(LambdaVar("pair"), first),
-        second
-      )
+      case first ~ second => ChurchPairConverter.encodePair((first, second))
     }
 
   /* ============================== Core lambda terms =============================== */
