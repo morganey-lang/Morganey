@@ -27,6 +27,10 @@ lazy val kernelSettings = Seq(
   libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 )
 
+lazy val stdlibSettings = Seq(
+  name := "morganey-std"
+)
+
 lazy val funtestsSettings = Seq(
   name := "morganey-funtests"
 )
@@ -38,44 +42,19 @@ lazy val dependencySettings =
  * ==================================== tasks =====================================
  */
 
-lazy val stdLibArtifact = Artifact("stdlib", "jar", "jar")
-
-lazy val packStdLib = TaskKey[File]("packStdLib", "Packs the std-lib into a single jar.")
-
-packStdLib := {
-  val rootDir = file(".")
-  val (_, coreFile) = packagedArtifact.in(Compile, packageBin).value
-
-  val targetDir = coreFile.getParentFile()
-
-  def filesIn(dir: File): Seq[File] = {
-    val (files, dirs) = IO.listFiles(dir).partition(_.isFile)
-    files.filter(_.getName endsWith ".mgn") ++ dirs.flatMap(filesIn)
-  }
-
-  def relativeTo(base: File, f: File): String =
-    base.toURI.relativize(f.toURI).getPath
-
-  val stdLibJar = filesIn(rootDir / "std").map(f => f -> relativeTo(rootDir, f))
-  val scalaMajorV = scalaVersion.value.split("\\.").init.mkString(".")
-  val stdLibJarFile = targetDir / s"${name.value}-stdlib_$scalaMajorV-${version.value}.jar"
-
-  IO.jar(stdLibJar, stdLibJarFile, new java.util.jar.Manifest())
-  stdLibJarFile
-}
-
 lazy val build = TaskKey[Unit]("build", "Builds morganey and copies all generated files into the target folder.")
 
 build := {
-  val (_, coreFile) = packagedArtifact.in(Compile, packageBin).value
-  val (_, macroFile) = packagedArtifact.in(macros).in(Compile, packageBin).value
+  val (_, coreFile)   = packagedArtifact.in(Compile, packageBin).value
+  val (_, macroFile)  = packagedArtifact.in(macros).in(Compile, packageBin).value
   val (_, kernelFile) = packagedArtifact.in(kernel).in(Compile, packageBin).value
-  val _ = packStdLib.value
+  val (_, stdlibFile) = packagedArtifact.in(stdlib).in(Compile, packageBin).value
 
   val targetDir = coreFile.getParentFile()
 
   IO.copyFile(macroFile, targetDir / macroFile.getName())
   IO.copyFile(kernelFile, targetDir / kernelFile.getName())
+  IO.copyFile(stdlibFile, targetDir / stdlibFile.getName())  
 }
 
 addCommandAlias("funtests", ";assembly;funtests/test")
@@ -92,12 +71,12 @@ lazy val morganey = (project in file("."))
     mainClass := Some("me.rexim.morganey.Main"),
     initialCommands in console := "import me.rexim.morganey.meta._"
   )
-  .settings(addArtifact(stdLibArtifact, packStdLib).settings:_*)
   .aggregate(macros, kernel)
   .dependsOn(
     macros % dependencySettings,
     kernel % dependencySettings,
-    hiddenArgs
+    hiddenArgs,
+    stdlib
   )
 
 lazy val macros = (project in file("macros"))
@@ -112,6 +91,10 @@ lazy val kernel = (project in file("kernel"))
   .settings(commonSettings :_*)
   .settings(kernelSettings :_*)
   .dependsOn(hiddenArgs)
+
+lazy val stdlib = (project in file("std"))
+  .settings(commonSettings :_*)
+  .settings(stdlibSettings :_*)
 
 lazy val funtests = (project in file("funtests"))
   .settings(commonSettings :_*)
