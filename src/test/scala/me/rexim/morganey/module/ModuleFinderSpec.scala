@@ -5,7 +5,7 @@ import java.io.File
 
 class ModuleFinderSpec extends FlatSpec with Matchers {
   val moduleFinder =
-    new ModuleFinder(List(new File("./std/")))
+    new ModuleFinder(List(new File("./std/src/main/resources/std/")))
 
   "Module finder" should "find high-level modules in the modules path" in {
     moduleFinder.findModuleFile("prelude").map(_.getName()) should be (Some("prelude.mgn"))

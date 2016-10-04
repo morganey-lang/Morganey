@@ -11,7 +11,7 @@ import org.scalatest._
 import scala.util.Success
 
 class MorganeyExecutorSpecs extends FlatSpec with Matchers {
-  val moduleFinder = new ModuleFinder(List(new File("./std/")))
+  val moduleFinder = new ModuleFinder(List(new File("./std/src/main/resources/std/")))
 
   val programBindings = List(
     MorganeyBinding(m"x", m"\\x. x"),
