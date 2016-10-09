@@ -55,7 +55,7 @@ build := {
 
   IO.copyFile(macroFile, targetDir / macroFile.getName())
   IO.copyFile(kernelFile, targetDir / kernelFile.getName())
-  IO.copyFile(stdlibFile, targetDir / stdlibFile.getName())  
+  IO.copyFile(stdlibFile, targetDir / stdlibFile.getName())
 }
 
 addCommandAlias("funtests", ";assembly;funtests/test")
