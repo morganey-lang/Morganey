@@ -4,6 +4,7 @@ import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar, LambdaTerm}
 import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.church.ChurchNumberConverter.{decodeNumber, encodeNumber}
 import me.rexim.morganey.util._
+import hiddenargs._
 
 object ChurchPairConverter {
   // (λ z . ((z x) y))
@@ -35,19 +36,15 @@ object ChurchPairConverter {
     }
   }
 
-  def decodeList(list: LambdaTerm): Option[List[LambdaTerm]] = {
-    def decodeListAgg(list: LambdaTerm, agg: List[LambdaTerm]): Option[List[LambdaTerm]] = {
-      decodeNumber(list) match {
-        case Some(0) => Some(agg)
-        case _ => decodePair(list) match {
-          case Some((first, second)) => decodeListAgg(second, first :: agg)
-          case _ => None
-        }
+  @hiddenargs
+  def decodeList(list: LambdaTerm, @hidden acc: List[LambdaTerm] = List()): Option[List[LambdaTerm]] =
+    decodeNumber(list) match {
+      case Some(0) => Some(acc.reverse)
+      case _ => decodePair(list) match {
+        case Some((first, second)) => decodeList(second, first :: acc)
+        case _ => None
       }
     }
-
-    decodeListAgg(list, List()).map(_.reverse)
-  }
 
   def encodeList(xs: List[LambdaTerm]): LambdaTerm =
     xs.foldRight(encodeNumber(0)) { case (a, term) => encodePair((a, term)) }
