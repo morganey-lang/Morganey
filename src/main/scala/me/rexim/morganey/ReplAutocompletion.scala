@@ -56,7 +56,7 @@ object ReplAutocompletion {
     def findAllModulesIn(path: String): List[(File, File)] =
       Try(
         moduleFinder.paths.toStream
-          .map { f => (f, new File(f, loadPathToRelativeFile(path))) }
+          .map { f => (f, new File(f, modulePathToRelativeFile(path))) }
           .filter { case (_, f) => f.exists() }
           .flatMap { case (root, f) => f.listFiles() map (root -> _) }
           .filter { case (_, f) => validMorganeyElement(f) }
