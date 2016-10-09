@@ -18,4 +18,6 @@ class ModuleFinderSpec extends FlatSpec with Matchers {
   "Module finder" should "not find unexisting modules" in {
     moduleFinder.findModuleFile("khooy") should be (None)
   }
+
+  // TODO: add specs for ModuleFinder.findModuleInClasspath
 }
