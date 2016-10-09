@@ -14,7 +14,8 @@ lazy val commonSettings = Seq(
   ),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   test in assembly := {},
-  assemblyJarName := "morganey.jar"
+  buildInfoKeys := Seq[BuildInfoKey](version),
+  buildInfoPackage := "me.rexim.morganey"
 )
 
 lazy val macroSettings = Seq(
@@ -66,6 +67,7 @@ addCommandAlias("retest", ";rebuild;test")
  */
 
 lazy val morganey = (project in file("."))
+  .enablePlugins(BuildInfoPlugin)
   .settings(commonSettings :_*)
   .settings(
     mainClass := Some("me.rexim.morganey.Main"),
@@ -97,6 +99,7 @@ lazy val stdlib = (project in file("std"))
   .settings(stdlibSettings :_*)
 
 lazy val funtests = (project in file("funtests"))
+  .enablePlugins(BuildInfoPlugin)
   .settings(commonSettings :_*)
   .settings(funtestsSettings :_*)
   .dependsOn(hiddenArgs)
