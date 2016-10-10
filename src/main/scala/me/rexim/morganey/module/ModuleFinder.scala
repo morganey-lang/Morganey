@@ -1,13 +1,14 @@
 package me.rexim.morganey.module
 
 import java.io.File
+import java.net.URL
 
 import ModuleFinder._
 
 object ModuleFinder {
   val fileExtension = "mgn"
 
-  def loadPathToRelativeFile(modulePath: String): String =
+  def modulePathToRelativeFile(modulePath: String): String =
     modulePath.replace('.', File.separatorChar)
 
   def relativeFileToLoadPath(relativeFile: String): String =
@@ -20,7 +21,13 @@ object ModuleFinder {
 class ModuleFinder(val paths: List[File]) {
   def findModuleFile(modulePath: String): Option[File] = {
     paths.toStream
-      .map(new File(_, s"${loadPathToRelativeFile(modulePath)}.$fileExtension"))
+      .map(new File(_, s"${modulePathToRelativeFile(modulePath)}.$fileExtension"))
       .find(_.isFile())
+  }
+
+  def findModuleInClasspath(classLoader: ClassLoader, modulePath: String): Option[URL] = {
+    val resourcePath = modulePathToRelativeFile(modulePath)
+    val resourceUrl = classLoader.getResource(resourcePath)
+    Option(resourceUrl)
   }
 }
