@@ -14,7 +14,7 @@ lazy val commonSettings = Seq(
   ),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   test in assembly := {},
-  assemblyJarName := "morganey.jar"
+  assemblyJarName := "morganey.jar",
   bintrayOrganization := Some("morganey-lang"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 )
