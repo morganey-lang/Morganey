@@ -1,4 +1,4 @@
-load math.arithmetic
+load std.math.arithmetic
 
 true := \a.b. a
 false := \a.b. b
