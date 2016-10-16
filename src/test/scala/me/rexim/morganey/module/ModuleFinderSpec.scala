@@ -19,5 +19,5 @@ class ModuleFinderSpec extends FlatSpec with Matchers {
     moduleFinder.findModuleFile("khooy") should be (None)
   }
 
-  // TODO: add specs for ModuleFinder.findModuleInClasspath
+  // TODO(#256): add specs for ModuleFinder.findModuleInClasspath
 }
