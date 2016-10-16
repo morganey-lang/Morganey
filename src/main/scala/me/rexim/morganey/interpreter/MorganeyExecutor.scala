@@ -11,7 +11,7 @@ import me.rexim.morganey.ast.error.{BindingLoop, NonExistingBinding}
 
 object MorganeyExecutor {
 
-  // TODO: use classpath modules in MorganeyExecutor
+  // TODO(#258): use classpath modules in MorganeyExecutor
 
   def interpretNode(node: MorganeyNode,
                     moduleFinder: ModuleFinder,

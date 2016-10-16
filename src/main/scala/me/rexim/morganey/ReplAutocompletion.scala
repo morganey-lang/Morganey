@@ -14,7 +14,7 @@ import scala.util.Try
 
 object ReplAutocompletion {
 
-  // TODO: use classpath modules in ReplAutocompletion
+  // TODO(#257): use classpath modules in ReplAutocompletion
 
   def complete(buffer: String, context: ReplContext): List[String] =
     complete(buffer, buffer.length, context)

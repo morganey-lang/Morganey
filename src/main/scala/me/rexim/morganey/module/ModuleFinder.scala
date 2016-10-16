@@ -25,8 +25,9 @@ class ModuleFinder(val paths: List[File]) {
       .find(_.isFile())
   }
 
-  def findModuleInClasspath(classLoader: ClassLoader, modulePath: String): Option[URL] = {
-    val resourcePath = modulePathToRelativeFile(modulePath)
+  def findModuleInClasspath(modulePath: String): Option[URL] = {
+    val classLoader = this.getClass.getClassLoader
+    val resourcePath = s"${modulePathToRelativeFile(modulePath)}.$fileExtension"
     val resourceUrl = classLoader.getResource(resourcePath)
     Option(resourceUrl)
   }
