@@ -19,5 +19,8 @@ class ModuleFinderSpec extends FlatSpec with Matchers {
     moduleFinder.findModuleFile("khooy") should be (None)
   }
 
-  // TODO(#256): add specs for ModuleFinder.findModuleInClasspath
+  "Module finder" should "find modules in JVM classpath" in {
+    val url = moduleFinder.findModuleInClasspath("std.prelude")
+    assert(url.isDefined, "std.prelude was not found in classpath")
+  }
 }
