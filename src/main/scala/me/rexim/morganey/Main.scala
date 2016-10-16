@@ -70,7 +70,7 @@ object Main extends SignalHandler {
   }
 
   def executeProgram(context: ReplContext, programFile: String) = {
-    import MorganeyExecutor._
+    import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
 
     val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder, Set())

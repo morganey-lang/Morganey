@@ -10,7 +10,7 @@ import org.scalatest._
 
 import scala.util.Success
 
-class MorganeyExecutorSpecs extends FlatSpec with Matchers {
+class MorganeyCompilerSpec extends FlatSpec with Matchers {
   val moduleFinder = new ModuleFinder(List(new File("./std/src/main/resources/std/")))
 
   val programBindings = List(
@@ -27,21 +27,21 @@ class MorganeyExecutorSpecs extends FlatSpec with Matchers {
 
   val programInput = "khooy".toStream
 
-  "Executor" should "compile a correct program to a reducible term" in {
+  "Compiler" should "compile a correct program to a reducible term" in {
     val Right(expectedProgram) = programBody.addBindings(MorganeyBinding(LambdaVar("input"), LambdaInput(() => programInput)) :: programBindings)
-    MorganeyExecutor.compileProgram(() => programInput)(rawProgram) should be (Success(expectedProgram))
+    MorganeyCompiler.compileProgram(() => programInput)(rawProgram) should be (Success(expectedProgram))
   }
 
-  "Executor" should "fail an incorrect program" in {
-    MorganeyExecutor.compileProgram(() =>programInput)(programBindings).isFailure should be (true)
+  "Compiler" should "fail an incorrect program" in {
+    MorganeyCompiler.compileProgram(() =>programInput)(programBindings).isFailure should be (true)
   }
 
-  "Executor" should "not interpret empty loading nodes and just ignore them" in {
-    MorganeyExecutor.interpretNode(MorganeyLoading(None), moduleFinder, Set()) should be (Success(List()))
+  "Compiler" should "not interpret empty loading nodes and just ignore them" in {
+    MorganeyCompiler.interpretNode(MorganeyLoading(None), moduleFinder, Set()) should be (Success(List()))
   }
 
-  "Executor" should "should returns bindings as is during their interpretation as a node" in {
+  "Compiler" should "should returns bindings as is during their interpretation as a node" in {
     val binding = MorganeyBinding(lvar("khooy"), lvar("khooy"))
-    MorganeyExecutor.interpretNode(binding, moduleFinder, Set()) should be (Success(List(binding)))
+    MorganeyCompiler.interpretNode(binding, moduleFinder, Set()) should be (Success(List(binding)))
   }
 }

@@ -35,7 +35,7 @@ object MorganeyRepl {
   def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
     node match {
       case MorganeyLoading(Some(module)) => {
-        MorganeyExecutor.loadModule(module, context.moduleFinder, Set()) match {
+        MorganeyCompiler.loadModule(module, context.moduleFinder, Set()) match {
           case Success(bindings) => Computation(ReplResult(context.addBindings(bindings), None))
           case Failure(e) => Computation.failed(e)
         }

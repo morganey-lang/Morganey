@@ -9,9 +9,9 @@ import java.io.Reader
 
 import me.rexim.morganey.ast.error.{BindingLoop, NonExistingBinding}
 
-object MorganeyExecutor {
+object MorganeyCompiler {
 
-  // TODO(#258): use classpath modules in MorganeyExecutor
+  // TODO(#258): use classpath modules in MorganeyCompiler
 
   def interpretNode(node: MorganeyNode,
                     moduleFinder: ModuleFinder,
