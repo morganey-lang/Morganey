@@ -50,3 +50,7 @@ second := \n.n (\a.b.b)
 cons := pair
 head := first
 tail := second
+
+/* Takes `n` first elements from list `xs`
+ */
+take := Y (\rec.n.xs. (isnil xs) [] ((gt n 0) (cons (head xs) (rec (pred n) (tail xs))) [])) 
