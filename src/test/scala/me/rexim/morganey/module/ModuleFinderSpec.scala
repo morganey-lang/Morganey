@@ -5,14 +5,14 @@ import java.io.File
 
 class ModuleFinderSpec extends FlatSpec with Matchers {
   val moduleFinder =
-    new ModuleFinder(List(new File("./std/src/main/resources/std/")))
+    new ModuleFinder(List(new File("./std/src/main/resources/")))
 
   "Module finder" should "find high-level modules in the modules path" in {
-    moduleFinder.findModuleFile("prelude").map(_.getName()) should be (Some("prelude.mgn"))
+    moduleFinder.findModuleFile("std.prelude").map(_.getName()) should be (Some("prelude.mgn"))
   }
 
   "Module finder" should "find nested modules in the modules path" in {
-    moduleFinder.findModuleFile("math.arithmetic").map(_.getName()) should be (Some("arithmetic.mgn"))
+    moduleFinder.findModuleFile("std.math.arithmetic").map(_.getName()) should be (Some("arithmetic.mgn"))
   }
 
   "Module finder" should "not find unexisting modules" in {

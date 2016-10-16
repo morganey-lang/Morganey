@@ -85,7 +85,7 @@ object Main extends SignalHandler {
 
   def main(args: Array[String]) = {
     val context =
-      ReplContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/src/main/resources/std/"))))
+      ReplContext(List[MorganeyBinding](), new ModuleFinder(List(new File("./std/src/main/resources/"))))
 
     args.toList match {
       case Nil => startRepl(context)
