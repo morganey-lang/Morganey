@@ -3,6 +3,7 @@ package me.rexim.morganey
 import java.io.{File, FileInputStream, InputStreamReader, Reader}
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.regex.Pattern
+import java.net.URL
 
 import scala.util._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
@@ -62,8 +63,19 @@ package object util {
     inputStream.map(new InputStreamReader(_, UTF_8))
   }
 
+  def reader(url: URL): Try[Reader] = {
+    Try(new InputStreamReader(url.openStream()))
+  }
+
   def withReader[T](path: String)(f: Reader => Try[T]): Try[T] =
     withReader(new File(path))(f)
+
+  def withReader[T](url: URL)(f: Reader => Try[T]): Try[T] =
+    reader(url).flatMap { reader =>
+      val result = f(reader)
+      reader.close()
+      result
+    }
 
   def withReader[T](file: File)(f: Reader => Try[T]): Try[T] =
     reader(file).flatMap { reader =>

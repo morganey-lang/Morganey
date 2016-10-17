@@ -1,4 +1,4 @@
-load list
+load std.list
 
 id := \x. x
 flip := \f.x.y. f y x

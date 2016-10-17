@@ -9,10 +9,7 @@ import java.io.Reader
 
 import me.rexim.morganey.ast.error.{BindingLoop, NonExistingBinding}
 
-object MorganeyExecutor {
-
-  // TODO(#258): use classpath modules in MorganeyExecutor
-
+object MorganeyCompiler {
   def interpretNode(node: MorganeyNode,
                     moduleFinder: ModuleFinder,
                     loadedModules: Set[String]): Try[List[MorganeyBinding]] =
@@ -38,7 +35,7 @@ object MorganeyExecutor {
       Success(List())
     } else {
       moduleFinder
-        .findModuleFile(modulePath)
+        .findModuleInClasspath(modulePath)
         .map(Success(_))
         .getOrElse(moduleNotFound)
         .flatMap(withReader(_)(loadModuleFromReader(_, moduleFinder, loadedModules + modulePath)))

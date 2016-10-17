@@ -1,6 +1,6 @@
-load functions
-load logic
-load math.arithmetic
+load std.functions
+load std.logic
+load std.math.arithmetic
 
 nil := \a.b. b
 isnil := \l.l (\h.t.d. (\a.b.b)) (\a.b.a)

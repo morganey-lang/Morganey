@@ -1,3 +1,3 @@
-load prelude
+load std.prelude
 
 main := Y (\fib.n.a.b. (iszero n) 0 (pair a (fib (pred n) b (plus a b)))) 15 0 1
