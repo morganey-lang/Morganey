@@ -3,8 +3,8 @@
 
 # Morganey [![Status Ventis](https://img.shields.io/badge/status-ventis-yellow.svg)](https://github.com/ForNeVeR/andivionian-status-classifier)
 
-[Lambda Calculus][wiki-lambda-calculus] interpreted based programming language
-that recognizes Church encoded structures.
+[Lambda Calculus][wiki-lambda-calculus] based, interpreted programming
+language that recognizes Church encoded structures.
 
 ## Usage ##
 
