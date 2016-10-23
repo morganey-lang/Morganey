@@ -1,10 +1,9 @@
 package me.rexim.morganey.church
 
-import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaVar, LambdaTerm}
-import me.rexim.morganey.ast.LambdaTerm
-import me.rexim.morganey.church.ChurchNumberConverter.{decodeNumber, encodeNumber}
-import me.rexim.morganey.util._
 import hiddenargs._
+import me.rexim.morganey.ast.{LambdaApp, LambdaFunc, LambdaTerm, LambdaVar}
+import me.rexim.morganey.church.ChurchNumberConverter.{decodeNumber, encodeNumber}
+import me.rexim.morganey.monad._
 
 object ChurchPairConverter {
   // (λ z . ((z x) y))

@@ -1,6 +1,6 @@
 package me.rexim.morganey.util
 
-import me.rexim.morganey.util._
+import me.rexim.morganey.monad._
 import org.scalatest._
 
 class UtilSpec extends FlatSpec with Matchers {
