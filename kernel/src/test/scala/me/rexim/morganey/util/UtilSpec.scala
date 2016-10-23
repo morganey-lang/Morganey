@@ -26,20 +26,5 @@ class UtilSpec extends FlatSpec with Matchers {
     matcher2                      should be (None)
   }
 
-  "The unquoteString function" should "remove escape sequences parsed from the parser" in {
-    unquoteString("")        should be ("")
-    unquoteString(" ")       should be (" ")
-    unquoteString("test")    should be ("test")
-    unquoteString("\\b")     should be ("\b")
-    unquoteString("\\f")     should be ("\f")
-    unquoteString("\\n")     should be ("\n")
-    unquoteString("\\r")     should be ("\r")
-    unquoteString("\\t")     should be ("\t")
-    unquoteString("\\\"")    should be ("\"")
-    unquoteString("\\u0020") should be ("\u0020")
-    unquoteString("\\\\")    should be ("\\")
-
-    unquoteString("\\\"Hello, World!\\n\\\"") should be ("\"Hello, World!\n\"")
-  }
 
 }

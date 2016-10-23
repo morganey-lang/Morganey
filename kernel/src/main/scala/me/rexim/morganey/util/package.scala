@@ -1,15 +1,13 @@
 package me.rexim.morganey
 
 import java.io.{File, FileInputStream, InputStreamReader, Reader}
+import java.net.URL
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.regex.Pattern
-import java.net.URL
+
+import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
 
 import scala.util._
-import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
-import hiddenargs._
-
-import scala.annotation.tailrec
 
 package object util {
 
@@ -19,23 +17,6 @@ package object util {
       s: String => pattern.matcher(s).matches()
     }.toOption
 
-  @hiddenargs
-  @tailrec
-  def unquoteString(s: String, @hidden acc: String = ""): String =
-    if (s.isEmpty) acc else s(0) match {
-      case '"' => unquoteString(s.tail, acc)
-      case '\\' => s(1) match {
-        case 'b' => unquoteString(s.drop(2), acc + "\b")
-        case 'f' => unquoteString(s.drop(2), acc + "\f")
-        case 'n' => unquoteString(s.drop(2), acc + "\n")
-        case 'r' => unquoteString(s.drop(2), acc + "\r")
-        case 't' => unquoteString(s.drop(2), acc + "\t")
-        case '"' => unquoteString(s.drop(2), acc + "\"")
-        case 'u' => unquoteString(s.drop(6), acc + Integer.parseInt(s.slice(2, 6), 16).toChar.toString)
-        case c   => unquoteString(s.drop(2), acc + c.toString)
-      }
-      case c => unquoteString(s.tail, acc + c.toString)
-    }
 
   def reader(path: String): Try[Reader] = reader(new File(path))
 
