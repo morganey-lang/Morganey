@@ -6,7 +6,6 @@ build_script:
   - sbt clean compile
 test_script:
   - sbt test-only
-  # TODO(#231): funtests Windows support
   - sbt funtests
 cache:
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
