@@ -53,4 +53,9 @@ tail := second
 
 /* Takes `n` first elements from list `xs`
  */
-take := Y (\rec.n.xs. (isnil xs) [] ((gt n 0) (cons (head xs) (rec (pred n) (tail xs))) [])) 
+take := Y (\rec.n.xs. (isnil xs) [] ((gt n 0) (cons (head xs) (rec (pred n) (tail xs))) []))
+
+/* Applied to a predicate `p` and a list `xs`, returns the longest
+ * prefix (possibly empty) of `xs` of elements that satisfy `p`
+ */
+takeWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (cons (head xs) (rec p (tail xs))) []))
