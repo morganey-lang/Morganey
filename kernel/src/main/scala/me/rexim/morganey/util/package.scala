@@ -11,6 +11,7 @@ import scala.util._
 
 package object util {
 
+  // TODO(#276): move validRegex to Commands
   def validRegex(regex: String): Option[String => Boolean] =
     Try {
       val pattern = Pattern.compile(regex)
