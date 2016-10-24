@@ -52,6 +52,7 @@ package object util {
   implicit class ParserOps[T <: LambdaParser](parser: T) {
     def parseWith[R](input: InputSource, f: T => parser.Parser[R]): Try[R] = {
       val production = f(parser)
+      // TODO(#279): Move logic inside of ParseOps.parseWith to InputSource
       val result = input match {
         case StringSource(string) => parser.parseAll(production, string)
         case ReaderSource(reader) => parser.parseAll(production, reader)
