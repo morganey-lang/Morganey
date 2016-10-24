@@ -48,6 +48,7 @@ package object util {
       result
     }
 
+  // TODO(#278): Move ParseOps and InputSource closer to LambdaParser
   implicit class ParserOps[T <: LambdaParser](parser: T) {
     def parseWith[R](input: InputSource, f: T => parser.Parser[R]): Try[R] = {
       val production = f(parser)
