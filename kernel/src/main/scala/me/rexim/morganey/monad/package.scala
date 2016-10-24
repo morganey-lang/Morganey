@@ -8,9 +8,9 @@ package object monad {
     * otherwise the elements are collected in a 'Some'.
     */
   def sequence[T](lst: List[Option[T]]): Option[List[T]] =
-  lst.foldRight(Option(List.empty[T])) {
-    case (ele, acc) => acc.flatMap(lst => ele.map(_ :: lst))
-  }
+    lst.foldRight(Option(List.empty[T])) {
+      case (ele, acc) => acc.flatMap(lst => ele.map(_ :: lst))
+    }
 
   def sequence[T](lst: List[Try[T]]): Try[List[T]] =
     lst.foldRight(Try(List.empty[T])) {
