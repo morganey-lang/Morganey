@@ -3,7 +3,7 @@ package me.rexim.morganey.meta
 import me.rexim.morganey.ast.LambdaTerm
 import me.rexim.morganey.church.ChurchNumberConverter.{decodeNumber, decodeChar}
 import me.rexim.morganey.church.ChurchPairConverter.{decodeList, decodePair}
-import me.rexim.morganey.util.sequence
+import me.rexim.morganey.monad.sequence
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds

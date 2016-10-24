@@ -3,7 +3,7 @@ package me.rexim.morganey.ast
 import me.rexim.morganey.ast.error._
 import me.rexim.morganey.church.ChurchNumberConverter._
 import me.rexim.morganey.church.ChurchPairConverter._
-import me.rexim.morganey.util._
+import me.rexim.morganey.monad._
 import hiddenargs._
 
 import scala.annotation.tailrec

@@ -257,4 +257,19 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
     func.get        should be (lnested(List("a", "b", "c", "d"), body))
   }
 
+  "The unquoteString function" should "remove escape sequences parsed from the parser" in {
+    Language.unquoteString("")        should be ("")
+    Language.unquoteString(" ")       should be (" ")
+    Language.unquoteString("test")    should be ("test")
+    Language.unquoteString("\\b")     should be ("\b")
+    Language.unquoteString("\\f")     should be ("\f")
+    Language.unquoteString("\\n")     should be ("\n")
+    Language.unquoteString("\\r")     should be ("\r")
+    Language.unquoteString("\\t")     should be ("\t")
+    Language.unquoteString("\\\"")    should be ("\"")
+    Language.unquoteString("\\u0020") should be ("\u0020")
+    Language.unquoteString("\\\\")    should be ("\\")
+
+    Language.unquoteString("\\\"Hello, World!\\n\\\"") should be ("\"Hello, World!\n\"")
+  }
 }

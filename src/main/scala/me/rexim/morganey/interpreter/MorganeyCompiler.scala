@@ -4,6 +4,7 @@ import scala.util._
 import me.rexim.morganey.ast._
 import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
 import me.rexim.morganey.module._
+import me.rexim.morganey.monad._
 import me.rexim.morganey.util._
 import java.io.Reader
 
