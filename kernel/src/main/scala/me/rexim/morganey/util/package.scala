@@ -19,6 +19,7 @@ package object util {
     }.toOption
 
 
+  // TODO(#277): move reader stuff to me.rexim.morganey.reader
   def reader(path: String): Try[Reader] = reader(new File(path))
 
   def reader(file: File): Try[Reader] = {
