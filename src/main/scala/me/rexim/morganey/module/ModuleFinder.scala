@@ -11,6 +11,9 @@ object ModuleFinder {
   def modulePathToRelativeFile(modulePath: String): String =
     modulePath.replace('.', File.separatorChar)
 
+  def modulePathToRelativeURL(modulePath: String): String =
+    modulePath.replace('.', '/')
+
   def relativeFileToLoadPath(relativeFile: String): String =
     relativeFile.replace(File.separatorChar, '.')
 
@@ -27,7 +30,7 @@ class ModuleFinder(val paths: List[File]) {
 
   def findModuleInClasspath(modulePath: String): Option[URL] = {
     val classLoader = this.getClass.getClassLoader
-    val resourcePath = s"${modulePathToRelativeFile(modulePath)}.$fileExtension"
+    val resourcePath = s"${modulePathToRelativeURL(modulePath)}.$fileExtension"
     val resourceUrl = classLoader.getResource(resourcePath)
     Option(resourceUrl)
   }
