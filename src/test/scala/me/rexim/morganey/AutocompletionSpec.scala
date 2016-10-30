@@ -85,10 +85,13 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
 
   it should "autocomplete commands" in {
     def addColon(s: String): String = ":" + s
+    def commandToString(cmd: Commands.Command): String =
+      s":${cmd.name}" + (if (cmd.hasTermArgument) " " else "")
+    val allCommands = Commands.commands.values map commandToString
 
     autocomplete(":exi", 4, List())  should be (Set("exit") map addColon)
-    autocomplete(":unbi", 4, List()) should be (Set("unbind") map addColon)
-    autocomplete(":", 1, List())     should be (Commands.commands.keySet map addColon)
+    autocomplete(":unbi", 4, List()) should be (Set("unbind ") map addColon)
+    autocomplete(":", 1, List())     should be (allCommands.toSet)
   }
 
   it should "not remove a part of the text, which was typed in, during autocompletion" in {
