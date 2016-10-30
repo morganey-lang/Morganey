@@ -24,4 +24,12 @@ class SamplesFuntest extends FlatSpec with Matchers with MorganeyProcess {
 
     actualOutput should be (expectedOutput)
   }
+
+  "ohcE sample" should "print the user's input backwards" in {
+    val input = new ByteArrayInputStream("Hello".getBytes("UTF-8"))
+    val expectedOutput = s"""string: \"olleH\"${System.lineSeparator()}"""
+    val actualOutput = morganey("./docs/samples/04-ohce.mgn") #< input !!
+
+    actualOutput should be (expectedOutput)
+  }
 }
