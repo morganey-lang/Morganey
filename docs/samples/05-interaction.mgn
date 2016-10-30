@@ -6,5 +6,5 @@ isnumber := \x. and (le '0' x) (le x '9')
 
 isspace := eq ' '
 
-// TODO: fix hanging of the sample
+// TODO: fix hanging of the interactive sample
 main := plus (stringAsNumber (takeWhile isnumber testInput)) (stringAsNumber (dropWhile isspace (dropWhile isnumber testInput)))
