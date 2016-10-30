@@ -1,0 +1,34 @@
+/** Multiplies two numbers
+ *
+ * In Church Encoding numbers encoded like that:
+ * 0 := \f.x. x
+ * 1 := \f.x. f x
+ * 2 := \f.x. f (f x)
+ * 3 := \f.x. f (f (f x))
+ * ...
+ *
+ * Let's say we have two numbers 2 and 3, which look like this in Church Encoding:
+ * 2 := \f.x. f (f x)
+ * 3 := \f.x. f (f (f x))
+ *
+ * To multiply those numbers we have to "peel off" the outer lambda abstraction of one of them, by applying `f`:
+ * 3 f =>
+ * (\f.x. f (f (f x))) f =>
+ * \x. f (f (f x))
+ *
+ * Then we apply the result to another number:
+ * 2 (3 f) =>
+ * 2 (\x. f (f (f x))) =>
+ * (\f.x. f (f x)) (\x. f (f (f x)))
+ * \x.(\x.f (f (f x))) ((\x.f (f (f x))) x)
+ * \x.f (f (f ((\x.f (f (f x))) x)))
+ * \x.f (f (f (f (f (f x)))))
+ *
+ * And then we wrap the result back with the "peeled off" lambda abstraction:
+ * \f. 2 (3 f) =>
+ * \f.x.f (f (f (f (f (f x))))) =>
+ * 6
+ */
+mult := \m.n.f. m (n f)
+
+main := mult 2 3
