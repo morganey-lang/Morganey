@@ -8,4 +8,10 @@ class SamplesFuntest extends FlatSpec with Matchers with MorganeyProcess {
     val actualOutput = morganey("./docs/samples/01-hello-world.mgn").!!
     actualOutput should be (expectedOutput)
   }
+
+  "Multiplication sample" should "print the result of 2 * 3" in {
+    val expectedOutput = s"number: 6${System.lineSeparator()}"
+    val actualOutput = morganey("./docs/samples/02-multiplication.mgn").!!
+    actualOutput should be (expectedOutput)
+  }
 }
