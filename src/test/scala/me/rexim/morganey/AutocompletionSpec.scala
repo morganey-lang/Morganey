@@ -12,10 +12,14 @@ import org.scalatest._
 
 class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
 
-  def autocomplete(line: String, cursor: Int, knownNames: List[String]): Set[String] = {
+  private val goodModuleFinder = new ModuleFinder(List(new File("./src/test/resources/load-autocomplete/")))
+  private val badModuleFinder = new ModuleFinder(List(new File("./khooy/")))
+
+  def autocomplete(line: String, cursor: Int,
+                   knownNames: List[String],
+                   moduleFinder: ModuleFinder = goodModuleFinder): Set[String] = {
     val id = I(lvar("x"))
     val fakeBindings = knownNames.map(name => MorganeyBinding(lvar(name), id))
-    val moduleFinder = new ModuleFinder(List(new File("./src/test/resources/load-autocomplete/")))
     val context = ReplContext(fakeBindings, moduleFinder)
     ReplAutocompletion.complete(line, cursor, context).toSet
   }
@@ -98,4 +102,7 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     autocomplete("(is", 3, bindings)  should be (Set("(isa", "(isb"))
   }
 
+  it should "not fail autocompleting load statements if ModuleFinder contains non-existing path" in {
+    autocomplete("load ", 5, List(), badModuleFinder) should be (Set())
+  }
 }
