@@ -146,11 +146,17 @@ object ReplAutocompletion {
 
   private object CommandWithArg {
 
+    private def hasTermArgument(cmd: Command): Boolean =
+      cmd match {
+        case StringCommand(_, _) => false
+        case TermCommand(_, _)   => true
+      }
+
     def unapply(line: String): Option[(String, String)] = {
       val potentialCommand = parseCommand(line)
       potentialCommand flatMap { case (p, arg) =>
         commands.values find { cmd =>
-          cmd.name == p && cmd.hasTermArgument
+          cmd.name == p && hasTermArgument(cmd)
         } map (_.name -> arg)
       }
     }

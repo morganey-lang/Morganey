@@ -11,10 +11,12 @@ object Commands {
 
   type CommandTask = ReplContext => Computation[ReplResult[String]]
 
-  case class Command(
-    name: String,
-    task: String => ReplContext => ReplResult[String],
-    hasTermArgument: Boolean)
+  sealed trait Command {
+    def name: String
+    def task: String => ReplContext => ReplResult[String]
+  }
+  case class StringCommand(name: String, task: String => ReplContext => ReplResult[String]) extends Command
+  case class TermCommand(name: String, task: String => ReplContext => ReplResult[String]) extends Command
 
   private def command(f: ReplContext => ReplResult[String]): CommandTask =
     { context: ReplContext => Computation(f(context)) }
@@ -27,10 +29,10 @@ object Commands {
   val unbindCountThreshold = 10
 
   val commands =
-    Seq(
-      Command("exit",   exitREPL,       false),
-      Command("raw",    rawPrintTerm,   false),
-      Command("unbind", unbindBindings, true)
+    Seq[Command](
+      StringCommand("exit",   exitREPL),
+      StringCommand("raw",    rawPrintTerm),
+      TermCommand  ("unbind", unbindBindings)
     )
     .map(x => x.name -> x)
     .toMap
