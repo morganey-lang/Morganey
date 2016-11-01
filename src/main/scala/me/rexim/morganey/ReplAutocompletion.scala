@@ -136,8 +136,7 @@ object ReplAutocompletion {
       val potentialCommand = parseCommand(line).map(_._1)
       val matchingCommands = potentialCommand map { p =>
         commands.values collect {
-          case c if c.name startsWith p =>
-            if (c.hasTermArgument) c.name + " " else c.name
+          case c if c.name startsWith p => c.name
         }
       }
       matchingCommands.map(_.toList)
