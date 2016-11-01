@@ -28,7 +28,7 @@ package object util {
   }
 
   def reader(url: URL): Try[Reader] = {
-    Try(new InputStreamReader(url.openStream()))
+    Try(new InputStreamReader(url.openStream(), UTF_8))
   }
 
   def withReader[T](path: String)(f: Reader => Try[T]): Try[T] =
