@@ -1,0 +1,3 @@
+load std.prelude
+
+main := reverse input

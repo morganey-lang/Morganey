@@ -1,0 +1,6 @@
+/**
+ * `input` is a global lazy evaluating Church pair encoded list of Church encoded numbers. It represents stdin.
+ * To implement the echo program, the program that just prints back the user's input, you have to simply bind 
+ * `main` to `input`
+ */
+main := input

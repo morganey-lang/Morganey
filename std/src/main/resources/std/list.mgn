@@ -59,3 +59,5 @@ take := Y (\rec.n.xs. (isnil xs) [] ((gt n 0) (cons (head xs) (rec (pred n) (tai
  * prefix (possibly empty) of `xs` of elements that satisfy `p`
  */
 takeWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (cons (head xs) (rec p (tail xs))) []))
+
+dropWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (rec p (tail xs)) xs))
