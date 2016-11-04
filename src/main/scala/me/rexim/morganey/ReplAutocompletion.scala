@@ -25,8 +25,11 @@ object ReplAutocompletion {
     lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames, cursor)
 
     beforeCursor match {
+      // if a command was (fully) typed in and requires a term as an argument
+      case CommandWithArg(cmd, arg)          =>
+        knownVariableNames filter (_ startsWith arg) map (b => s":$cmd $b")
       // if a command was typed in
-      case IsCommand(cmds)                   => cmds map (":" + _)
+      case SimpleCommand(cmds)               => cmds map (c => s":$c")
       // if a load statement was typed in (potential partially)
       case LoadStatement(parts, endsWithDot) =>
         val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot, context)
@@ -127,14 +130,30 @@ object ReplAutocompletion {
     }
   }
 
-  private object IsCommand {
+  private object SimpleCommand {
 
     def unapply(line: String): Option[List[String]] = {
       val potentialCommand = parseCommand(line).map(_._1)
       val matchingCommands = potentialCommand map { p =>
-        commands.keySet filter (_ startsWith p)
+        commands.values collect {
+          case c if c.name startsWith p => c.name
+        }
       }
       matchingCommands.map(_.toList)
+    }
+
+  }
+
+  private object CommandWithArg {
+
+    def unapply(line: String): Option[(String, String)] = {
+      val potentialCommand = parseCommand(line)
+      potentialCommand flatMap { case (p, arg) =>
+        commands.values find {
+          case StringCommand(_, _)  => false
+          case TermCommand(name, _) => name == p
+        } map (_.name -> arg)
+      }
     }
 
   }

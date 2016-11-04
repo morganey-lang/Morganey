@@ -9,12 +9,19 @@ import scala.util.{Failure, Success}
 
 object Commands {
 
-  final type Command = ReplContext => Computation[ReplResult[String]]
+  type CommandTask = ReplContext => Computation[ReplResult[String]]
 
-  private def command(f: ReplContext => ReplResult[String]): Command =
+  sealed trait Command {
+    def name: String
+    def task: String => ReplContext => ReplResult[String]
+  }
+  case class StringCommand(name: String, task: String => ReplContext => ReplResult[String]) extends Command
+  case class TermCommand(name: String, task: String => ReplContext => ReplResult[String]) extends Command
+
+  private def command(f: ReplContext => ReplResult[String]): CommandTask =
     { context: ReplContext => Computation(f(context)) }
 
-  private def unknownCommand(command: String): Command =
+  private def unknownCommand(command: String): CommandTask =
     { context: ReplContext => Computation.failed(new RuntimeException(s"Unknown command '$command'!")) }
 
   val commandPattern  = ":([a-zA-Z]*)".r
@@ -22,11 +29,13 @@ object Commands {
   val unbindCountThreshold = 10
 
   val commands =
-    Map[String, String => ReplContext => ReplResult[String]](
-      "exit"   -> exitREPL,
-      "raw"    -> rawPrintTerm,
-      "unbind" -> unbindBindings
+    Seq[Command](
+      StringCommand("exit",   exitREPL),
+      StringCommand("raw",    rawPrintTerm),
+      TermCommand  ("unbind", unbindBindings)
     )
+    .map(x => x.name -> x)
+    .toMap
 
   def parseCommand(line: String): Option[(String, String)] =
     line match {
@@ -35,9 +44,9 @@ object Commands {
       case _                          => None
     }
 
-  def unapply(line: String): Option[Command] =
+  def unapply(line: String): Option[CommandTask] =
     parseCommand(line) map {
-      case (cmd, args) if commands contains cmd => command(commands(cmd)(args.trim))
+      case (cmd, args) if commands contains cmd => command(commands(cmd).task(args.trim))
       case (cmd, _)                             => unknownCommand(cmd)
     }
 
@@ -60,7 +69,7 @@ object Commands {
       case Some(matcher) =>
         val (newContext, removedBindings) = context.removeBindings(b => !matcher(b.variable.name))
 
-        val removed = removedBindings.map(_.variable.name)
+        val removed = removedBindings.map(_.variable.name).distinct
         val message = removed match {
           case Nil       => "No bindings were removed!"
           case hd :: Nil => s"Binding '$hd' was removed!"
