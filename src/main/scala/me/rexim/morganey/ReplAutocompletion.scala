@@ -52,7 +52,7 @@ object ReplAutocompletion {
       f.isDirectory || isMorganeyModule(f)
 
     def topLevelDefinitions() =
-      moduleFinder.paths.flatMap(_.listFiles).filter(validMorganeyElement)
+      moduleFinder.paths.flatMap(path => Option(path.listFiles).toList.flatten).filter(validMorganeyElement)
 
     // List(root-file-of-module-path, module-file or directory)
     def findAllModulesIn(path: String): List[(File, File)] =
