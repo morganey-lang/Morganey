@@ -1,1 +1,1 @@
-Y := \f. (\x. f (x x)) (\x. f (x x))
+def Y := \f. (\x. f (x x)) (\x. f (x x))

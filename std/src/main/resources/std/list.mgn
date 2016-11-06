@@ -2,62 +2,62 @@ load std.functions
 load std.logic
 load std.math.arithmetic
 
-nil := \a.b. b
-isnil := \l.l (\h.t.d. (\a.b.b)) (\a.b.a)
+def nil := \a.b. b
+def isnil := \l.l (\h.t.d. (\a.b.b)) (\a.b.a)
 
 /* Reverses the list `xs`
  */
-reverse := \xs. Y (\reverseRec.xs.acc. (isnil xs) acc (reverseRec (tail xs) (cons (head xs) acc))) xs []
+def reverse := \xs. Y (\reverseRec.xs.acc. (isnil xs) acc (reverseRec (tail xs) (cons (head xs) acc))) xs []
 
 /* Range from `start` to `next`, with a step-size of `1`
  * example: range 1 5 = [1,2,3,4,5]
  * require: start <= end
  */
-range := \start.end. rangeWithStep start 1 end
+def range := \start.end. rangeWithStep start 1 end
 
 /* Range from `start` to `next`, with a step-size of `(next - start)`
  * example: rangeWithNext 1 3 10 = [1,3,5,7,9]
  * require: start <= end
  */
-rangeWithNext := \start.next.end. rangeWithStep start (minus next start) end
+def rangeWithNext := \start.next.end. rangeWithStep start (minus next start) end
 
 /* Range from `start` to `next`
  * example: rangeWithStep 5 3 15 = [5,8,11,14]
  * require: start <= end
  */
-rangeWithStep := Y (\rec.start.step.end. (le start end) (cons start (rec (plus start step) step end)) nil)
+def rangeWithStep := Y (\rec.start.step.end. (le start end) (cons start (rec (plus start step) step end)) nil)
 
 /* Maps function `f` over the elements of list `xs`
  */
-map := \f.xs. Y (\mapRec.xs. (isnil xs) [] (cons (f (head xs)) (mapRec (tail xs)))) xs
+def map := \f.xs. Y (\mapRec.xs. (isnil xs) [] (cons (f (head xs)) (mapRec (tail xs)))) xs
 
 /* Creates a list containing `n` times `x`
  */
-replicate := \n.x. Y (\replicateRec.i. (lt i n) (cons x (replicateRec (succ i))) []) 0
+def replicate := \n.x. Y (\replicateRec.i. (lt i n) (cons x (replicateRec (succ i))) []) 0
 
-foldl := \op.zero.xs. Y (\foldlRec.xs.acc. (isnil xs) acc (foldlRec (tail xs) (op acc (head xs)))) xs zero
+def foldl := \op.zero.xs. Y (\foldlRec.xs.acc. (isnil xs) acc (foldlRec (tail xs) (op acc (head xs)))) xs zero
 
-foldr := \op.zero.xs. foldl (\a.b. op b a) zero (reverse xs)
+def foldr := \op.zero.xs. foldl (\a.b. op b a) zero (reverse xs)
 
-sum := \xs. foldl plus 0 xs
+def sum := \xs. foldl plus 0 xs
 
-last := \xs. foldl (\a.b.b) [] xs
+def last := \xs. foldl (\a.b.b) [] xs
 
-pair := \x.y.z. z x y
-first := \n.n (\a.b.a)
-second := \n.n (\a.b.b)
+def pair := \x.y.z. z x y
+def first := \n.n (\a.b.a)
+def second := \n.n (\a.b.b)
 
-cons := pair
-head := first
-tail := second
+def cons := pair
+def head := first
+def tail := second
 
 /* Takes `n` first elements from list `xs`
  */
-take := Y (\rec.n.xs. (isnil xs) [] ((gt n 0) (cons (head xs) (rec (pred n) (tail xs))) []))
+def take := Y (\rec.n.xs. (isnil xs) [] ((gt n 0) (cons (head xs) (rec (pred n) (tail xs))) []))
 
 /* Applied to a predicate `p` and a list `xs`, returns the longest
  * prefix (possibly empty) of `xs` of elements that satisfy `p`
  */
-takeWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (cons (head xs) (rec p (tail xs))) []))
+def takeWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (cons (head xs) (rec p (tail xs))) []))
 
-dropWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (rec p (tail xs)) xs))
+def dropWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (rec p (tail xs)) xs))

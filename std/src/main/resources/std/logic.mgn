@@ -1,31 +1,31 @@
 load std.math.arithmetic
 
-true := \a.b. a
-false := \a.b. b
+def true := \a.b. a
+def false := \a.b. b
 
-if := \e.t.f. e t f
-else := \a.a
+def if := \e.t.f. e t f
+def else := \a.a
 
-and := \p.q. p q p
-or  := \p.q. p p p
-not := \p. p false true
+def and := \p.q. p q p
+def or  := \p.q. p p p
+def not := \p. p false true
 
-iszero := \n. n (\x. false) true
+def iszero := \n. n (\x. false) true
 
 // less or equals
-le := \m.n. iszero (minus m n)
+def le := \m.n. iszero (minus m n)
 
 // less than
-lt := \m.n. and (le m n) (not (eq m n))
+def lt := \m.n. and (le m n) (not (eq m n))
 
 // greater or equals
-ge := \m.n. le n m
+def ge := \m.n. le n m
 
 // greater than
-gt := \m.n. and (ge m n) (not (eq m n))
+def gt := \m.n. and (ge m n) (not (eq m n))
 
 // equals
-eq := \m.n. and (le m n) (le n m)
+def eq := \m.n. and (le m n) (le n m)
 
 // not equals
-ne := \m.n. not (eq m n)
+def ne := \m.n. not (eq m n)
