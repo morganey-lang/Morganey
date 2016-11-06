@@ -3,4 +3,4 @@
  * To implement the echo program, the program that just prints back the user's input, you have to simply bind 
  * `main` to `input`
  */
-main := input
+def main := input
