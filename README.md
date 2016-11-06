@@ -81,7 +81,7 @@ After that find the uberjar at `target/scala-2.11/morganey.jar`
              | <variable>
              | "(" <term> "," <term> ")"
              | "(" <term> ")"
-    <binding> ::= <variable> ":=" <term>
+    <binding> ::= "def" <variable> ":=" <term>
     <loading> ::= "load" <module-path>
     <module-path> := [a-zA-Z][a-zA-Z0-9.]*
 
