@@ -89,7 +89,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   /* ============================== Core lambda terms =============================== */
 
   def variable: Parser[LambdaVar] =
-    identifier.r ^^ { LambdaVar }
+    not(keywordParser) ~> identifier.r ^^ { LambdaVar }
 
   def func: Parser[LambdaFunc] =
     lambda ~> rep1(variable <~ abstractionDot) ~ term ^^ {
@@ -133,5 +133,12 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
 
   private def brackets[T](p: Parser[T]): Parser[T] =
     leftBracket ~> p <~ rightBracket
+
+  private def keywordParser: Parser[String] =
+    /* Allow keywords as prefix of identifiers,
+     * but disallow keywords used as identifier.
+     * see: http://stackoverflow.com/a/3770843
+     */
+    keywords.map(k => (k + "\\b").r).map(regex).reduceLeft(_ | _)
 
 }
