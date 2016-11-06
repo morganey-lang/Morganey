@@ -32,6 +32,12 @@ object Language {
 
   val loadKeyword        = "load"
 
+  val defKeyword         = "def"
+
+  val keywords           = Seq(
+    loadKeyword,
+    defKeyword)
+
   val bindingAssign      = ":="
 
   val abstractionDot     = "."
@@ -39,9 +45,7 @@ object Language {
   val comma              = ","
 
   /* comment-regex taken from: http://stackoverflow.com/a/5954831 */
-  val whiteSpacePattern  = """([ \t]|//.*|(?m)/\*(\*(?!/)|[^*]|[\n\r])*\*/)+"""
-
-  val lineBreak          = "[\n\r]"
+  val whiteSpacePattern  = """(\s|//.*|(?m)/\*(\*(?!/)|[^*])*\*/)+"""
 
   val leftParenthesis    = "("
 
