@@ -96,7 +96,7 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
       """
         |load foo
         |load bar
-        |x := 1
+        |def x := 1
       """.stripMargin
 
     val invalidModule =
@@ -104,7 +104,7 @@ class ParserSpec extends FlatSpec with Matchers with TestTerms {
         |load foo
         |load bar
         |(x (y z))
-        |x := 1
+        |def x := 1
       """.stripMargin
 
     LambdaParser.parseAll(LambdaParser.module, validModule).successful should be (true)
