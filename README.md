@@ -15,7 +15,9 @@ Before doing anything useful with Morganey you need to install
 
 For language samples and examples please visit [docs/samples/][samples-dir] directory. To execute a sample run:
 
-    $ sbt "run <path-to-sample>"
+```console
+$ sbt "run <path-to-sample>"
+```
 
 from the root of the source code directory. For example, to run the 15 first fibonacci numbers sample run:
 
