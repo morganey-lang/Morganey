@@ -29,6 +29,6 @@
  * \f.x.f (f (f (f (f (f x))))) =>
  * 6
  */
-mult := \m.n.f. m (n f)
+def mult := \m.n.f. m (n f)
 
-main := mult 2 3
+def main := mult 2 3

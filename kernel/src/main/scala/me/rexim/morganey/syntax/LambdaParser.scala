@@ -2,7 +2,6 @@ package me.rexim.morganey.syntax
 
 import me.rexim.morganey.ast._
 import me.rexim.morganey.church.{ChurchNumberConverter, ChurchPairConverter}
-import me.rexim.morganey.util._
 import me.rexim.morganey.syntax.Language._
 
 import scala.collection.immutable.NumericRange
@@ -90,7 +89,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   /* ============================== Core lambda terms =============================== */
 
   def variable: Parser[LambdaVar] =
-    identifier.r ^^ { LambdaVar }
+    not(keywordParser) ~> identifier.r ^^ { LambdaVar }
 
   def func: Parser[LambdaFunc] =
     lambda ~> rep1(variable <~ abstractionDot) ~ term ^^ {
@@ -111,7 +110,7 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   /* =========================== Morganey extension terms =========================== */
 
   def binding: Parser[MorganeyBinding] =
-    (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
+    defKeyword ~> (variable <~ bindingAssign) ~ term ^^ { MorganeyBinding }
 
   def loading: Parser[MorganeyLoading] =
     loadKeyword ~> (modulePath.r ?) ^^ { MorganeyLoading }
@@ -120,10 +119,10 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
     loading | binding | term
 
   def script: Parser[List[MorganeyNode]] =
-    withLnBreaks(repsep(replCommand, newLines))
+    rep(replCommand)
 
   def module: Parser[List[MorganeyNode]] =
-    withLnBreaks(repsep(loading | binding, newLines))
+    rep(loading | binding)
 
   /* ============================== Helper productions ============================== */
 
@@ -135,16 +134,11 @@ class LambdaParser extends JavaTokenParsers with ImplicitConversions {
   private def brackets[T](p: Parser[T]): Parser[T] =
     leftBracket ~> p <~ rightBracket
 
-  private def withLnBreaks[T](p: Parser[T]): Parser[T] =
-    optNewLines ~> p <~ optNewLines
-
-  private def newLine: Parser[String] =
-    lineBreak.r
-
-  private def optNewLines: Parser[List[String]] =
-    rep(newLine)
-
-  private def newLines: Parser[List[String]] =
-    rep1(newLine)
+  private def keywordParser: Parser[String] =
+    /* Allow keywords as prefix of identifiers,
+     * but disallow keywords used as identifier.
+     * see: http://stackoverflow.com/a/3770843
+     */
+    keywords.map(k => (k + "\\b").r).map(regex).reduceLeft(_ | _)
 
 }

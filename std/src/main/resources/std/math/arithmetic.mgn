@@ -1,17 +1,17 @@
-succ := \n.f.x. f (n f x)
+def succ := \n.f.x. f (n f x)
 
 /* Note that in the Church encoding,
  * pred 0 = 0
  */
-pred := \n.f.x. n (\g.h. h (g f)) (\u. x) (\u. u)
+def pred := \n.f.x. n (\g.h. h (g f)) (\u. x) (\u. u)
 
-plus := \m.n.f.x. (m f) (n f x)
+def plus := \m.n.f.x. (m f) (n f x)
 
 /* Note that in the Church encoding,
  * minus m n = if (m < n) 0
  */
-minus := \m.n. n pred m
+def minus := \m.n. n pred m
 
-mult := \m.n.f. m (n f)
+def mult := \m.n.f. m (n f)
 
-iszero := \n.n (\x.a.b.b) (\a.b.a)
+def iszero := \n.n (\x.a.b.b) (\a.b.a)
