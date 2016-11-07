@@ -11,6 +11,18 @@ language that recognizes Church encoded structures.
 Before doing anything useful with Morganey you need to install
 [sbt][scala-sbt] first.
 
+### Samples ###
+
+For language samples and examples please visit [docs/samples/][samples-dir] directory. To execute a sample run:
+
+    $ sbt "run <path-to-sample>"
+
+from the root of the source code directory. For example, to run the 15 first fibonacci numbers sample run:
+
+    $ sbt "run docs/samples/fib.mgn"
+
+For more information on executing Morganey programs please see [Program Execution](#program-execution) section.
+
 ### REPL ###
 
 To run the REPL just enter the following in the source code directory
@@ -136,5 +148,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [wiki-lambda-calculus]: https://en.wikipedia.org/wiki/Lambda_calculus
 [scala-sbt]: http://www.scala-sbt.org/
 [execution-semantic]: https://github.com/rexim/Morganey/wiki/Execution-Mode-Semantic
+[samples-dir]: docs/samples/
 
 <!-- waffles eaten: 4 -->
