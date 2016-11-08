@@ -19,7 +19,7 @@ For language samples and examples please visit [docs/samples/][samples-dir] dire
 $ sbt "run <path-to-sample>"
 ```
 
-from the root of the source code directory. For example, to run the 15 first fibonacci numbers sample run:
+from the root of the source code directory. For example, to execute the 15 first fibonacci numbers sample run:
 
 ```console
 $ sbt "run docs/samples/fib.mgn"
