@@ -74,9 +74,9 @@ def concat := \xs.ys. Y (\rec.zs. (isnil zs)
  * a is a boolean indicating if the nth value is present
  * b is the nth element of the sequence or nil, if a is false
  */
-def nth := Y (\rec.xs.n. (isnil xs)
-    	     		  (pair false [])
-			  ((eq n 0)
-			   (pair true (head xs))
-			   (rec (tail xs)
-			   	(pred n))))
+def nth := Y (\rec.n.xs. (isnil xs)
+    	     		 (pair false [])
+			 ((eq n 0)
+			  (pair true (head xs))
+			  (rec (pred n)
+			       (tail xs))))
