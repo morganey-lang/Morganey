@@ -11,11 +11,29 @@ language that recognizes Church encoded structures.
 Before doing anything useful with Morganey you need to install
 [sbt][scala-sbt] first.
 
+### Samples ###
+
+For language samples and examples please visit [docs/samples/][samples-dir] directory. To execute a sample run:
+
+```console
+$ sbt "run <path-to-sample>"
+```
+
+from the root of the source code directory. For example, to execute the 15 first fibonacci numbers sample run:
+
+```console
+$ sbt "run docs/samples/fib.mgn"
+```
+
+For more information on executing Morganey programs please see [Program Execution](#program-execution) section.
+
 ### REPL ###
 
 To run the REPL just enter the following in the source code directory
 
-    $ sbt run
+```console
+$ sbt run
+```
 
 and start entring REPL commands there. You can enter
 
@@ -36,7 +54,9 @@ To quit the REPL just `^C` it.
 
 To execute a program written in Morganey do the following:
 
-    $ sbt "run main.mgn"
+```console
+$ sbt "run main.mgn"
+```
 
 Where `main.mgn` is the name of the file that contains the
 program. The program should provide an entry point. An entry point is
@@ -51,9 +71,11 @@ For more information see [Execution Semantic][execution-semantic]
 
 To run the Unit Tests enter the following in the source code directory
 
-    $ sbt clean coverage test
-    $ sbt coverageReport
-    $ sbt coverageAggregate
+```console
+$ sbt clean coverage test
+$ sbt coverageReport
+$ sbt coverageAggregate
+```
 
 And after that you can take a look at the Unit Test coverage
 results. Just open `target/scala-2.11/scoverage-report/index.html`
@@ -61,13 +83,17 @@ with your favorite browser.
 
 ### Functional Tests ###
 
-    $ sbt funtests
+```console
+$ sbt funtests
+```
 
 ### Build an uberjar ###
 
 To build an uberjar run the following command
 
-    $ sbt assembly
+```console
+$ sbt assembly
+```
 
 After that find the uberjar at `target/scala-2.11/morganey.jar`
 
@@ -136,5 +162,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [wiki-lambda-calculus]: https://en.wikipedia.org/wiki/Lambda_calculus
 [scala-sbt]: http://www.scala-sbt.org/
 [execution-semantic]: https://github.com/rexim/Morganey/wiki/Execution-Mode-Semantic
+[samples-dir]: docs/samples/
 
 <!-- waffles eaten: 4 -->
