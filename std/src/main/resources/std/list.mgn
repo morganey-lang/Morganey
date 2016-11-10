@@ -61,3 +61,22 @@ def take := Y (\rec.n.xs. (isnil xs) [] ((gt n 0) (cons (head xs) (rec (pred n) 
 def takeWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (cons (head xs) (rec p (tail xs))) []))
 
 def dropWhile := Y (\rec.p.xs. (isnil xs) [] ((p (head xs)) (rec p (tail xs)) xs))
+
+/* Concatenation of lists `xs` and `ys`, by reconstruction of `xs`
+ * as a prefix of `ys`
+ */
+def concat := \xs.ys. Y (\rec.zs. (isnil zs)
+				   ys
+				   (cons (head zs)
+				   	 (rec (tail zs)))) xs
+
+/* Returns a tuple (a, b) where
+ * a is a boolean indicating if the nth value is present
+ * b is the nth element of the sequence or nil, if a is false
+ */
+def nth := Y (\rec.n.xs. (isnil xs)
+    	     		 (pair false [])
+			 ((eq n 0)
+			  (pair true (head xs))
+			  (rec (pred n)
+			       (tail xs))))
