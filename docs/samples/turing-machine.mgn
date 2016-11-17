@@ -110,18 +110,17 @@ def getTape := \machine.head machine
 /** returns the element at the n-th position */
 def getN := Y (\rec.index.list. (gt index 0) (rec (minus index 1) (tail list)) (head list))
 
-/**
- * Example usage:
- *
- * def tape := []
- * def program := [
- *   [1, 0, 1, 1, 2],
- *   [1, 2, 'x', 1, 0],
- *   [2, 0, 2, 1, 3],
- *   [3, 0, 1, 0, 1]
- * ]
- * def head := 0
- * def start := 1
- * def machine := newMachine tape head start program
- * def main := runMachine machine 
- */
+/** Example usage: */
+/*
+def tape := []
+def program := [
+  [1, 0, 1, 1, 2],
+  [1, 2, 'x', 1, 0],
+  [2, 0, 2, 1, 3],
+  [3, 0, 1, 0, 1]
+]
+def head := 0
+def start := 1
+def machine := newMachine tape head start program
+def main := runMachine machine
+*/
