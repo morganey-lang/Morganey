@@ -1,0 +1,126 @@
+load std.prelude
+
+/**
+ * Format of the Turing Machine:
+ * [tape, head, state, program]
+ *
+ * - tape = list of numbers
+ * - head = the current read/write position (initially 0)
+ * - state = the current state of the machine (initially 1)
+ * - program = the program of the turing machine
+ *    - represented by a list of lists
+ *    - each inner list is a 5-tuple consisting of:
+ *      1. the current state
+ *      2. the character to read
+ *      3. the character to write
+ *      4. the move direction (0 = left, 1 = right)
+ *      5. the next state
+ *
+ * The state 0 is the halt state.
+ */
+
+/** creates a new turing machine based on the given tape, head, state and program */
+def newMachine :=
+  \tape.head.state.program.
+    (cons tape (cons head (cons state (cons program nil))))
+
+/** runs the given machine */
+def runMachine :=
+  Y (\rec.machine.
+     (eq (getState machine) 0)
+      machine
+      (rec (executeStep machine))
+  )
+
+/** executes one step of the given turing machine */
+def executeStep :=
+  \machine.
+     (eq (getState machine) 0)
+      machine
+      (nextMachine machine (getInstruction (getState machine)
+                                (getTapeContent machine)
+                                (getProgram machine)))
+
+/** creates a new machine based on the provided instruction */
+def nextMachine :=
+  \machine.instr.
+    (newMachine
+      (copyTapeWith (getTape machine) (getN 2 instr) (getHead machine))
+      ((eq (getN 3 instr) 0) (minus (getHead machine) 1) (plus (getHead machine) 1))
+      (getN 4 instr)
+      (getProgram machine)
+    )
+
+/** copies the given tape with the character at the specified index */
+def copyTapeWith :=
+  \tape.character.index.
+    Y (\rec.tape.counter.acc.
+       (isnil tape)
+        ((eq index counter)
+          (reverse (cons character acc))
+          ((gt index counter)
+            (rec nil (plus counter 1) (cons 0 acc))
+            (reverse acc)
+          )
+        )
+        (rec (tail tape)
+             (plus counter 1)
+             (cons ((ne counter index)
+               (head tape)
+               character
+             ) acc))
+    ) tape 0 nil
+
+
+/** returns the instruction for the given state */
+def getInstruction :=
+  \state.character.program.
+    Y (\rec.program.
+       (and (eq (head (head program)) state)
+            (eq (head (tail (head program))) character))
+              (head program)
+              (rec (tail program))
+    ) program
+
+/** returns the program of the given turing machine */
+def getProgram := \machine.head (applyN tail 3 machine)
+
+/** returns the head of the given turing machine */
+def getHead := \machine.head (tail machine)
+
+/** returns the state of the given turing machine */
+def getState := \machine.head (applyN tail 2 machine)
+
+/** returns the content of the tape at the current head position */
+def getTapeContent := \machine.getTapeContentAt (getTape machine) (getHead machine)
+
+/** returns the tape content at the specified index */
+def getTapeContentAt :=
+  Y (\rec.tape.index.
+     (isnil tape)
+      0
+      ((eq index 0)
+        (head tape)
+        (rec (tail tape) (minus index 1)))
+  )
+
+/** returns the tape of the given turing machine */
+def getTape := \machine.head machine
+
+/** returns the element at the n-th position */
+def getN := Y (\rec.index.list. (gt index 0) (rec (minus index 1) (tail list)) (head list))
+
+/** Example usage: */
+/*
+def tape := []
+def program := [
+  [1, 0, 1, 1, 2],
+  [1, 2, 'x', 1, 0],
+  [2, 0, 2, 1, 3],
+  [3, 0, 1, 0, 1]
+]
+def head := 0
+def start := 1
+def machine := newMachine tape head start program
+def main := runMachine machine
+*/
