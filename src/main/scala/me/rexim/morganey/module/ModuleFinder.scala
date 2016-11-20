@@ -66,4 +66,18 @@ class ModuleFinder(val paths: List[File]) {
   def topLevelDefinitions() =
     paths.flatMap(path => Option(path.listFiles).toList.flatten).filter(validMorganeyElement)
 
+  /**
+    * Returns a list of tuples (a, b), where
+    * a = the root directory of this module-path
+    * b = the path of a certain module
+    *
+    * Requirement: `b` is a sub-path of `a`
+    */
+  def findAllModulesIn(path: String): List[(File, File)] = paths.toStream
+    .map { f => (f, new File(f, modulePathToRelativeFile(path))) }
+    .filter { case (_, f) => f.exists() }
+    .flatMap { case (root, f) => f.listFiles() map (root -> _) }
+    .filter { case (_, f) => validMorganeyElement(f) }
+    .distinct
+    .toList
 }

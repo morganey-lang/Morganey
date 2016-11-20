@@ -51,24 +51,13 @@ object ReplAutocompletion {
 
     val moduleFinder = context.moduleFinder
 
-    // List(root-file-of-module-path, module-file or directory)
-    def findAllModulesIn(path: String): List[(File, File)] =
-      Try(
-        moduleFinder.paths.toStream
-          .map { f => (f, new File(f, modulePathToRelativeFile(path))) }
-          .filter { case (_, f) => f.exists() }
-          .flatMap { case (root, f) => f.listFiles() map (root -> _) }
-          .filter { case (_, f) => validMorganeyElement(f) }
-          .distinct
-          .toList
-      ).toOption.getOrElse(Nil)
 
     def stripExtensionIfModuleFile(f: File): File =
       if (isMorganeyModule(f)) new File(f.getParent, f.getName.replaceAll(s".$fileExtension", ""))
       else f
 
     def everythingIn(path: List[String], fileNameFilter: String => Boolean = _ => true) =
-      findAllModulesIn(path.mkString("."))
+      moduleFinder.findAllModulesIn(path.mkString("."))
         .map { case (root, f) => (root, stripExtensionIfModuleFile(f)) }
         .filter { case (root, f) => fileNameFilter(f.getName) }
         .map(relativize)
