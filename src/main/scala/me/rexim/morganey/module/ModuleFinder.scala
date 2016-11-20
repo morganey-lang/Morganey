@@ -41,7 +41,7 @@ class ModuleFinder(val paths: List[File]) {
   /**
     * Returns a sequence of all directories and .*mgn-Files at the top level of all module paths
     *
-    * Imaging having a two folders in the morganey path `modsA` and `modsB`:
+    * Imagine having a two folders in the morganey path `modsA` and `modsB`:
     *
     * `modsA`:
     * +---list.mgn
