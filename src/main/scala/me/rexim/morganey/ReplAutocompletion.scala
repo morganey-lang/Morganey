@@ -51,12 +51,6 @@ object ReplAutocompletion {
 
     val moduleFinder = context.moduleFinder
 
-    def validMorganeyElement(f: File) =
-      f.isDirectory || isMorganeyModule(f)
-
-    def topLevelDefinitions() =
-      moduleFinder.paths.flatMap(path => Option(path.listFiles).toList.flatten).filter(validMorganeyElement)
-
     // List(root-file-of-module-path, module-file or directory)
     def findAllModulesIn(path: String): List[(File, File)] =
       Try(
@@ -98,7 +92,7 @@ object ReplAutocompletion {
       // load a.b.|
       case (xs, true)        => everythingIn(xs)
       // load |
-      case (Nil, false)      => topLevelDefinitions().map(moduleName)
+      case (Nil, false)      => moduleFinder.topLevelDefinitions().map(moduleName)
       // load math.ari|
       case (xs :+ x, false)  => everythingIn(xs, matches(_, x))
     }

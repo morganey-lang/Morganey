@@ -17,6 +17,9 @@ object ModuleFinder {
   def relativeFileToLoadPath(relativeFile: String): String =
     relativeFile.replace(File.separatorChar, '.')
 
+  def validMorganeyElement(f: File) =
+    f.isDirectory || isMorganeyModule(f)
+
   def isMorganeyModule(file: File) =
     file.isFile() && (file.getName endsWith s".$fileExtension")
 }
@@ -34,4 +37,33 @@ class ModuleFinder(val paths: List[File]) {
     val resourceUrl = classLoader.getResource(resourcePath)
     Option(resourceUrl)
   }
+
+  /**
+    * Returns a sequence of all directories and .*mgn-Files at the top level of all module paths
+    *
+    * Imaging having a two folders in the morganey path `modsA` and `modsB`:
+    *
+    * `modsA`:
+    * +---list.mgn
+    * +---pair.mgn
+    * |
+    * \---math
+    *     \---arithmetic.mgn
+    *
+    * `modsB`:
+    * +---logic.mgn
+    * +---bools.mgn
+    * |
+    * \---numbers
+    *     +--- floats.mgn
+    *     \--- whole-numbers.mgn
+    *
+    * In that case `topLevelDefinitions` should return
+    * {{{
+    * Seq(list.mgn, pair.mgn, math, logic.mgn, bools.mgn, numbers)
+    * }}}
+    */
+  def topLevelDefinitions() =
+    paths.flatMap(path => Option(path.listFiles).toList.flatten).filter(validMorganeyElement)
+
 }
