@@ -11,15 +11,15 @@ class ModuleFinderSpec extends FlatSpec with Matchers {
     moduleFinder.findModuleFile("std.prelude").map(_.getName()) should be (Some("prelude.mgn"))
   }
 
-  "Module finder" should "find nested modules in the modules path" in {
+  it should "find nested modules in the modules path" in {
     moduleFinder.findModuleFile("std.math.arithmetic").map(_.getName()) should be (Some("arithmetic.mgn"))
   }
 
-  "Module finder" should "not find unexisting modules" in {
+  it should "not find unexisting modules" in {
     moduleFinder.findModuleFile("khooy") should be (None)
   }
 
-  "Module finder" should "find modules in JVM classpath" in {
+  it should "find modules in JVM classpath" in {
     val url = moduleFinder.findModuleInClasspath("std.prelude")
     assert(url.isDefined, "std.prelude was not found in classpath")
   }
