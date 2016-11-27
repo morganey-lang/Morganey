@@ -40,7 +40,7 @@ class ModuleFinder(val paths: List[File]) {
     Option(resourceUrl)
   }
 
-  def findAllModules(): Set[String] = {
+  def findAllModulesInClasspath(): Set[String] = {
     import scala.collection.JavaConversions._
 
     val classLoader = this.getClass.getClassLoader
