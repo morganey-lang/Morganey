@@ -5,6 +5,8 @@ import java.net.URL
 
 import ModuleFinder._
 
+import scala.io.Source
+
 object ModuleFinder {
   val fileExtension = "mgn"
 
@@ -36,6 +38,16 @@ class ModuleFinder(val paths: List[File]) {
     val resourcePath = s"${modulePathToRelativeURL(modulePath)}.$fileExtension"
     val resourceUrl = classLoader.getResource(resourcePath)
     Option(resourceUrl)
+  }
+
+  def findAllModules(): Set[String] = {
+    import scala.collection.JavaConversions._
+
+    val classLoader = this.getClass.getClassLoader
+    classLoader
+      .getResources("morganey-index")
+      .toSet
+      .flatMap((url: URL) => Source.fromInputStream(url.openStream()).getLines().toSet)
   }
 
   /**
