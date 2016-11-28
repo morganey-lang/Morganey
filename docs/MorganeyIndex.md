@@ -30,5 +30,6 @@ foo/x.mgn
 foo/y.mgn
 ```
 
-Morganey index is required for module REPL autocompletion to work
-correctly.
+Morganey index is not necessary for Morganey interpreter to actually
+load the modules, but absolutely crucial when one wants to TAB
+autocomplete module names in the REPL.
