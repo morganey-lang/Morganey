@@ -1,10 +1,12 @@
 # Morganey Index
 
 Morganey index is a file called `morganey-index` that is located at
-the root of Morganey module container. Morganey module container is a
-place that is discoverable via JVM classpath mechanism (jar, folder,
-etc) and contains Morganey modules. For example, here is the structure
-of a jar which is a Morganey module container:
+the root of every Morganey module container. Morganey module container
+is a place that is discoverable via JVM classpath mechanism (jar,
+folder, etc) and contains Morganey modules. Morganey interpreter can
+load multiple modules at once, and each of them should contain its own
+Index file. For example, here is the structure of a jar which is a
+Morganey module container:
 
 ```
 foo.jar
