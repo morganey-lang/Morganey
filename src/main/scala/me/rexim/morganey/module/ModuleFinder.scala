@@ -73,7 +73,7 @@ class ModuleFinder(val paths: List[File], val classLoader: ClassLoader = ModuleF
     * Seq(list.mgn, pair.mgn, math, logic.mgn, bools.mgn, numbers)
     * }}}
     */
-  def topLevelDefinitions() =
+  def topLevelDefinitions(): List[File] =
     paths.flatMap(path => Option(path.listFiles).toList.flatten).filter(validMorganeyElement)
 
   /**
