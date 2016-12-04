@@ -1,16 +1,14 @@
-package me.rexim.morganey
+package me.rexim.morganey.autocompletion
 
 import java.io.File
 
 import me.rexim.morganey.Commands._
 import me.rexim.morganey.ast._
-import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.ReplContext
+import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.syntax.Language.identifier
 import me.rexim.morganey.util._
-
-import scala.util.Try
 
 object ReplAutocompletion {
 

@@ -13,6 +13,7 @@ import scala.util.{Failure, Success, Try}
 import java.io.File
 
 import jline.console.completer.Completer
+import me.rexim.morganey.autocompletion.ReplAutocompletion
 
 import scala.io.Source
 
