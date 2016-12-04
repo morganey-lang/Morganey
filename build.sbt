@@ -10,7 +10,8 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
   libraryDependencies ++= Seq(
     "jline" % "jline" % "2.12.1",
-    "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
+    "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test",
+    "org.mockito" % "mockito-core" % "2.2.28" % "test"
   ),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   test in assembly := {},
