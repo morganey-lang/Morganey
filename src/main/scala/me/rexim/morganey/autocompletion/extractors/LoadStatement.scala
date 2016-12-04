@@ -5,23 +5,18 @@ import me.rexim.morganey.syntax._
 import me.rexim.morganey.util._
 
 object LoadStatement {
-  val zeroLoad = (Nil, false)
+  private val zeroLoad = (Nil, false)
 
-  def pathInformation(path: String) =
-    if (path.isEmpty) {
-      zeroLoad
-    } else if (path == ".") {
-      (Nil, true)
-    } else {
-      val pathElements = path.split("\\.", -1).toList
-      val endsWithDot  = pathElements.lastOption.exists(_.isEmpty)
-      val realPathElements =
-        if (endsWithDot) pathElements.init
-        else pathElements
-      (realPathElements, endsWithDot)
-    }
+  private def pathInformation(path: String) = {
+    val pathElements = path.split("\\.", -1).toList
+    val endsWithDot  = pathElements.lastOption.exists(_.isEmpty)
+    val realPathElements =
+      if (endsWithDot) pathElements.init
+      else pathElements
+    (realPathElements, endsWithDot)
+  }
 
-  def handleLoading(load: MorganeyLoading) =
+  private def handleLoading(load: MorganeyLoading) =
     load.modulePath map pathInformation getOrElse zeroLoad
 
   def unapply(line: String): Option[(List[String], Boolean)] = {
