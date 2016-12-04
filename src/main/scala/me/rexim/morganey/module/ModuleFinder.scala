@@ -5,6 +5,8 @@ import java.net.URL
 
 import ModuleFinder._
 
+import scala.io.Source
+
 object ModuleFinder {
   val fileExtension = "mgn"
 
@@ -24,7 +26,7 @@ object ModuleFinder {
     file.isFile() && (file.getName endsWith s".$fileExtension")
 }
 
-class ModuleFinder(val paths: List[File]) {
+class ModuleFinder(val paths: List[File], val classLoader: ClassLoader = ModuleFinder.getClass.getClassLoader) {
   def findModuleFile(modulePath: String): Option[File] = {
     paths.toStream
       .map(new File(_, s"${modulePathToRelativeFile(modulePath)}.$fileExtension"))
@@ -32,10 +34,18 @@ class ModuleFinder(val paths: List[File]) {
   }
 
   def findModuleInClasspath(modulePath: String): Option[URL] = {
-    val classLoader = this.getClass.getClassLoader
     val resourcePath = s"${modulePathToRelativeURL(modulePath)}.$fileExtension"
     val resourceUrl = classLoader.getResource(resourcePath)
     Option(resourceUrl)
+  }
+
+  def findAllModulesInIndex(): Set[String] = {
+    import scala.collection.JavaConversions._
+
+    classLoader
+      .getResources("morganey-index")
+      .toSet
+      .flatMap((url: URL) => Source.fromInputStream(url.openStream()).getLines().toSet)
   }
 
   /**
