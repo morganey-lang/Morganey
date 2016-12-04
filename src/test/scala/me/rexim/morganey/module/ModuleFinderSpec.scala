@@ -1,9 +1,12 @@
 package me.rexim.morganey.module
 
 import org.scalatest._
+import org.scalatest.mockito.MockitoSugar
 import java.io.File
+import java.net.URL
+import org.mockito.Mockito._
 
-class ModuleFinderSpec extends FlatSpec with Matchers {
+class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
   val moduleFinder =
     new ModuleFinder(List(new File("./std/src/main/resources/")))
 
@@ -20,7 +23,12 @@ class ModuleFinderSpec extends FlatSpec with Matchers {
   }
 
   it should "find modules in JVM classpath" in {
-    val url = moduleFinder.findModuleInClasspath("std.prelude")
-    assert(url.isDefined, "std.prelude was not found in classpath")
+    val expectedUrl = new URL("file://std/prelude.mgn")
+    val classLoader = mock[ClassLoader]
+    when(classLoader.getResource("std/prelude.mgn")).thenReturn(expectedUrl)
+    val moduleFinder = new ModuleFinder(Nil, classLoader)
+
+    moduleFinder.findModuleInClasspath("std.prelude") should
+      be (Some(expectedUrl))
   }
 }
