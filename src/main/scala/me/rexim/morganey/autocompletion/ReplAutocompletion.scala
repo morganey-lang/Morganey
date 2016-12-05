@@ -1,16 +1,16 @@
-package me.rexim.morganey
+package me.rexim.morganey.autocompletion
 
 import java.io.File
 
 import me.rexim.morganey.Commands._
 import me.rexim.morganey.ast._
-import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.ReplContext
+import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.syntax.Language.identifier
 import me.rexim.morganey.util._
 
-import scala.util.Try
+import extractors._
 
 object ReplAutocompletion {
 
@@ -29,7 +29,10 @@ object ReplAutocompletion {
       case CommandWithArg(cmd, arg)          =>
         knownVariableNames filter (_ startsWith arg) map (b => s":$cmd $b")
       // if a command was typed in
-      case SimpleCommand(cmds)               => cmds map (c => s":$c")
+      case SimpleCommand(prefix)             =>
+        commands.keys.toList
+          .filter(_ startsWith prefix)
+          .map(name => s":$name")
       // if a load statement was typed in (potential partially)
       case LoadStatement(parts, endsWithDot) =>
         val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot, context)
@@ -85,46 +88,6 @@ object ReplAutocompletion {
       // load math.ari|
       case (xs :+ x, false)  => everythingIn(xs, matches(_, x))
     }
-  }
-
-  private object LoadStatement {
-    val zeroLoad = (Nil, false)
-
-    def pathInformation(path: String) =
-      if (path.isEmpty) {
-        zeroLoad
-      } else if (path == ".") {
-        (Nil, true)
-      } else {
-        val pathElements = path.split("\\.", -1).toList
-        val endsWithDot  = pathElements.lastOption.exists(_.isEmpty)
-        val realPathElements =
-          if (endsWithDot) pathElements.init
-          else pathElements
-        (realPathElements, endsWithDot)
-      }
-
-    def handleLoading(load: MorganeyLoading) =
-      load.modulePath map pathInformation getOrElse zeroLoad
-
-    def unapply(line: String): Option[(List[String], Boolean)] = {
-      val parseResult = LambdaParser.parseWith(line, _.loading).toOption
-      parseResult.map(handleLoading)
-    }
-  }
-
-  private object SimpleCommand {
-
-    def unapply(line: String): Option[List[String]] = {
-      val potentialCommand = parseCommand(line).map(_._1)
-      val matchingCommands = potentialCommand map { p =>
-        commands.values collect {
-          case c if c.name startsWith p => c.name
-        }
-      }
-      matchingCommands.map(_.toList)
-    }
-
   }
 
   private object CommandWithArg {

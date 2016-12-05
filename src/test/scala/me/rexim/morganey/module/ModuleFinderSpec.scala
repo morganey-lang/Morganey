@@ -61,4 +61,15 @@ class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
 
     moduleFinder.findAllModulesInIndex() should be (expectedModules)
   }
+
+  it should "return top level definitions" in {
+    val moduleFinder = new ModuleFinder(List(new File("./src/test/resources/load-autocomplete/")))
+    val expectedDefinitions = Seq(
+      "boolean.mgn",
+      "list.mgn",
+      "math",
+      "prelude.mgn")
+
+    moduleFinder.topLevelDefinitions.map(_.getName).sorted should be (expectedDefinitions.sorted)
+  }
 }

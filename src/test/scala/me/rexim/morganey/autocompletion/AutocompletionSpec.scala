@@ -1,13 +1,13 @@
-package me.rexim.morganey
+package me.rexim.morganey.autocompletion
 
 import java.io.File
 
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.ast.MorganeyBinding
 import me.rexim.morganey.helpers.TestTerms
-import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.interpreter.ReplContext
-
+import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.Commands
 import org.scalatest._
 
 class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
