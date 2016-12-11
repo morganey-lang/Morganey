@@ -96,7 +96,7 @@ object ReplAutocompletion {
   private def matches(definition: String, name: String) =
     definition.toLowerCase startsWith name.toLowerCase
 
-  private def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
+  def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
     lazy val globalPrefix = line take cursor
     lazy val allNames     = knownVariableNames map (globalPrefix + _)
     val lastName = lastNameInLine(line)
@@ -112,7 +112,13 @@ object ReplAutocompletion {
     filtered.getOrElse(allNames)
   }
 
-  private def lastNameInLine(line: String): Option[(Int, String)] = {
+
+  /** Takes the longest postfix of a string that matches the {{Language.identifier}} regex
+    *
+    * @param line line to extract the identifier postfix from
+    * @return either nothing or both the identifier name and the index it starts from
+    */
+  def lastNameInLine(line: String): Option[(Int, String)] = {
     def stringMatches(n: Int): Option[(Int, String)] =
       Option(line takeRight n)
         .filter(_.matches(identifier))
