@@ -6,6 +6,7 @@ class LastNameInLineSpec extends FlatSpec with Matchers {
   "lastNameInLine" should "extract identifier postfix if it is present" in {
     ReplAutocompletion.lastNameInLine("hello") should be (Some((0, "hello")))
     ReplAutocompletion.lastNameInLine("#$%^ hello") should be (Some(5, "hello"))
+    ReplAutocompletion.lastNameInLine("$#*(&* hello5") should be (Some(7, "hello5"))
   }
 
   it should "return nothing if there is no identifier postfix" in {
