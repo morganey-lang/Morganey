@@ -28,7 +28,7 @@ object Commands {
   val commandWithArgs = ":([a-zA-Z]*) (.*)".r
   val unbindCountThreshold = 10
 
-  val commands =
+  val commands: Map[String, Command] =
     Seq[Command](
       StringCommand("exit",   exitREPL),
       StringCommand("raw",    rawPrintTerm),

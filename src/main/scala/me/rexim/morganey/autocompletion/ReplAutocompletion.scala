@@ -24,9 +24,11 @@ object ReplAutocompletion {
     val (beforeCursor, _) = buffer splitAt cursor
     lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames, cursor)
 
+    val commandWithArg = new CommandWithArg(commands)
+
     beforeCursor match {
       // if a command was (fully) typed in and requires a term as an argument
-      case CommandWithArg(cmd, arg)          =>
+      case commandWithArg(cmd, arg)          =>
         knownVariableNames filter (_ startsWith arg) map (b => s":$cmd $b")
       // if a command was typed in
       case SimpleCommand(prefix)             =>
@@ -90,19 +92,6 @@ object ReplAutocompletion {
     }
   }
 
-  private object CommandWithArg {
-
-    def unapply(line: String): Option[(String, String)] = {
-      val potentialCommand = parseCommand(line)
-      potentialCommand flatMap { case (p, arg) =>
-        commands.values find {
-          case StringCommand(_, _)  => false
-          case TermCommand(name, _) => name == p
-        } map (_.name -> arg)
-      }
-    }
-
-  }
 
   private def matches(definition: String, name: String) =
     definition.toLowerCase startsWith name.toLowerCase
