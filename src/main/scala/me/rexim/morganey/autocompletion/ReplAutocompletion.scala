@@ -113,9 +113,9 @@ object ReplAutocompletion {
   }
 
 
-  /** Takes the longest postfix of a string that matches the {{Language.identifier}} regex
+  /** Takes the longest suffix of a string that matches the {{Language.identifier}} regex
     *
-    * @param line line to extract the identifier postfix from
+    * @param line line to extract the identifier suffix from
     * @return either nothing or both the identifier name and the index it starts from
     */
   def lastNameInLine(line: String): Option[(Int, String)] = {
