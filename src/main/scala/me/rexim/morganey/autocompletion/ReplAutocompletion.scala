@@ -93,7 +93,13 @@ object ReplAutocompletion {
   }
 
 
-  private def matches(definition: String, name: String) =
+  /** Checks case-insensitively whether `definition` is a prefix of `name`
+    *
+    * @param definition definition
+    * @param name name
+    * @return true if `definition` is a prefix of `name` case-insensitively and false otherwise
+    */
+  def matches(definition: String, name: String) =
     definition.toLowerCase startsWith name.toLowerCase
 
   def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
@@ -113,7 +119,7 @@ object ReplAutocompletion {
   }
 
 
-  /** Takes the longest suffix of a string that matches the {{Language.identifier}} regex
+  /** Takes the longest suffix of a string that matches the `Language.identifier` regex
     *
     * @param line line to extract the identifier suffix from
     * @return either nothing or both the identifier name and the index it starts from
