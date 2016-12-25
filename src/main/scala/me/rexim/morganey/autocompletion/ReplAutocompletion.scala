@@ -22,7 +22,7 @@ object ReplAutocompletion {
   def complete(buffer: String, cursor: Int, context: ReplContext): List[String] = {
     val knownVariableNames = context.bindings.map(_.variable.name)
     val (beforeCursor, _) = buffer splitAt cursor
-    lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames, cursor)
+    lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames)
 
     val commandWithArg = new CommandWithArg(commands)
 
@@ -101,9 +101,8 @@ object ReplAutocompletion {
   private[autocompletion] def matches(definition: String, name: String) =
     definition.toLowerCase startsWith name.toLowerCase
 
-  private[autocompletion] def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
-    lazy val globalPrefix = line take cursor
-    lazy val allNames     = knownVariableNames map (globalPrefix + _)
+  private[autocompletion] def matchingDefinitions(line: String, knownVariableNames: List[String]): List[String] = {
+    lazy val allNames     = knownVariableNames map (line + _)
     val lastName = lastNameInLine(line)
 
     val filtered = lastName map { case (off, lname) =>
