@@ -20,12 +20,19 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers {
     ReplAutocompletion.matches("khooy", "") should be (true)
   }
 
-  it should "answer true if name is a prefix of definition case-insensitively" in {
+  it should "answer true if name is a prefix of definition" in {
+    ReplAutocompletion.matches("foo", "foo") should be (true)
+    ReplAutocompletion.matches("foobar", "foo") should be (true)
+  }
+
+  it should "answer false if name is not a prefix of definition" in {
     ReplAutocompletion.matches("", "foo") should be (false)
     ReplAutocompletion.matches("bar", "foo") should be (false)
     ReplAutocompletion.matches("barfoo", "foo") should be (false)
+  }
 
-    ReplAutocompletion.matches("foo", "foo") should be (true)
-    ReplAutocompletion.matches("foobar", "foo") should be (true)
+  it should "answer true if name is a prefix of definition case-insensitively" in {
+    ReplAutocompletion.matches("FOO", "foo") should be (true)
+    ReplAutocompletion.matches("fOobar", "foo") should be (true)
   }
 }
