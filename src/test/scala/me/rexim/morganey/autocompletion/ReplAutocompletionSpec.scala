@@ -14,4 +14,18 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers {
     ReplAutocompletion.lastNameInLine("hello #$%^") should be (None)
     ReplAutocompletion.lastNameInLine("#$%^ hello &#*$#") should be (None)
   }
+
+  "matches" should "answer true on empty name and any definition" in {
+    ReplAutocompletion.matches("", "") should be (true)
+    ReplAutocompletion.matches("khooy", "") should be (true)
+  }
+
+  it should "answer true if name is a prefix of definition case-insensitively" in {
+    ReplAutocompletion.matches("", "foo") should be (false)
+    ReplAutocompletion.matches("bar", "foo") should be (false)
+    ReplAutocompletion.matches("barfoo", "foo") should be (false)
+
+    ReplAutocompletion.matches("foo", "foo") should be (true)
+    ReplAutocompletion.matches("foobar", "foo") should be (true)
+  }
 }

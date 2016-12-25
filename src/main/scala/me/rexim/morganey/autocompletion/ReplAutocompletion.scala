@@ -93,11 +93,11 @@ object ReplAutocompletion {
   }
 
 
-  /** Checks case-insensitively whether `definition` is a prefix of `name`
+  /** Checks case-insensitively whether `name` is a prefix of `definition`
     *
     * @param definition definition
     * @param name name
-    * @return true if `definition` is a prefix of `name` case-insensitively and false otherwise
+    * @return true if `name` is a prefix of `definition` case-insensitively and false otherwise
     */
   def matches(definition: String, name: String) =
     definition.toLowerCase startsWith name.toLowerCase
