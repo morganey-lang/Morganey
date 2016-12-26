@@ -10,6 +10,8 @@ import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.Commands
 import org.scalatest._
 
+/** Integration tests for Morganey autocompletion mechanism
+  */
 class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
 
   private val goodModuleFinder = new ModuleFinder(List(new File("./src/test/resources/load-autocomplete/")))

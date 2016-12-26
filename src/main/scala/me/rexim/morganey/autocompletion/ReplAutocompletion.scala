@@ -51,7 +51,7 @@ object ReplAutocompletion {
     }
   }
 
-  private def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean, context: ReplContext): List[String] = {
+  private[autocompletion] def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean, context: ReplContext): List[String] = {
     import ModuleFinder._
 
     val moduleFinder = context.moduleFinder
@@ -92,11 +92,16 @@ object ReplAutocompletion {
     }
   }
 
-
-  private def matches(definition: String, name: String) =
+  /** Checks case-insensitively whether `name` is a prefix of `definition`
+    *
+    * @param definition definition
+    * @param name name
+    * @return true if `name` is a prefix of `definition` case-insensitively and false otherwise
+    */
+  private[autocompletion] def matches(definition: String, name: String) =
     definition.toLowerCase startsWith name.toLowerCase
 
-  def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
+  private[autocompletion] def matchingDefinitions(line: String, knownVariableNames: List[String], cursor: Int): List[String] = {
     lazy val globalPrefix = line take cursor
     lazy val allNames     = knownVariableNames map (globalPrefix + _)
     val lastName = lastNameInLine(line)
@@ -113,12 +118,12 @@ object ReplAutocompletion {
   }
 
 
-  /** Takes the longest suffix of a string that matches the {{Language.identifier}} regex
+  /** Takes the longest suffix of a string that matches the `Language.identifier` regex
     *
     * @param line line to extract the identifier suffix from
     * @return either nothing or both the identifier name and the index it starts from
     */
-  def lastNameInLine(line: String): Option[(Int, String)] = {
+  private[autocompletion] def lastNameInLine(line: String): Option[(Int, String)] = {
     def stringMatches(n: Int): Option[(Int, String)] =
       Option(line takeRight n)
         .filter(_.matches(identifier))
