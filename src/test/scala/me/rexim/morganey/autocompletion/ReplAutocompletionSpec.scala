@@ -35,4 +35,18 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers {
     ReplAutocompletion.matches("FOO", "foo") should be (true)
     ReplAutocompletion.matches("fOobar", "foo") should be (true)
   }
+
+  "matchingDefinitions" should "return nothing on empty line without any known variables" in {
+    ReplAutocompletion.matchingDefinitions("", Nil) should be (Nil)
+  }
+
+  it should "return all of the known variables on empty line" in {
+    val knownVariableNames = List("a", "b")
+    ReplAutocompletion.matchingDefinitions("", knownVariableNames) should be (knownVariableNames)
+  }
+
+  it should "return autocompletion options on a given prefix" in {
+    val knownVariableNames = List("aa", "ab", "ba", "bb")
+    ReplAutocompletion.matchingDefinitions("a", knownVariableNames) should be (List("aa", "ab"))
+  }
 }
