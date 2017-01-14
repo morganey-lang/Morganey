@@ -39,13 +39,15 @@ class ModuleFinder(val paths: List[File], val classLoader: ClassLoader = ModuleF
     Option(resourceUrl)
   }
 
-  def findAllModulesInIndex(): Set[String] = {
+  def findAllModulesInIndex(): List[Module] = {
     import scala.collection.JavaConversions._
 
     classLoader
       .getResources("morganey-index")
       .toSet
       .flatMap((url: URL) => Source.fromInputStream(url.openStream()).getLines().toSet)
+      .toList
+      .map(new Module(_))
   }
 
   /**

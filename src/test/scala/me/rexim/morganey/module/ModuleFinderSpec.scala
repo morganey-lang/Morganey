@@ -4,7 +4,6 @@ import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 
-
 import java.io._
 import java.util.Vector
 import java.net.URL
@@ -50,7 +49,7 @@ class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
     import scala.collection.JavaConverters._
 
     val moduleContainers = List(List("hello.mgn", "world.mgn"), List("a/foo.mgn", "b/bar.mgn"))
-    val expectedModules = moduleContainers.flatMap(identity).toSet
+    val expectedModules = moduleContainers.flatMap(identity).map(new Module(_))
     val mockedMorganeyIndexUrls = moduleContainers.map(mockMorganeyIndexUrl)
 
     val classLoader = mock[ClassLoader]
@@ -59,7 +58,7 @@ class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
 
     val moduleFinder = new ModuleFinder(Nil, classLoader)
 
-    moduleFinder.findAllModulesInIndex() should be (expectedModules)
+    moduleFinder.findAllModulesInIndex().map(_.name).sorted should be (expectedModules.map(_.name).sorted)
   }
 
   it should "return top level definitions" in {
