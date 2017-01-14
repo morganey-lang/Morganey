@@ -52,44 +52,9 @@ object ReplAutocompletion {
   }
 
   private[autocompletion] def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean, context: ReplContext): List[String] = {
-    import ModuleFinder._
-
-    val moduleFinder = context.moduleFinder
-
-
-    def stripExtensionIfModuleFile(f: File): File =
-      if (isMorganeyModule(f)) new File(f.getParent, f.getName.replaceAll(s".$fileExtension", ""))
-      else f
-
-    def everythingIn(path: List[String], fileNameFilter: String => Boolean = _ => true) =
-      moduleFinder.findAllModulesIn(path.mkString("."))
-        .map { case (root, f) => (root, stripExtensionIfModuleFile(f)) }
-        .filter { case (root, f) => fileNameFilter(f.getName) }
-        .map(relativize)
-        .map(_.replace('/', File.separatorChar))
-        .map(relativeFileToLoadPath)
-
-    def relativize(baseAndFile: (File, File)): String = {
-      val (base, file) = baseAndFile
-      base.toURI().relativize(file.toURI()).getPath()
-    }
-
-    def moduleName(file: File): String = {
-      val rawName = stripExtensionIfModuleFile(file).getName
-      val suffix = if (file.isDirectory) "." else ""
-      s"$rawName$suffix"
-    }
-
-    (parts, endsWithDot) match {
-      // load .|
-      case (Nil, true)       => Nil
-      // load a.b.|
-      case (xs, true)        => everythingIn(xs)
-      // load |
-      case (Nil, false)      => moduleFinder.topLevelDefinitions().map(moduleName)
-      // load math.ari|
-      case (xs :+ x, false)  => everythingIn(xs, matches(_, x))
-    }
+    val moduleName = s"${parts.mkString(".")}${if (endsWithDot) "." else ""}"
+    val knownModuleNames = context.moduleFinder.findAllModulesInIndex.map(_.name)
+    knownModuleNames.filter(_ startsWith moduleName)
   }
 
   /** Checks case-insensitively whether `name` is a prefix of `definition`

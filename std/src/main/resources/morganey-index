@@ -1,6 +1,6 @@
-list.mgn
-prelude.mgn
-common.mgn
-math/arithmetic.mgn
-logic.mgn
-functions.mgn
+std/list.mgn
+std/prelude.mgn
+std/common.mgn
+std/math/arithmetic.mgn
+std/logic.mgn
+std/functions.mgn

@@ -11,29 +11,7 @@ import java.nio.charset.StandardCharsets
 
 class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
   val moduleFinder =
-    new ModuleFinder(List(new File("./std/src/main/resources/")))
-
-  "Module finder" should "find high-level modules in the modules path" in {
-    moduleFinder.findModuleFile("std.prelude").map(_.getName()) should be (Some("prelude.mgn"))
-  }
-
-  it should "find nested modules in the modules path" in {
-    moduleFinder.findModuleFile("std.math.arithmetic").map(_.getName()) should be (Some("arithmetic.mgn"))
-  }
-
-  it should "not find unexisting modules" in {
-    moduleFinder.findModuleFile("khooy") should be (None)
-  }
-
-  it should "find modules in JVM classpath" in {
-    val expectedUrl = new URL("file://std/prelude.mgn")
-    val classLoader = mock[ClassLoader]
-    when(classLoader.getResource("std/prelude.mgn")).thenReturn(expectedUrl)
-    val moduleFinder = new ModuleFinder(Nil, classLoader)
-
-    moduleFinder.findModuleInClasspath("std.prelude") should
-      be (Some(expectedUrl))
-  }
+    new ModuleFinder()
 
   def mockMorganeyIndexUrl(modulesInIndex: List[String]): URL = {
     val morganeyIndexContent = modulesInIndex.mkString("\n")
@@ -43,6 +21,18 @@ class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
       .thenReturn(new ByteArrayInputStream(morganeyIndexContent.getBytes(StandardCharsets.UTF_8)))
 
     morganeyIndexUrl
+  }
+
+  behavior of "Module Finder"
+
+  it should "find modules in JVM classpath" in {
+    val expectedUrl = new URL("file://std/prelude.mgn")
+    val classLoader = mock[ClassLoader]
+    when(classLoader.getResource("std/prelude.mgn")).thenReturn(expectedUrl)
+    val moduleFinder = new ModuleFinder(classLoader)
+
+    moduleFinder.findModuleInClasspath("std.prelude") should
+      be (Some(expectedUrl))
   }
 
   it should "return all modules from Morganey index" in {
@@ -56,19 +46,8 @@ class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
     when(classLoader.getResources("morganey-index"))
       .thenReturn(new Vector(mockedMorganeyIndexUrls.asJava).elements())
 
-    val moduleFinder = new ModuleFinder(Nil, classLoader)
+    val moduleFinder = new ModuleFinder(classLoader)
 
     moduleFinder.findAllModulesInIndex().map(_.name).sorted should be (expectedModules.map(_.name).sorted)
-  }
-
-  it should "return top level definitions" in {
-    val moduleFinder = new ModuleFinder(List(new File("./src/test/resources/load-autocomplete/")))
-    val expectedDefinitions = Seq(
-      "boolean.mgn",
-      "list.mgn",
-      "math",
-      "prelude.mgn")
-
-    moduleFinder.topLevelDefinitions.map(_.getName).sorted should be (expectedDefinitions.sorted)
   }
 }

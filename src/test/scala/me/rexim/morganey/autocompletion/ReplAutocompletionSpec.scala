@@ -1,8 +1,15 @@
 package me.rexim.morganey.autocompletion
 
-import org.scalatest._
+import me.rexim.morganey.interpreter.ReplContext
+import me.rexim.morganey.module.ModuleFinder
 
-class ReplAutocompletionSpec extends FlatSpec with Matchers {
+import org.scalatest._
+import org.scalatest.mockito.MockitoSugar
+
+import org.mockito.Mockito._
+import org.mockito.Matchers._
+
+class ReplAutocompletionSpec extends FlatSpec with Matchers with MockitoSugar {
   "lastNameInLine" should "extract identifier suffix if it is present" in {
     ReplAutocompletion.lastNameInLine("hello") should be (Some((0, "hello")))
     ReplAutocompletion.lastNameInLine("#$%^ hello") should be (Some(5, "hello"))
@@ -48,5 +55,19 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers {
   it should "return autocompletion options on a given prefix" in {
     val knownVariableNames = List("aa", "ab", "ba", "bb")
     ReplAutocompletion.matchingDefinitions("a", knownVariableNames) should be (List("aa", "ab"))
+  }
+
+  "autocompleteLoadStatement" should "blhablahsd" ignore {
+    val moduleFinderMock = mock[ModuleFinder]
+
+    val context = ReplContext(
+      bindings = Nil,
+      moduleFinder = moduleFinderMock
+    )
+
+    ReplAutocompletion.autocompleteLoadStatement(Nil, false, context) should be (Nil)
+    ReplAutocompletion.autocompleteLoadStatement(Nil, true, context) should be (Nil)
+
+    ReplAutocompletion.autocompleteLoadStatement(List("a", "b"), true, context) should be (Nil)
   }
 }
