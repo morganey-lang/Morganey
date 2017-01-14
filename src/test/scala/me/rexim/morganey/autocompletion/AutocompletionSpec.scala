@@ -79,6 +79,8 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     autocomplete("(\\x . p)", 7, manyBindings) should be (Set("(\\x . PLUS", "(\\x . PRED"))
   }
 
+  // TODO: after #312 this test case became incorrect. Fix it so it
+  // reflect corrent behavior of the module REPL autocompletion
   it should "autocomplete paths in load statements" ignore {
     def addLoad(s: String): String = s"load $s"
 
@@ -89,6 +91,8 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     autocomplete("load math.ar", 12, List()) should be (Set("math.arithmetic") map addLoad)
   }
 
+  // TODO: after #312 this test case became incorrect. Fix it so it
+  // reflect corrent behavior of the module REPL autocompletion
   it should "not fail autocompleting load statements if ModuleFinder contains non-existing path" ignore {
     autocomplete("load ", 5, List(), badModuleFinder) should be (Set())
   }

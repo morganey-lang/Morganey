@@ -57,17 +57,7 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers with MockitoSugar {
     ReplAutocompletion.matchingDefinitions("a", knownVariableNames) should be (List("aa", "ab"))
   }
 
-  "autocompleteLoadStatement" should "blhablahsd" ignore {
-    val moduleFinderMock = mock[ModuleFinder]
-
-    val context = ReplContext(
-      bindings = Nil,
-      moduleFinder = moduleFinderMock
-    )
-
-    ReplAutocompletion.autocompleteLoadStatement(Nil, false, context) should be (Nil)
-    ReplAutocompletion.autocompleteLoadStatement(Nil, true, context) should be (Nil)
-
-    ReplAutocompletion.autocompleteLoadStatement(List("a", "b"), true, context) should be (Nil)
+  // TODO: implement this unit test
+  "autocompleteLoadStatement" should "" ignore {
   }
 }
