@@ -6,31 +6,38 @@ import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.ast.MorganeyBinding
 import me.rexim.morganey.helpers.TestTerms
 import me.rexim.morganey.interpreter.ReplContext
-import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.module.{ModuleFinder, Module}
 import me.rexim.morganey.Commands
 import org.scalatest._
+import org.scalatest.mockito.MockitoSugar
+import org.mockito.Mockito._
 
 /** Integration tests for Morganey autocompletion mechanism
   */
-class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
+class AutocompletionSpec extends FlatSpec with Matchers with TestTerms with MockitoSugar {
+  private val manyBindings = List("SUCC", "PRED", "MULT", "PLUS")
 
-  private val goodModuleFinder = new ModuleFinder()
-  private val badModuleFinder = new ModuleFinder()
+  private val modules = List(
+    "std/boolean.mgn",
+    "std/math/arithmetic.mgn",
+    "std/list.mgn",
+    "std/prelude.mgn"
+  ).map(new Module(_))
 
-  def autocomplete(line: String, cursor: Int,
-                   knownNames: List[String],
-                   moduleFinder: ModuleFinder = goodModuleFinder): Set[String] = {
+  private val mockModuleFinder = {
+    val moduleFinder = mock[ModuleFinder]
+    when(moduleFinder.findAllModulesInIndex()).thenReturn(modules)
+    moduleFinder
+  }
+
+  private def autocomplete(line: String, cursor: Int,
+                           knownNames: List[String],
+                           moduleFinder: ModuleFinder = mockModuleFinder): Set[String] = {
     val id = I(lvar("x"))
     val fakeBindings = knownNames.map(name => MorganeyBinding(lvar(name), id))
     val context = ReplContext(fakeBindings, moduleFinder)
     ReplAutocompletion.complete(line, cursor, context).toSet
   }
-
-  private val manyBindings            = List("SUCC", "PRED", "MULT", "PLUS")
-  // toplevel modules of morganey, add a "." after names of directories
-  private val topLevelMorganeyModules = Set("boolean", "math.", "list", "prelude")
-  // modules in math.*, add a "." after names of directories
-  private val mathMorganeyModules     = Set("arithmetic")
 
   "The repl" should "not autocomplete, if no bindings are known" in {
     autocomplete("", 0, List())   should be (Set())
@@ -79,22 +86,12 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms  {
     autocomplete("(\\x . p)", 7, manyBindings) should be (Set("(\\x . PLUS", "(\\x . PRED"))
   }
 
-  // TODO: after #312 this test case became incorrect. Fix it so it
-  // reflect corrent behavior of the module REPL autocompletion
-  it should "autocomplete paths in load statements" ignore {
+  it should "autocomplete paths in load statements" in {
     def addLoad(s: String): String = s"load $s"
 
     autocomplete("load .", 6, List())        should be (Set() map addLoad)
-    autocomplete("load ", 5, List())         should be (topLevelMorganeyModules map addLoad)
-    autocomplete("load m", 6, List())        should be (topLevelMorganeyModules filter (_ startsWith "m") map addLoad)
-    autocomplete("load math.", 12, List())   should be (mathMorganeyModules map ("math." + _) map addLoad)
-    autocomplete("load math.ar", 12, List()) should be (Set("math.arithmetic") map addLoad)
-  }
-
-  // TODO: after #312 this test case became incorrect. Fix it so it
-  // reflect corrent behavior of the module REPL autocompletion
-  it should "not fail autocompleting load statements if ModuleFinder contains non-existing path" ignore {
-    autocomplete("load ", 5, List(), badModuleFinder) should be (Set())
+    autocomplete("load ", 5, List())         should be (modules.map(_.name).map(addLoad).toSet)
+    autocomplete("load std.m", 10, List())   should be (Set("load std.math.arithmetic"))
   }
 
   it should "autocomplete commands" in {
