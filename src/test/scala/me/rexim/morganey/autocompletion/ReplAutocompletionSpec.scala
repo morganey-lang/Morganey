@@ -1,7 +1,7 @@
 package me.rexim.morganey.autocompletion
 
 import me.rexim.morganey.interpreter.ReplContext
-import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.module.{ModuleFinder, Module}
 
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
@@ -57,7 +57,21 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers with MockitoSugar {
     ReplAutocompletion.matchingDefinitions("a", knownVariableNames) should be (List("aa", "ab"))
   }
 
-  // TODO: implement this unit test
-  "autocompleteLoadStatement" should "" ignore {
+  "autocompleteLoadStatement" should "should autocomplete modules according to the Morganey Index" in {
+    val moduleFinderMock = mock[ModuleFinder]
+
+    when(moduleFinderMock.findAllModulesInIndex()).thenReturn(List(
+      "foo.mgn",
+      "bar.mgn",
+      "a/b.mgn"
+    ).map(new Module(_)))
+
+    val context = ReplContext(
+      bindings = Nil,
+      moduleFinder = moduleFinderMock
+    )
+
+    ReplAutocompletion.autocompleteLoadStatement(Nil, false, context).sorted should be (List("foo", "bar", "a.b").sorted)
+    ReplAutocompletion.autocompleteLoadStatement(List("a"), true, context).sorted should be (List("a.b"))
   }
 }
