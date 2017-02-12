@@ -61,6 +61,36 @@ build := {
   IO.copyFile(stdlibFile, targetDir / stdlibFile.getName())
 }
 
+
+lazy val moduleIndexFileName = "morganey-index"
+
+lazy val buildModuleIndex = TaskKey[Seq[File]]("buildModuleIndex", "Builds the module index in the std-lib subproject.")
+
+buildModuleIndex := {
+  val indexFile   = (resourceManaged in stdlib in Compile).value / moduleIndexFileName
+  val stdLibRoot  = (resourceDirectory in stdlib in Compile).value
+  val moduleIndex = makeModuleIndex(stdLibRoot)
+  IO.write(indexFile, moduleIndex)
+  Seq(indexFile)
+}
+
+def makeModuleIndex(stdLibRoot: File): String = {
+  def recurse(file: File): Seq[File] =
+    if (file.isDirectory) file.listFiles() match {
+      case null => Seq()
+      case xs   => xs flatMap recurse
+    } else if (file.isFile && (file.getName endsWith ".mgn")) {
+      Seq(file)
+    } else Seq()
+
+  val stdLibFiles   = recurse(stdLibRoot / "std")
+  val relativeFiles = stdLibFiles pair relativeTo(stdLibRoot) map (_._2) map (_.replaceAll("\\\\", "/"))
+  relativeFiles.mkString("\n")
+}
+
+resourceGenerators in stdlib in Compile += buildModuleIndex.taskValue
+
+
 addCommandAlias("funtests", ";assembly;funtests/test")
 addCommandAlias("rebuild", ";clean;build")
 addCommandAlias("retest", ";rebuild;test")
