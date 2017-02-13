@@ -3,9 +3,16 @@ jdk: oraclejdk7
 sudo: false
 scala:
   - 2.11.8
+before_script:
+  - sbt clean compile
 script:
-  - sbt retest
+  - sbt test-only
   - sbt funtests
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 notifications:
   email:
     - reximkut@gmail.com
+cache:
+  directories:
+  - $HOME/.ivy2/cache

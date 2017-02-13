@@ -8,8 +8,10 @@ lazy val commonSettings = Seq(
   version := "0.0.1",
   scalaVersion := "2.11.8",
   scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
+  resolvers += Resolver.bintrayRepo("keddelzz", "maven"),
   libraryDependencies ++= Seq(
     "jline" % "jline" % "2.12.1",
+    "com.github.keddelzz.hidden-args" %% "hidden-args" % "0.0.1",
     "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test",
     "org.mockito" % "mockito-core" % "2.2.28" % "test"
   ),
@@ -61,6 +63,36 @@ build := {
   IO.copyFile(stdlibFile, targetDir / stdlibFile.getName())
 }
 
+
+lazy val moduleIndexFileName = "morganey-index"
+
+lazy val buildModuleIndex = TaskKey[Seq[File]]("buildModuleIndex", "Builds the module index in the std-lib subproject.")
+
+buildModuleIndex := {
+  val indexFile   = (resourceManaged in stdlib in Compile).value / moduleIndexFileName
+  val stdLibRoot  = (resourceDirectory in stdlib in Compile).value
+  val moduleIndex = makeModuleIndex(stdLibRoot)
+  IO.write(indexFile, moduleIndex)
+  Seq(indexFile)
+}
+
+def makeModuleIndex(stdLibRoot: File): String = {
+  def recurse(file: File): Seq[File] =
+    if (file.isDirectory) file.listFiles() match {
+      case null => Seq()
+      case xs   => xs flatMap recurse
+    } else if (file.isFile && (file.getName endsWith ".mgn")) {
+      Seq(file)
+    } else Seq()
+
+  val stdLibFiles   = recurse(stdLibRoot / "std")
+  val relativeFiles = stdLibFiles pair relativeTo(stdLibRoot) map (_._2) map (_.replaceAll("\\\\", "/"))
+  relativeFiles.mkString("\n")
+}
+
+resourceGenerators in stdlib in Compile += buildModuleIndex.taskValue
+
+
 addCommandAlias("funtests", ";assembly;funtests/test")
 addCommandAlias("rebuild", ";clean;build")
 addCommandAlias("retest", ";rebuild;test")
@@ -80,7 +112,6 @@ lazy val morganey = (project in file("."))
   .dependsOn(
     macros % dependencySettings,
     kernel % dependencySettings,
-    hiddenArgs,
     stdlib
   )
 
@@ -88,14 +119,12 @@ lazy val macros = (project in file("macros"))
   .settings(commonSettings :_*)
   .settings(macroSettings :_*)
   .dependsOn(
-    kernel % dependencySettings,
-    hiddenArgs
+    kernel % dependencySettings
   )
 
 lazy val kernel = (project in file("kernel"))
   .settings(commonSettings :_*)
   .settings(kernelSettings :_*)
-  .dependsOn(hiddenArgs)
 
 lazy val stdlib = (project in file("std"))
   .settings(commonSettings :_*)
@@ -105,6 +134,3 @@ lazy val funtests = (project in file("funtests"))
   .enablePlugins(BuildInfoPlugin)
   .settings(commonSettings :_*)
   .settings(funtestsSettings :_*)
-  .dependsOn(hiddenArgs)
-
-lazy val hiddenArgs = ProjectRef(uri("https://github.com/keddelzz/hidden-args.git"), "hiddenargs")
