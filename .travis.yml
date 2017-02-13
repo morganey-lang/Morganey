@@ -9,3 +9,6 @@ script:
 notifications:
   email:
     - reximkut@gmail.com
+cache:
+  directories:
+  - $HOME/.ivy2/cache
