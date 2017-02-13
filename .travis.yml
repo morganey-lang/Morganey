@@ -3,8 +3,9 @@ jdk: oraclejdk7
 sudo: false
 scala:
   - 2.11.8
-script:
+before_script:
   - sbt clean compile
+script:
   - sbt test-only
   - sbt funtests
   - find $HOME/.sbt -name "*.lock" | xargs rm
