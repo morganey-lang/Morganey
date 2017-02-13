@@ -4,7 +4,8 @@ sudo: false
 scala:
   - 2.11.8
 script:
-  - sbt retest
+  - sbt clean compile
+  - sbt test-only
   - sbt funtests
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
