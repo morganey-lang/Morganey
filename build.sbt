@@ -108,11 +108,11 @@ lazy val morganey = (project in file("."))
     mainClass := Some("me.rexim.morganey.Main"),
     initialCommands in console := "import me.rexim.morganey.meta._"
   )
-  .aggregate(macros, kernel)
+  .aggregate(macros, kernel, stdlib)
   .dependsOn(
     macros % dependencySettings,
     kernel % dependencySettings,
-    stdlib
+    stdlib % dependencySettings
   )
 
 lazy val macros = (project in file("macros"))
