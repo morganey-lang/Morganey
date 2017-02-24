@@ -67,6 +67,20 @@ argument:
 
 For more information see [Execution Semantic][execution-semantic]
 
+### As a Thirdparty Dependency ###
+
+Morganey is available on [JCenter][jcenter].
+
+#### sbt ####
+
+```scala
+resolvers += Resolver.jcenterRepo
+
+libraryDependencies ++= Seq(
+  "me.rexim" %% "morganey" % "0.1.0"
+)
+```
+
 ### Unit Tests ###
 
 To run the Unit Tests enter the following in the source code directory
@@ -163,5 +177,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [scala-sbt]: http://www.scala-sbt.org/
 [execution-semantic]: https://github.com/rexim/Morganey/wiki/Execution-Mode-Semantic
 [samples-dir]: docs/samples/
+[jcenter]: https://bintray.com/morganey-lang/maven/morganey
 
 <!-- waffles eaten: 4 -->
