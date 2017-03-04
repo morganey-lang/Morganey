@@ -41,7 +41,7 @@ class ModuleSpec extends FlatSpec with Matchers with MockitoSugar {
     new Module(ResourcePath("a/b/c.mgn")).canonicalPath should be ("a.b.c")
   }
 
-  it should "parse and return bindings inside of the resource it encapsulates" ignore {
+  it should "parse and return bindings inside of the resource it encapsulates" in {
     val moduleContent = """|def a := a
                            |def b := b""".stripMargin
     val resourcePath = "a/b/c.mgn"
@@ -55,7 +55,7 @@ class ModuleSpec extends FlatSpec with Matchers with MockitoSugar {
       )))
   }
 
-  it should "parse and return module dependencies" ignore {
+  it should "parse and return module dependencies" in {
     val moduleContent = """|load foo
                            |load bar.baz
                            |def c := c""".stripMargin

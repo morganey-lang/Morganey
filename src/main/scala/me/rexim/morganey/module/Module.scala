@@ -1,13 +1,35 @@
 package me.rexim.morganey.module
 
-import me.rexim.morganey.ast.MorganeyBinding
+import me.rexim.morganey.ast._
+import me.rexim.morganey.syntax._
+import me.rexim.morganey.util._
 import scala.util._
+
+import java.net.URL
 
 class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.getClassLoader) {
   def canonicalPath: String =
     modulePath.asCanonicalPath.path
 
-  // TODO: Implement Module.{bindings, dependencies}
-  def bindings: Try[Set[MorganeyBinding]] = ???
-  def dependencies: Try[Set[Module]] = ???
+  private def nodes: Try[List[MorganeyNode]] = {
+    val CanonicalPath(canonicalPath) = modulePath.asCanonicalPath
+    val ResourcePath(resourcePath) = modulePath.asResourcePath
+
+    lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$canonicalPath module was not found"))
+
+    for {
+      resourceUrl <- Option(classLoader.getResource(resourcePath)).map(Success(_)).getOrElse(moduleNotFound)
+      moduleNodes <- withReader(resourceUrl)(LambdaParser.parseWith(_, _.module))
+    } yield moduleNodes
+  }
+
+  def bindings: Try[Set[MorganeyBinding]] =
+    nodes.map(_.collect {
+      case binding: MorganeyBinding => binding
+    }.toSet)
+
+  def dependencies: Try[Set[Module]] =
+    nodes.map(_.collect {
+      case MorganeyLoading(Some(canonicalPath)) => new Module(CanonicalPath(canonicalPath), classLoader)
+    }.toSet)
 }
