@@ -116,19 +116,19 @@ After that find the uberjar at `target/scala-2.11/morganey.jar`
 This project introduces the following custom sbt commands:
 
 - `sbt build`: Compiles the subprojects `kernel`, `macros` and
-  `stdlib` and copies the resulting jar-files into the target directory
+  `stdlib` and copies the resulting JAR files into the target directory
   of the root project.
 
 - `sbt buildModuleIndex`: Traverses the stdlib subproject and creates
-  a resource file containing a list of modules - the so called
-  [module-index]. This command is automatically run if you `sbt
+  a resource file containing a list of modules - the so-called
+  [module-index]. This command is run automatically if you `sbt
   compile` the project.
 
 - `sbt rebuild`: Alias for the execution of the commands `sbt clean`
   and `sbt build`.
 
 - `sbt retest`: Alias for the execution of the commands `sbt rebuild`
-  and `sbt retest`.
+  and `sbt test`.
 
 ## Language ##
 
