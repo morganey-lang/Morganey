@@ -111,6 +111,25 @@ $ sbt assembly
 
 After that find the uberjar at `target/scala-2.11/morganey.jar`
 
+### Custom sbt commands ###
+
+This project introduces the following custom sbt commands:
+
+- `sbt build`: Compiles the subprojects `kernel`, `macros` and
+  `stdlib` and copies the resulting JAR files into the target directory
+  of the root project.
+
+- `sbt buildModuleIndex`: Traverses the stdlib subproject and creates
+  a resource file containing a list of modules - the so-called
+  [module-index]. This command is run automatically if you `sbt
+  compile` the project.
+
+- `sbt rebuild`: Alias for the execution of the commands `sbt clean`
+  and `sbt build`.
+
+- `sbt retest`: Alias for the execution of the commands `sbt rebuild`
+  and `sbt test`.
+
 ## Language ##
 
 ### BNF ###
@@ -178,5 +197,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [execution-semantic]: https://github.com/rexim/Morganey/wiki/Execution-Mode-Semantic
 [samples-dir]: docs/samples/
 [jcenter]: https://bintray.com/morganey-lang/maven/morganey
+[module-index]: https://github.com/morganey-lang/Morganey/blob/master/docs/MorganeyIndex.md
 
 <!-- waffles eaten: 4 -->
