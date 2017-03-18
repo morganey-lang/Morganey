@@ -5,7 +5,7 @@ import me.rexim.morganey.ast._
 import me.rexim.morganey.syntax._
 import me.rexim.morganey.module._
 import me.rexim.morganey.monad._
-import me.rexim.morganey.util._
+import me.rexim.morganey.reader._
 import java.io.Reader
 
 import me.rexim.morganey.ast.error.{BindingLoop, NonExistingBinding}

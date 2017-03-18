@@ -2,7 +2,7 @@ package me.rexim.morganey.module
 
 import me.rexim.morganey.ast._
 import me.rexim.morganey.syntax._
-import me.rexim.morganey.util._
+import me.rexim.morganey.reader._
 import scala.util._
 
 import java.net.URL
