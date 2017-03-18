@@ -47,22 +47,4 @@ package object util {
       reader.close()
       result
     }
-
-  // TODO(#278): Move ParseOps and InputSource closer to LambdaParser
-  implicit class ParserOps[T <: LambdaParser](parser: T) {
-    def parseWith[R](input: InputSource, f: T => parser.Parser[R]): Try[R] = {
-      val production = f(parser)
-      // TODO(#279): Move logic inside of ParseOps.parseWith to InputSource
-      val result = input match {
-        case StringSource(string) => parser.parseAll(production, string)
-        case ReaderSource(reader) => parser.parseAll(production, reader)
-      }
-      handleResult(result)
-    }
-
-    private def handleResult[R](parseRes: parser.ParseResult[R]): Try[R] = parseRes match {
-      case parser.Success(result, _) => Success(result)
-      case res                       => Failure(new LambdaParserException(res.toString))
-    }
-  }
 }

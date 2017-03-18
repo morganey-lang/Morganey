@@ -20,7 +20,7 @@ object LoadStatement {
     load.modulePath map pathInformation getOrElse zeroLoad
 
   def unapply(line: String): Option[(List[String], Boolean)] = {
-    val parseResult = LambdaParser.parseWith(line, _.loading).toOption
+    val parseResult = LambdaParser.parseAll(LambdaParser.loading, line).toOption
     parseResult.map(handleLoading)
   }
 }

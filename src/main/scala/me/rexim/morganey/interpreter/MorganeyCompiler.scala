@@ -2,7 +2,7 @@ package me.rexim.morganey.interpreter
 
 import scala.util._
 import me.rexim.morganey.ast._
-import me.rexim.morganey.syntax.{LambdaParser, LambdaParserException}
+import me.rexim.morganey.syntax._
 import me.rexim.morganey.module._
 import me.rexim.morganey.monad._
 import me.rexim.morganey.util._
@@ -23,7 +23,7 @@ object MorganeyCompiler {
   def loadModuleFromReader(reader: Reader,
                            moduleFinder: ModuleFinder,
                            loadedModules: Set[String]): Try[List[MorganeyBinding]] =
-    LambdaParser.parseWith(reader, _.module).flatMap {
+    LambdaParser.parseAll(LambdaParser.module, reader).toTry.flatMap {
       nodes => sequence(nodes.map(interpretNode(_, moduleFinder, loadedModules))).map(_.flatten)
     }
 

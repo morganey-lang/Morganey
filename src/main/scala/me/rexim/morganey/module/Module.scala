@@ -19,7 +19,7 @@ class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.
 
     for {
       resourceUrl <- Option(classLoader.getResource(resourcePath)).map(Success(_)).getOrElse(moduleNotFound)
-      moduleNodes <- withReader(resourceUrl)(LambdaParser.parseWith(_, _.module))
+      moduleNodes <- withReader(resourceUrl)(LambdaParser.parseAll(LambdaParser.module, _).toTry)
     } yield moduleNodes
   }
 

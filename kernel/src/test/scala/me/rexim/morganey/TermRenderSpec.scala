@@ -3,7 +3,7 @@ package me.rexim.morganey
 import me.rexim.morganey.ast._
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.helpers.TestTerms
-import me.rexim.morganey.syntax.LambdaParser
+import me.rexim.morganey.syntax._
 import me.rexim.morganey.util._
 import org.scalatest._
 
@@ -72,7 +72,7 @@ class TermRenderSpec extends FlatSpec with Matchers with TestTerms {
   }
 
   "Parsing a term, and reparsing the result of the pretty-printer" should "always succeed" in {
-    def parse(x: String) = LambdaParser.parseWith(x, _.term)
+    def parse(x: String) = LambdaParser.parseAll(LambdaParser.term, x).toTry
 
     val terms = Seq(
       "a", "xs", "foo",
