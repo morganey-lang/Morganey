@@ -4,7 +4,6 @@ import me.rexim.morganey.ast._
 import me.rexim.morganey.ast.LambdaTermHelpers._
 import me.rexim.morganey.helpers.TestTerms
 import me.rexim.morganey.syntax._
-import me.rexim.morganey.util._
 import org.scalatest._
 
 class TermRenderSpec extends FlatSpec with Matchers with TestTerms {

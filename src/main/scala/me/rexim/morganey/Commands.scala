@@ -3,9 +3,10 @@ package me.rexim.morganey
 import me.rexim.morganey.interpreter.{ReplContext, ReplResult}
 import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.syntax._
-import me.rexim.morganey.util._
 
-import scala.util.{Failure, Success}
+import scala.util._
+
+import java.util.regex.Pattern
 
 object Commands {
 
@@ -61,6 +62,12 @@ object Commands {
     }
     ReplResult(context, Option(output))
   }
+
+  private[morganey] def validRegex(regex: String): Option[String => Boolean] =
+    Try {
+      val pattern = Pattern.compile(regex)
+      s: String => pattern.matcher(s).matches()
+    }.toOption
 
   private def unbindBindings(args: String)(context: ReplContext): ReplResult[String] =
     validRegex(args) match {

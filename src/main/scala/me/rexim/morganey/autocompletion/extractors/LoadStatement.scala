@@ -2,7 +2,6 @@ package me.rexim.morganey.autocompletion.extractors
 
 import me.rexim.morganey.ast._
 import me.rexim.morganey.syntax._
-import me.rexim.morganey.util._
 
 object LoadStatement {
   private val zeroLoad = (Nil, false)

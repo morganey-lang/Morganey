@@ -7,7 +7,6 @@ import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyLoading, Morg
 import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.interpreter.TermOutputHelper._
 import me.rexim.morganey.syntax._
-import me.rexim.morganey.util._
 
 import scala.util.{Failure, Success}
 
