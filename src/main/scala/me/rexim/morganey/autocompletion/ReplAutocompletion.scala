@@ -8,7 +8,6 @@ import me.rexim.morganey.interpreter.ReplContext
 import me.rexim.morganey.module.ModuleFinder
 import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.syntax.Language.identifier
-import me.rexim.morganey.util._
 
 import extractors._
 

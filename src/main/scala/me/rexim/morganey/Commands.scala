@@ -2,10 +2,11 @@ package me.rexim.morganey
 
 import me.rexim.morganey.interpreter.{ReplContext, ReplResult}
 import me.rexim.morganey.reduction.Computation
-import me.rexim.morganey.syntax.LambdaParser
-import me.rexim.morganey.util._
+import me.rexim.morganey.syntax._
 
-import scala.util.{Failure, Success}
+import scala.util._
+
+import java.util.regex.Pattern
 
 object Commands {
 
@@ -54,13 +55,19 @@ object Commands {
     sys.exit(0)
 
   private def rawPrintTerm(args: String)(context: ReplContext): ReplResult[String] = {
-    val parseResult = LambdaParser.parseWith(args, _.term)
+    val parseResult = LambdaParser.parseAll(LambdaParser.term, args).toTry
     val output = parseResult match {
       case Success(term) => term.toString
       case Failure(e)    => e.getMessage
     }
     ReplResult(context, Option(output))
   }
+
+  private[morganey] def validRegex(regex: String): Option[String => Boolean] =
+    Try {
+      val pattern = Pattern.compile(regex)
+      s: String => pattern.matcher(s).matches()
+    }.toOption
 
   private def unbindBindings(args: String)(context: ReplContext): ReplResult[String] =
     validRegex(args) match {

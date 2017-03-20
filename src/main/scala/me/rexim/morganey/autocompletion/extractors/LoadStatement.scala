@@ -2,7 +2,6 @@ package me.rexim.morganey.autocompletion.extractors
 
 import me.rexim.morganey.ast._
 import me.rexim.morganey.syntax._
-import me.rexim.morganey.util._
 
 object LoadStatement {
   private val zeroLoad = (Nil, false)
@@ -20,7 +19,7 @@ object LoadStatement {
     load.modulePath map pathInformation getOrElse zeroLoad
 
   def unapply(line: String): Option[(List[String], Boolean)] = {
-    val parseResult = LambdaParser.parseWith(line, _.loading).toOption
+    val parseResult = LambdaParser.parseAll(LambdaParser.loading, line).toOption
     parseResult.map(handleLoading)
   }
 }

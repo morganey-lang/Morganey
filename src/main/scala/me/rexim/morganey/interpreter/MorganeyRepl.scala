@@ -6,8 +6,7 @@ import me.rexim.morganey.reduction.NormalOrder._
 import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyLoading, MorganeyNode}
 import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.interpreter.TermOutputHelper._
-import me.rexim.morganey.syntax.LambdaParser
-import me.rexim.morganey.util._
+import me.rexim.morganey.syntax._
 
 import scala.util.{Failure, Success}
 
@@ -21,7 +20,7 @@ object MorganeyRepl {
     }
 
   private def parseAndEval(context: ReplContext, line: String): Computation[ReplResult[String]] = {
-    val parseResult = Computation(LambdaParser.parseWith(line, _.replCommand))
+    val parseResult = Computation(LambdaParser.parseAll(LambdaParser.replCommand, line).toTry)
 
     // TODO(#197): discriminate bindings from the rest of the nodes here and inform the user if the binding was redefined
     val evaluation = parseResult flatMap {
