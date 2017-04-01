@@ -16,7 +16,7 @@ import scala.util._
 class ModuleSpec extends FlatSpec with Matchers with MockitoSugar {
   // TODO: Extract mockClassLoaderResource into reusable thing
   //
-  // Reuse that thing in ModuleFinderSpec
+  // Reuse that thing in ModuleIndexSpec
 
   def mockClassLoaderResource(resourcePath: String, resourceContent: String): ClassLoader = {
     val resourceUrl: URL = {

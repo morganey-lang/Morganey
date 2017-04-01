@@ -24,18 +24,18 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms with Mock
     "std/prelude.mgn"
   ).map(resourcePath => new Module(ResourcePath(resourcePath)))
 
-  private val mockModuleFinder = {
-    val moduleFinder = mock[ModuleFinder]
-    when(moduleFinder.findAllModulesInIndex()).thenReturn(modules)
-    moduleFinder
+  private val mockModuleIndex = {
+    val moduleIndex = mock[ModuleIndex]
+    when(moduleIndex.modules()).thenReturn(modules)
+    moduleIndex
   }
 
   private def autocomplete(line: String, cursor: Int,
                            knownNames: List[String],
-                           moduleFinder: ModuleFinder = mockModuleFinder): Set[String] = {
+                           moduleIndex: ModuleIndex = mockModuleIndex): Set[String] = {
     val id = I(lvar("x"))
     val fakeBindings = knownNames.map(name => MorganeyBinding(lvar(name), id))
-    val context = ReplContext(fakeBindings, moduleFinder)
+    val context = ReplContext(fakeBindings, moduleIndex)
     ReplAutocompletion.complete(line, cursor, context).toSet
   }
 

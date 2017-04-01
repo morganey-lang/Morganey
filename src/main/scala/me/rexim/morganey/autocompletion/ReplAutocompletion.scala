@@ -5,7 +5,7 @@ import java.io.File
 import me.rexim.morganey.Commands._
 import me.rexim.morganey.ast._
 import me.rexim.morganey.interpreter.ReplContext
-import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.module.ModuleIndex
 import me.rexim.morganey.syntax.LambdaParser
 import me.rexim.morganey.syntax.Language.identifier
 
@@ -52,7 +52,7 @@ object ReplAutocompletion {
 
   private[autocompletion] def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean, context: ReplContext): List[String] = {
     val moduleName = s"${parts.mkString(".")}${if (endsWithDot) "." else ""}"
-    val knownModuleNames = context.moduleFinder.findAllModulesInIndex.map(_.canonicalPath)
+    val knownModuleNames = context.moduleIndex.modules.map(_.canonicalPath)
     knownModuleNames.filter(_ startsWith moduleName)
   }
 

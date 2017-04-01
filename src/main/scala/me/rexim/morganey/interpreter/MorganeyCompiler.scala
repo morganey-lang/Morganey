@@ -11,38 +11,6 @@ import java.io.Reader
 import me.rexim.morganey.ast.error.{BindingLoop, NonExistingBinding}
 
 object MorganeyCompiler {
-  def interpretNode(node: MorganeyNode,
-                    moduleFinder: ModuleFinder,
-                    loadedModules: Set[String]): Try[List[MorganeyBinding]] =
-    node match {
-      case binding: MorganeyBinding => Success(List(binding))
-      case MorganeyLoading(Some(modulePath)) => loadModule(modulePath, moduleFinder, loadedModules)
-      case MorganeyLoading(None) => Success(List())
-    }
-
-  def loadModuleFromReader(reader: Reader,
-                           moduleFinder: ModuleFinder,
-                           loadedModules: Set[String]): Try[List[MorganeyBinding]] =
-    LambdaParser.parseAll(LambdaParser.module, reader).toTry.flatMap {
-      nodes => sequence(nodes.map(interpretNode(_, moduleFinder, loadedModules))).map(_.flatten)
-    }
-
-  def loadModule(modulePath: String,
-                 moduleFinder: ModuleFinder,
-                 loadedModules: Set[String]): Try[List[MorganeyBinding]] = {
-    lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$modulePath module was not found"))
-
-    if (loadedModules.contains(modulePath)) {
-      Success(List())
-    } else {
-      moduleFinder
-        .findModuleInClasspath(modulePath)
-        .map(Success(_))
-        .getOrElse(moduleNotFound)
-        .flatMap(withReader(_)(loadModuleFromReader(_, moduleFinder, loadedModules + modulePath)))
-    }
-  }
-
   def compileProgram(input: () => Stream[Char])(rawProgram: List[MorganeyBinding]): Try[LambdaTerm] = {
     rawProgram.partition(_.variable.name == "main") match {
       case (List(MorganeyBinding(LambdaVar("main"), program)), bindings) =>

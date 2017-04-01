@@ -7,6 +7,7 @@ import me.rexim.morganey.ast.{LambdaTerm, MorganeyBinding, MorganeyLoading, Morg
 import me.rexim.morganey.reduction.Computation
 import me.rexim.morganey.interpreter.TermOutputHelper._
 import me.rexim.morganey.syntax._
+import me.rexim.morganey.module._
 
 import scala.util.{Failure, Success}
 
@@ -33,8 +34,8 @@ object MorganeyRepl {
 
   def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
     node match {
-      case MorganeyLoading(Some(module)) => {
-        MorganeyCompiler.loadModule(module, context.moduleFinder, Set()) match {
+      case MorganeyLoading(Some(modulePath)) => {
+        new Module(CanonicalPath(modulePath)).loadProgram() match {
           case Success(bindings) => Computation(ReplResult(context.addBindings(bindings), None))
           case Failure(e) => Computation.failed(e)
         }
