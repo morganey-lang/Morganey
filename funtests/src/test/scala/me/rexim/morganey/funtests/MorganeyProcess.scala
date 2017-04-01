@@ -5,5 +5,5 @@ import me.rexim.morganey.BuildInfo
 
 trait MorganeyProcess {
   def morganey(args: String*): ProcessBuilder =
-    s"java -jar ./target/scala-2.11/morganey-assembly-${BuildInfo.version}.jar ${args.mkString(" ")}"
+    s"java -cp .:./target/scala-2.11/morganey-assembly-${BuildInfo.version}.jar me.rexim.morganey.Main ${args.mkString(" ")}"
 }

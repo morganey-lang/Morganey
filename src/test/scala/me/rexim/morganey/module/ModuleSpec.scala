@@ -1,40 +1,15 @@
 package me.rexim.morganey.module
 
 import me.rexim.morganey.ast._
+import me.rexim.morganey.mock._
 
 import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 
-import java.io._
-import java.util.Vector
-import java.net.URL
-import java.nio.charset.StandardCharsets
-
 import scala.util._
 
-class ModuleSpec extends FlatSpec with Matchers with MockitoSugar {
-  // TODO: Extract mockClassLoaderResource into reusable thing
-  //
-  // Reuse that thing in ModuleIndexSpec
-
-  def mockClassLoaderResource(resourcePath: String, resourceContent: String): ClassLoader = {
-    val resourceUrl: URL = {
-      val mockResourceUrl = mock[URL]
-      when(mockResourceUrl.openStream())
-        .thenReturn(new ByteArrayInputStream(resourceContent.getBytes(StandardCharsets.UTF_8)))
-      mockResourceUrl
-    }
-
-    val classLoader: ClassLoader = {
-      val mockClassLoader = mock[ClassLoader]
-      when(mockClassLoader.getResource(resourcePath)).thenReturn(resourceUrl)
-      mockClassLoader
-    }
-
-    classLoader
-  }
-
+class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
   behavior of "Module"
 
   it should "return its canonical path" in {
@@ -65,5 +40,13 @@ class ModuleSpec extends FlatSpec with Matchers with MockitoSugar {
 
     new Module(ResourcePath(resourcePath), classLoader).dependencies.map(_.map(_.canonicalPath)) should
       be (Success(Set("foo", "bar.baz")))
+  }
+
+  it should "not load already loaded modules into program" in {
+    val resourcePath = "a/b/c.mgn"
+    val classLoader = mockClassLoaderResource(resourcePath, "def c := c")
+
+    new Module(ResourcePath(resourcePath), classLoader)
+      .loadProgram(Set(ResourcePath(resourcePath).asCanonicalPath.path)) should be (Success(Nil))
   }
 }

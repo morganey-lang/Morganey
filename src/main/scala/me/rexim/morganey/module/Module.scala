@@ -13,17 +13,21 @@ class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.
     modulePath.asCanonicalPath.path
 
   def loadProgram(loadedModules: Set[String] = Set.empty): Try[List[MorganeyBinding]] =
-    for {
-      interalBindings <- bindings.map(_.toList)
-      externalDependencies <- dependencies.map(_.toList)
-      externalBindings <- sequence(externalDependencies.map(_.loadProgram(loadedModules + canonicalPath))).map(_.flatten)
-    } yield interalBindings ++ externalBindings
+    if (!loadedModules.contains(canonicalPath)) {
+      for {
+        interalBindings <- bindings.map(_.toList)
+        externalDependencies <- dependencies.map(_.toList)
+        externalBindings <- sequence(externalDependencies.map(_.loadProgram(loadedModules + canonicalPath))).map(_.flatten)
+      } yield interalBindings ++ externalBindings
+    } else {
+      Success(Nil)
+    }
 
   private def nodes: Try[List[MorganeyNode]] = {
     val CanonicalPath(canonicalPath) = modulePath.asCanonicalPath
     val ResourcePath(resourcePath) = modulePath.asResourcePath
 
-    lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$canonicalPath module was not found"))
+    lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$resourcePath module was not found"))
 
     for {
       resourceUrl <- Option(classLoader.getResource(resourcePath)).map(Success(_)).getOrElse(moduleNotFound)
