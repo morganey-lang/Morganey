@@ -35,6 +35,4 @@ class MorganeyCompilerSpec extends FlatSpec with Matchers {
   it should "fail an incorrect program" in {
     MorganeyCompiler.compileProgram(() =>programInput)(programBindings).isFailure should be (true)
   }
-
-  it should ""
 }
