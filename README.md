@@ -21,6 +21,7 @@ $ sbt "run <path-to-sample>"
 
 from the root of the source code directory. For example, to execute the 15 first fibonacci numbers sample run:
 
+<!-- TODO(aa4e7fae-0a00-4af9-91c9-36bb6389ab99): Samples execution instructions don't work -->
 ```console
 $ sbt "run docs/samples/fib.mgn"
 ```
