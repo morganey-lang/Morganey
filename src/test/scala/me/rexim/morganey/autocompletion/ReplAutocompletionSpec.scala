@@ -58,9 +58,9 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers with MockitoSugar {
   }
 
   "autocompleteLoadStatement" should "should autocomplete modules according to the Morganey Index" in {
-    val moduleFinderMock = mock[ModuleFinder]
+    val moduleIndexMock = mock[ModuleIndex]
 
-    when(moduleFinderMock.findAllModulesInIndex()).thenReturn(List(
+    when(moduleIndexMock.modules()).thenReturn(List(
       "foo.mgn",
       "bar.mgn",
       "a/b.mgn"
@@ -68,7 +68,7 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers with MockitoSugar {
 
     val context = ReplContext(
       bindings = Nil,
-      moduleFinder = moduleFinderMock
+      moduleIndex = moduleIndexMock
     )
 
     ReplAutocompletion.autocompleteLoadStatement(Nil, false, context).sorted should be (List("foo", "bar", "a.b").sorted)

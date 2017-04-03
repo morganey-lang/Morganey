@@ -14,7 +14,7 @@ object Language {
 
   val symbolCharLiteral  = "'[\u0020-\u00B0]'"
 
-  val modulePath         = "[a-zA-Z][a-zA-Z0-9.]*"
+  val modulePath         = "[a-zA-Z][a-zA-Z0-9.\\-]*"
 
   /** For handling escape sequences, which are currently supported as `characterLiteral` */
   val escapeSequences =

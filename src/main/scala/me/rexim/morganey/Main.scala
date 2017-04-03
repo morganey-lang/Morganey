@@ -2,7 +2,7 @@ package me.rexim.morganey
 
 import jline.console.ConsoleReader
 import me.rexim.morganey.interpreter._
-import me.rexim.morganey.module.ModuleFinder
+import me.rexim.morganey.module._
 import me.rexim.morganey.ast._
 import me.rexim.morganey.reduction.Computation
 import sun.misc.{Signal, SignalHandler}
@@ -74,7 +74,8 @@ object Main extends SignalHandler {
     import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
 
-    val result = loadModuleFromReader(new java.io.FileReader(programFile), context.moduleFinder, Set())
+    val result = new Module(ResourcePath(programFile))
+      .loadProgram()
       .flatMap(compileProgram(() => Source.stdin.toStream))
       .map(_.norReduce())
 
@@ -86,7 +87,7 @@ object Main extends SignalHandler {
 
   def main(args: Array[String]) = {
     val context =
-      ReplContext(List[MorganeyBinding](), new ModuleFinder())
+      ReplContext(List[MorganeyBinding](), new ModuleIndex())
 
     args.toList match {
       case Nil => startRepl(context)

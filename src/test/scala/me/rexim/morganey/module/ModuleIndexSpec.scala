@@ -1,5 +1,7 @@
 package me.rexim.morganey.module
 
+import me.rexim.morganey.mock._
+
 import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
@@ -9,10 +11,7 @@ import java.util.Vector
 import java.net.URL
 import java.nio.charset.StandardCharsets
 
-class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
-  val moduleFinder =
-    new ModuleFinder()
-
+class ModuleIndexSpec extends FlatSpec with Matchers with ClassLoaderMocking {
   def mockMorganeyIndexUrl(modulesInIndex: List[String]): URL = {
     val morganeyIndexContent = modulesInIndex.mkString("\n")
 
@@ -23,32 +22,25 @@ class ModuleFinderSpec extends FlatSpec with MockitoSugar with Matchers {
     morganeyIndexUrl
   }
 
-  behavior of "Module Finder"
+  behavior of "Module Index"
 
-  it should "find modules in JVM classpath" in {
-    val expectedUrl = new URL("file://std/prelude.mgn")
-    val classLoader = mock[ClassLoader]
-    when(classLoader.getResource("std/prelude.mgn")).thenReturn(expectedUrl)
-    val moduleFinder = new ModuleFinder(classLoader)
-
-    moduleFinder.findModuleInClasspath("std.prelude") should
-      be (Some(expectedUrl))
-  }
-
-  it should "return all modules from Morganey index" in {
+  it should "return all modules from the index" in {
     import scala.collection.JavaConverters._
 
-    val moduleContainers = List(List("hello.mgn", "world.mgn"), List("a/foo.mgn", "b/bar.mgn"))
-    val expectedModules = moduleContainers.flatMap(identity).map(path => new Module(ResourcePath(path)))
+    val moduleContainers = List(
+      List("hello.mgn", "world.mgn"),
+      List("a/foo.mgn", "b/bar.mgn")
+    )
+    val expectedModules = moduleContainers.flatten.map(path => new Module(ResourcePath(path)))
     val mockedMorganeyIndexUrls = moduleContainers.map(mockMorganeyIndexUrl)
 
     val classLoader = mock[ClassLoader]
     when(classLoader.getResources("morganey-index"))
       .thenReturn(new Vector(mockedMorganeyIndexUrls.asJava).elements())
 
-    val moduleFinder = new ModuleFinder(classLoader)
+    val moduleIndex = new ModuleIndex(classLoader)
 
-    moduleFinder.findAllModulesInIndex().map(_.canonicalPath).sorted should
+    moduleIndex.modules().map(_.canonicalPath).sorted should
       be (expectedModules.map(_.canonicalPath).sorted)
   }
 }
