@@ -27,7 +27,10 @@ class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.
     val CanonicalPath(canonicalPath) = modulePath.asCanonicalPath
     val ResourcePath(resourcePath) = modulePath.asResourcePath
 
-    lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$resourcePath module was not found"))
+    // TODO(a965237a-2497-41d0-81df-1861054a0d8d): print URLs of classpath on this error
+    //
+    // That should help user to troubleshoot their not found modules
+    lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$canonicalPath module was not found"))
 
     for {
       resourceUrl <- Option(classLoader.getResource(resourcePath)).map(Success(_)).getOrElse(moduleNotFound)
