@@ -6,7 +6,7 @@ import me.rexim.morganey.reader._
 import me.rexim.morganey.monad._
 import scala.util._
 
-import java.net.URL
+import java.net.{URL, URLClassLoader}
 
 class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.getClassLoader) {
   def canonicalPath: String =
@@ -23,14 +23,24 @@ class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.
       Success(Nil)
     }
 
-  private def nodes: Try[List[MorganeyNode]] = {
+  private[module] def classPathUrls: Seq[URL] =
+    classLoader match {
+      case urlClassLoader: URLClassLoader => urlClassLoader.getURLs
+      case _ => Seq()
+    }
+
+  private[module] def nodes: Try[List[MorganeyNode]] = {
     val CanonicalPath(canonicalPath) = modulePath.asCanonicalPath
     val ResourcePath(resourcePath) = modulePath.asResourcePath
+    val classPathList =
+      classPathUrls
+        .map(url => s"  $url")
+        .mkString("\n")
 
-    // TODO(a965237a-2497-41d0-81df-1861054a0d8d): print URLs of classpath on this error
-    //
-    // That should help user to troubleshoot their not found modules
-    lazy val moduleNotFound = Failure(new ModuleNotFoundException(s"$canonicalPath module was not found"))
+    lazy val moduleNotFound = Failure(new ModuleNotFoundException(
+      s"""|$canonicalPath module was not found.
+          |$classPathList""".stripMargin
+    ))
 
     for {
       resourceUrl <- Option(classLoader.getResource(resourcePath)).map(Success(_)).getOrElse(moduleNotFound)
