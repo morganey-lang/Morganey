@@ -70,7 +70,7 @@ object Main extends SignalHandler {
     }
   }
 
-  def executeProgram(context: ReplContext, programFile: String) = {
+  def executeProgram(programFile: String) = {
     import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
 
@@ -91,7 +91,7 @@ object Main extends SignalHandler {
 
     args.toList match {
       case Nil => startRepl(context)
-      case programFile :: _ => executeProgram(context, programFile)
+      case programFile :: _ => executeProgram(programFile)
     }
   }
 
