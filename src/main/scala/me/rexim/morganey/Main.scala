@@ -49,9 +49,12 @@ object Main extends SignalHandler {
   def startRepl(context: ReplContext) = {
     Signal.handle(new Signal("INT"), this)
 
+    windowsRedirectedInputHack()
+
     val running = true
     var globalContext = context
-    val con = initializeConsoleReader()
+    val con = new ConsoleReader()
+    con.setPrompt("λ> ")
     con.addCompleter(new TerminalReplAutocompletion(() => globalContext))
 
     def line() = Option(con.readLine()).map(_.trim)
@@ -95,7 +98,7 @@ object Main extends SignalHandler {
     }
   }
 
-  private def initializeConsoleReader(): ConsoleReader = {
+  private def windowsRedirectedInputHack() = {
     lazy val isInputRedirected = System.console == null
     lazy val isWindows =
       Option(System.getProperty("os.name"))
@@ -106,9 +109,5 @@ object Main extends SignalHandler {
       // input, otherwise JLine just hangs when trying to read it.
       System.setProperty("jline.WindowsTerminal.directConsole", "false")
     }
-
-    val con = new ConsoleReader()
-    con.setPrompt("λ> ")
-    con
   }
 }
