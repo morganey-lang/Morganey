@@ -116,8 +116,8 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
         terms.foldRight(tree) {
           case (ele, acc) =>
             liftComplexTerm(ele).wrap2(acc) {
-              case (a, b) if unapply => pq"$a :: $b"
-              case (a, b)            => q"$a :: $b"
+              case (a, b) if unapply => pq"$a +: $b"
+              case (a, b)            => q"$a +: $b"
             }
         }
 

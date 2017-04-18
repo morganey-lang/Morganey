@@ -100,7 +100,8 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
     rest should be (lfunc("d", one))
   }
 
-  "Splicing of terms into lists" should "be supported by the quotation macro" in {
+  "Splicing sequences of terms into lists" should "be supported by the quotation macro" in {
+    // Lists
     {
       val terms   = List(zero, one, two)
       val spliced = m"[..$terms]"
@@ -116,9 +117,43 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
       val spliced = m"[..$terms, 2]"
       spliced should be (`[0 .. 2]`)
     }
+
+    // Vectors
+    {
+      val terms   = Vector(zero, one, two)
+      val spliced = m"[..$terms]"
+      spliced should be (`[0 .. 2]`)
+    }
+    {
+      val terms   = Vector(one, two)
+      val spliced = m"[0, ..$terms]"
+      spliced should be (`[0 .. 2]`)
+    }
+    {
+      val terms   = Vector(zero, one)
+      val spliced = m"[..$terms, 2]"
+      spliced should be (`[0 .. 2]`)
+    }
+
+    // Seqs
+    {
+      val terms   = Seq(zero, one, two)
+      val spliced = m"[..$terms]"
+      spliced should be (`[0 .. 2]`)
+    }
+    {
+      val terms   = Seq(one, two)
+      val spliced = m"[0, ..$terms]"
+      spliced should be (`[0 .. 2]`)
+    }
+    {
+      val terms   = Seq(zero, one)
+      val spliced = m"[..$terms, 2]"
+      spliced should be (`[0 .. 2]`)
+    }
   }
 
-  "Unsplicing of terms out of lists" should "be supported by the unquotation macro" in {
+  "Unsplicing sequences of terms out of lists" should "be supported by the unquotation macro" in {
     {
       val m"[..$unspliced]" = `[0 .. 2]`
       unspliced should be (List(zero, one, two))
