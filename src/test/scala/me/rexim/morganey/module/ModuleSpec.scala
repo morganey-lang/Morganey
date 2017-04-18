@@ -9,6 +9,8 @@ import org.scalatest.mockito.MockitoSugar
 
 import scala.util._
 
+import java.net.{URL, URLClassLoader}
+
 class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
   behavior of "Module"
 
@@ -42,11 +44,45 @@ class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
       be (Success(Set("foo", "bar.baz")))
   }
 
+  it should "should print list of class path URLs on ModuleNotFound error" in {
+    val urls = Array(
+      new URL("https://github.com/"),
+      new URL("https://www.google.ru/")
+    )
+    val urlClassLoader = mock[URLClassLoader]
+    when(urlClassLoader.getURLs()).thenReturn(urls)
+
+    new Module(ResourcePath("a/b/c.mgn"), urlClassLoader).nodes match {
+      case Failure(e) => assert(urls.forall { url =>
+        e.getMessage.containsSlice(url.toString)
+      }, "Not all classpaths are presented in the ModuleNotFound error message")
+      case _ => fail("Successfully loaded non-existing module")
+    }
+  }
+
   it should "not load already loaded modules into program" in {
     val resourcePath = "a/b/c.mgn"
     val classLoader = mockClassLoaderResource(resourcePath, "def c := c")
 
     new Module(ResourcePath(resourcePath), classLoader)
       .loadProgram(Set(ResourcePath(resourcePath).asCanonicalPath.path)) should be (Success(Nil))
+  }
+
+  it should "return class path URLs if the provided class loader is URLClassLoader" in {
+    val urls = Array(
+      new URL("https://github.com/"),
+      new URL("https://www.google.ru/")
+    )
+    val urlClassLoader = mock[URLClassLoader]
+    when(urlClassLoader.getURLs()).thenReturn(urls)
+
+    val module = new Module(CanonicalPath("foo.bar"), urlClassLoader)
+    module.classPathUrls should be (urls)
+  }
+
+  it should "return empty list of URLs if the provided class loader is NOT URLClassLoader" in {
+    val classLoader = mock[ClassLoader]
+    val module = new Module(CanonicalPath("foo.bar"), classLoader)
+    module.classPathUrls should be (Seq())
   }
 }
