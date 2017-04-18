@@ -59,7 +59,7 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
     val m"${nTwo: Int}" = two
     nTwo should be (2)
 
-    val m"${numbers: List[Int]}" = pair(zero, pair(one, pair(two, zero)))
+    val m"${numbers: List[Int]}" = `[0 .. 2]`
     numbers should be (List(0, 1, 2))
 
     val m"${list: List[Int]}" = zero
@@ -98,6 +98,39 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
 
     val m"\\b.c.$rest" = m"\\b.c.d.1"
     rest should be (lfunc("d", one))
+  }
+
+  "Splicing of terms into lists" should "be supported by the quotation macro" in {
+    {
+      val terms   = List(zero, one, two)
+      val spliced = m"[..$terms]"
+      spliced should be (`[0 .. 2]`)
+    }
+    {
+      val terms   = List(one, two)
+      val spliced = m"[0, ..$terms]"
+      spliced should be (`[0 .. 2]`)
+    }
+    {
+      val terms   = List(zero, one)
+      val spliced = m"[..$terms, 2]"
+      spliced should be (`[0 .. 2]`)
+    }
+  }
+
+  "Unsplicing of terms out of lists" should "be supported by the unquotation macro" in {
+    {
+      val m"[..$unspliced]" = `[0 .. 2]`
+      unspliced should be (List(zero, one, two))
+    }
+    {
+      val m"[0, ..$unspliced]" = `[0 .. 2]`
+      unspliced should be (List(one, two))
+    }
+    {
+      val m"[..$unspliced, 2]" = `[0 .. 2]`
+      unspliced should be (List(zero, one))
+    }
   }
 
 }
