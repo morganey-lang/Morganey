@@ -153,18 +153,106 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
     }
   }
 
-  "Unsplicing sequences of terms out of lists" should "be supported by the unquotation macro" in {
+  "Unsplicing sequences of terms out of lists (without specified types)" should "be supported by the unquotation macro" in {
     {
       val m"[..$unspliced]" = `[0 .. 2]`
-      unspliced should be (List(zero, one, two))
+      unspliced should be(List(zero, one, two))
     }
     {
       val m"[0, ..$unspliced]" = `[0 .. 2]`
-      unspliced should be (List(one, two))
+      unspliced should be(List(one, two))
     }
     {
       val m"[..$unspliced, 2]" = `[0 .. 2]`
-      unspliced should be (List(zero, one))
+      unspliced should be(List(zero, one))
+    }
+  }
+
+  "Unsplicing sequences of terms out of lists (with specified types)" should "be supported by the unquotation macro" in {
+    // Lists
+    {
+      val m"[..${unspliced: List[LambdaTerm]}]" = `[0 .. 2]`
+      unspliced should be(List(zero, one, two))
+    }
+    {
+      val m"[0, ..${unspliced: List[LambdaTerm]}]" = `[0 .. 2]`
+      unspliced should be(List(one, two))
+    }
+    {
+      val m"[..${unspliced: List[LambdaTerm]}, 2]" = `[0 .. 2]`
+      unspliced should be(List(zero, one))
+    }
+
+    // Vectors
+    {
+      val m"[..${unspliced: Vector[LambdaTerm]}]" = `[0 .. 2]`
+      unspliced should be (Vector(zero, one, two))
+    }
+    {
+      val m"[0, ..${unspliced: Vector[LambdaTerm]}]" = `[0 .. 2]`
+      unspliced should be (Vector(one, two))
+    }
+    {
+      val m"[..${unspliced: Vector[LambdaTerm]}, 2]" = `[0 .. 2]`
+      unspliced should be (Vector(zero, one))
+    }
+
+    // Seqs
+    {
+      val m"[..${unspliced: Seq[LambdaTerm]}]" = `[0 .. 2]`
+      unspliced should be (Seq(zero, one, two))
+    }
+    {
+      val m"[0, ..${unspliced: Vector[LambdaTerm]}]" = `[0 .. 2]`
+      unspliced should be (Seq(one, two))
+    }
+    {
+      val m"[..${unspliced: Vector[LambdaTerm]}, 2]" = `[0 .. 2]`
+      unspliced should be (Seq(zero, one))
+    }
+  }
+
+  "Unsplicing sequences of terms out of lists (with specified types and autoconversion)" should "be supported by the unquotation macro" in {
+    // Lists
+    {
+      val m"[..${unspliced: List[Int]}]" = `[0 .. 2]`
+      unspliced should be(List(0, 1, 2))
+    }
+    {
+      val m"[0, ..${unspliced: List[Int]}]" = `[0 .. 2]`
+      unspliced should be(List(1, 2))
+    }
+    {
+      val m"[..${unspliced: List[Int]}, 2]" = `[0 .. 2]`
+      unspliced should be(List(0, 1))
+    }
+
+    // Vectors
+    {
+      val m"[..${unspliced: Vector[Int]}]" = `[0 .. 2]`
+      unspliced should be (Vector(0, 1, 2))
+    }
+    {
+      val m"[0, ..${unspliced: Vector[Int]}]" = `[0 .. 2]`
+      unspliced should be (Vector(1, 2))
+    }
+    {
+      val m"[..${unspliced: Vector[Int]}, 2]" = `[0 .. 2]`
+      unspliced should be (Vector(0, 1))
+    }
+
+    // Seqs
+    {
+      val m"[..${unspliced: Seq[Int]}]" = `[0 .. 2]`
+      unspliced should be (Seq(0, 1, 2))
+    }
+    {
+      val m"[0, ..${unspliced: Vector[Int]}]" = `[0 .. 2]`
+      unspliced should be (Seq(1, 2))
+    }
+    {
+      val m"[..${unspliced: Vector[Int]}, 2]" = `[0 .. 2]`
+      unspliced should be (Seq(0, 1))
     }
   }
 
