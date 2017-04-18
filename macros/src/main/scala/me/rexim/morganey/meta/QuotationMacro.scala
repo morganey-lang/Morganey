@@ -23,6 +23,9 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
 
   private val (parts, method, args) = macroApplication()
 
+  private def isUnapply = TermName("unapply") == method
+  private def isApply   = TermName("apply") == method
+
   private lazy val IterableClass: TypeSymbol =
     typeOf[Iterable[_]].typeSymbol.asType
   private lazy val IterableTParam: Type =
@@ -36,16 +39,20 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
   private lazy val liftList_   = c.inferImplicitValue(typeOf[Lift[List[LambdaTerm]]], silent = true)
   private lazy val unliftList  = implicitly[Unlift[List[LambdaTerm]]]
   private lazy val unliftList_ = c.inferImplicitValue(typeOf[Unlift[List[LambdaTerm]]], silent = true)
+  private def unliftColl_ (tpe: Type) = c.inferImplicitValue(unliftableT(tpe), silent = true)
 
   private type Lift[T] = me.rexim.morganey.meta.Liftable[T]
-  private lazy val LiftableTpe = typeOf[Lift[_]]
+  private lazy val LiftableTpe = typeOf[me.rexim.morganey.meta.Liftable[_]]
   private def liftableT(tpe: Type): Type = appliedType(LiftableTpe, tpe)
 
   private type Unlift[T] = me.rexim.morganey.meta.Unliftable[T]
-  private lazy val UnliftableTpe = typeOf[Unlift[_]]
+  private lazy val UnliftableTpe = typeOf[me.rexim.morganey.meta.Unliftable[_]]
   private def unliftableT(tpe: Type): Type = appliedType(UnliftableTpe, tpe)
 
   private case class Lifted(exp: Tree, preamble: List[Tree] = Nil) {
+    def define(decl: Tree): Lifted =
+      Lifted(exp, preamble :+ decl)
+
     def wrap(f: Tree => Tree): Lifted =
       Lifted(f(exp), preamble)
 
@@ -89,7 +96,10 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
     case LambdaVar(DottedHole(_)) =>
       c.abort(c.enclosingPosition, "Illegal usage of ..!")
     case LambdaVar(Hole(hole)) =>
-      replaceHole(hole, dotted = false)
+      replaceHole(hole, dotted = false) match {
+        case Left(x) => x
+        case Right((x, _)) => x
+      }
     case LambdaVar(name) =>
       Lifted(q"_root_.me.rexim.morganey.ast.LambdaVar($name)")
     case LambdaFunc(param, body) =>
@@ -105,8 +115,6 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
   private def liftComplexTerm(term: LambdaTerm): Lifted = term match {
     case unliftList(terms) =>
 
-      val unapply = TermName("unapply") == method
-
       def isDottedHole(term: LambdaTerm): Boolean = term match {
         case LambdaVar(DottedHole(_)) => true
         case _                        => false
@@ -116,8 +124,8 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
         terms.foldRight(tree) {
           case (ele, acc) =>
             liftComplexTerm(ele).wrap2(acc) {
-              case (a, b) if unapply => pq"$a +: $b"
-              case (a, b)            => q"$a +: $b"
+              case (a, b) if isUnapply => pq"$a +: $b"
+              case (a, b)              => q"$a +: $b"
             }
         }
 
@@ -125,25 +133,55 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
         terms.foldLeft(tree) {
           case (acc, ele) =>
             acc.wrap2(liftComplexTerm(ele)) {
-              case (a, b) if unapply => pq"$a :+ $b"
-              case (a, b)            => q"$a :+ $b"
+              case (a, b) if isUnapply => pq"$a :+ $b"
+              case (a, b)              => q"$a :+ $b"
             }
         }
 
       terms.span(!isDottedHole(_)) match {
         // [..$xs, _*]
         case (Nil, LambdaVar(DottedHole(hole)) :: rest) =>
-          val holeContent = replaceHole(hole, dotted = true)
-          val app = append(holeContent, rest)
-          if (unapply) app.wrap(x => pq"$unliftList_($x)")
-          else app.wrap(x => q"$liftList_($x)")
+
+          replaceHole(hole, dotted = true) match {
+            // apply
+            case Left(holeContent) =>
+              val app = append(holeContent, rest)
+              app.wrap(x => q"$liftList_($x)")
+
+            // unapply
+            case Right((holeContent, tpeCtor)) =>
+              val app       = append(holeContent, rest)
+              val exactly   = TermName(c.freshName("exactly"))
+              val LTermsTpe = appliedType(tpeCtor, LambdaTermTpe)
+              val preamble  =
+                q"""
+                  val $exactly: _root_.me.rexim.morganey.meta.Unliftable[$LTermsTpe] =
+                    ${unliftColl_(LTermsTpe)}
+                """
+              app.wrap(x => pq"$exactly($x)").define(preamble)
+          }
 
         // [_*, ..$xs]
         case (init, LambdaVar(DottedHole(hole)) :: Nil) =>
-          val holeContent = replaceHole(hole, dotted = true)
-          val prep = prepend(init, holeContent)
-          if (unapply) prep.wrap(x => pq"$unliftList_($x)")
-          else prep.wrap(x => q"$liftList_($x)")
+
+          replaceHole(hole, dotted = true) match {
+            // apply
+            case Left(holeContent) =>
+              val prep = prepend(init, holeContent)
+              prep.wrap(x => q"$liftList_($x)")
+
+            // unapply
+            case Right((holeContent, tpeCtor)) =>
+              val prep      = prepend(init, holeContent)
+              val exactly   = TermName(c.freshName("exactly"))
+              val LTermsTpe = appliedType(tpeCtor, LambdaTermTpe)
+              val preamble  =
+                q"""
+                  val $exactly: _root_.me.rexim.morganey.meta.Unliftable[$LTermsTpe] =
+                    ${unliftColl_(LTermsTpe)}
+                """
+              prep.wrap(x => pq"$exactly($x)").define(preamble)
+          }
 
         // no dotted list
         case (_, Nil) =>
@@ -157,79 +195,83 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
       liftPrimitiveTerm(simple)
   }
 
-  private def replaceHole(hole: Int, dotted: Boolean): Lifted = method match {
-    case TermName("apply") =>
-      val arg = args(hole)
-      val tpe =
-        if (!dotted) arg.tpe
-        else iterableT(arg.tpe)
+  private def replaceHole(hole: Int, dotted: Boolean): Either[Lifted, (Lifted, Type /* of collection */)] =
+    if (isApply) Left(replaceHoleWithExp(hole, dotted))
+    else Right(replaceHoleWithPattern(hole, dotted))
 
-      def quote(tree: Tree): Tree =
-        if (tpe <:< LambdaTermTpe) {
-          /*
-           * A value of type `LambdaTerm` will be inserted into the hole.
-           */
-          tree
-        } else {
-          /*
-           * A value of type `tpe` will be inserted into the hole.
-           * To be able to do so, it has to be converted to a value of type `LambdaTerm`.
-           * Instances of the typeclass me.rexim.morganey.meta.Liftable know how to do the conversion.
-           */
-          val liftTpe = c.inferImplicitValue(liftableT(tpe), silent = true)
-          if (liftTpe.nonEmpty) {
-            q"$liftTpe($tree)"
-          } else {
-            val reason = s"Because no implicit value of type me.rexim.morganey.meta.Liftable[$tpe] could be found!"
-            val msg    = s"Couldn't lift a value of type $tpe to lambda term! ($reason)"
-            c.abort(arg.pos, msg)
-          }
-        }
+  private def replaceHoleWithExp(hole: Int, dotted: Boolean): Lifted = {
+    val arg = args(hole)
+    val tpe =
+      if (!dotted) arg.tpe
+      else iterableT(arg.tpe)
 
-      if (!dotted) {
-        Lifted(quote(arg))
+    def quote(tree: Tree): Tree =
+      if (tpe <:< LambdaTermTpe) {
+        /*
+         * A value of type `LambdaTerm` will be inserted into the hole.
+         */
+        tree
       } else {
-        val parName = TermName(c.freshName())
-        val list    = q"$arg.map { ($parName: $tpe) => ${quote(q"$parName")} }.toList"
-        Lifted(list)
-      }
-
-    case TermName("unapply") =>
-      val x = TermName(s"x$hole")
-      val subpattern = c.internal.subpatterns(args.head).get.apply(hole)
-
-      def unQuote(tpe: Type): Lifted = {
-        val unliftTpe = c.inferImplicitValue(unliftableT(tpe), silent = true)
-
-        if (unliftTpe.nonEmpty) {
-          if (!dotted) {
-            Lifted(pq"$unliftTpe($x @ _)")
-          } else {
-            val each = TermName(c.freshName(s"each$hole"))
-            val preamble =
-              q"""
-                  val $each: _root_.me.rexim.morganey.meta.UnapplyEach[$tpe] =
-                    new _root_.me.rexim.morganey.meta.UnapplyEach[$tpe]($unliftTpe)
-                """
-            Lifted(pq"$each($x @ _)", List(preamble))
-          }
+        /*
+         * A value of type `tpe` will be inserted into the hole.
+         * To be able to do so, it has to be converted to a value of type `LambdaTerm`.
+         * Instances of the typeclass me.rexim.morganey.meta.Liftable know how to do the conversion.
+         */
+        val liftTpe = c.inferImplicitValue(liftableT(tpe), silent = true)
+        if (liftTpe.nonEmpty) {
+          q"$liftTpe($tree)"
         } else {
-          val reason = s"Because no implicit value of type me.rexim.morganey.meta.Unliftable[$tpe] could be found!"
-          val msg    = s"Couldn't unlift a lambda term to a value of type $tpe! ($reason)"
-          c.abort(subpattern.pos, msg)
+          val reason = s"Because no implicit value of type me.rexim.morganey.meta.Liftable[$tpe] could be found!"
+          val msg    = s"Couldn't lift a value of type $tpe to lambda term! ($reason)"
+          c.abort(arg.pos, msg)
         }
       }
 
-      subpattern match {
-        case pq"$_: $tpt" =>
-          val typedTpt = c.typecheck(tpt, c.TYPEmode)
-          val tpe =
-            if (!dotted) typedTpt.tpe
-            else iterableT(typedTpt.tpe)
-          unQuote(tpe)
-        case _ =>
-          unQuote(LambdaTermTpe)
+    if (!dotted) {
+      Lifted(quote(arg))
+    } else {
+      val parName = TermName(c.freshName())
+      val list    = q"$arg.map { ($parName: $tpe) => ${quote(q"$parName")} }.toList"
+      Lifted(list)
+    }
+  }
+
+  private def replaceHoleWithPattern(hole: Int, dotted: Boolean): (Lifted, Type) = {
+    val x = TermName(s"x$hole")
+    val subpattern = c.internal.subpatterns(args.head).get.apply(hole)
+
+    def unQuote(tpe: Type, tpeCtor: Type): (Lifted, Type) = {
+      val unliftTpe = c.inferImplicitValue(unliftableT(tpe), silent = true)
+
+      if (unliftTpe.nonEmpty) {
+        if (!dotted) {
+          (Lifted(pq"$unliftTpe($x @ _)"), tpeCtor)
+        } else {
+          val each = TermName(c.freshName(s"each$hole"))
+          val preamble =
+            q"""
+              val $each: _root_.me.rexim.morganey.meta.UnapplyEach[$tpe, $tpeCtor] =
+                new _root_.me.rexim.morganey.meta.UnapplyEach[$tpe, $tpeCtor]($unliftTpe)
+            """
+          (Lifted(pq"$each($x @ _)", List(preamble)), tpeCtor)
+        }
+      } else {
+        val reason = s"Because no implicit value of type me.rexim.morganey.meta.Unliftable[$tpe] could be found!"
+        val msg    = s"Couldn't unlift a lambda term to a value of type $tpe! ($reason)"
+        c.abort(subpattern.pos, msg)
       }
+    }
+
+    subpattern match {
+      case pq"$_: $tpt" =>
+        val typedTpt = c.typecheck(tpt, c.TYPEmode)
+        val tpe =
+          if (!dotted) typedTpt.tpe
+          else iterableT(typedTpt.tpe)
+        unQuote(tpe, typedTpt.tpe.typeConstructor)
+      case _ =>
+        unQuote(LambdaTermTpe, typeOf[List[_]].typeConstructor)
+    }
   }
 
   private def wrapAst(term: LambdaTerm): Tree = method match {
