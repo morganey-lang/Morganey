@@ -49,12 +49,24 @@ object Main extends SignalHandler {
   def startRepl(context: ReplContext) = {
     Signal.handle(new Signal("INT"), this)
 
-    val running = true
+    windowsRedirectedInputHack()
+
     var globalContext = context
-    val con = initializeConsoleReader()
+
+    val running = true
+    val con = new ConsoleReader()
+    con.setPrompt("λ> ")
     con.addCompleter(new TerminalReplAutocompletion(() => globalContext))
 
     def line() = Option(con.readLine()).map(_.trim)
+
+    // TODO(b6a7635e-46f3-412e-848b-f770d9d4e709): try to get rid of duplicate code
+    awaitComputationResult(MorganeyRepl.evalLine(context, "load std.prelude")) match {
+      case Success(ReplResult(newContext, _)) =>
+        globalContext = newContext
+      case Failure(e) =>
+        con.println(e.getMessage)
+    }
 
     while (running) line() match {
       case None                => exitRepl() // eof
@@ -70,7 +82,10 @@ object Main extends SignalHandler {
     }
   }
 
-  def executeProgram(context: ReplContext, programFile: String) = {
+  def executeProgram(programFile: String) = {
+    // TODO(d60b7de5-11f1-4d98-a30e-3d1baa0aae3e): Implement prelude
+    // mechanism for execution mode
+
     import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
 
@@ -91,11 +106,11 @@ object Main extends SignalHandler {
 
     args.toList match {
       case Nil => startRepl(context)
-      case programFile :: _ => executeProgram(context, programFile)
+      case programFile :: _ => executeProgram(programFile)
     }
   }
 
-  private def initializeConsoleReader(): ConsoleReader = {
+  private def windowsRedirectedInputHack() = {
     lazy val isInputRedirected = System.console == null
     lazy val isWindows =
       Option(System.getProperty("os.name"))
@@ -106,9 +121,5 @@ object Main extends SignalHandler {
       // input, otherwise JLine just hangs when trying to read it.
       System.setProperty("jline.WindowsTerminal.directConsole", "false")
     }
-
-    val con = new ConsoleReader()
-    con.setPrompt("λ> ")
-    con
   }
 }
