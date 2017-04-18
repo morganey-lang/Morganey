@@ -1,11 +1,18 @@
 package me.rexim.morganey.meta
 
 import me.rexim.morganey.ast.LambdaTerm
-import me.rexim.morganey.monad.sequence
+import me.rexim.morganey.monad._
 
-class UnapplyEach[T](unliftT: Unliftable[T]) {
+import scala.collection.generic.CanBuildFrom
+import scala.language.higherKinds
 
-  def unapply(terms: List[LambdaTerm]): Option[List[T]] =
-    sequence(terms map unliftT.unapply)
+class UnapplyEach[T, CC[+X] <: TraversableOnce[X]](unliftT: Unliftable[T])
+                                                  (implicit cbf: CanBuildFrom[CC[LambdaTerm], T, CC[T]],
+                                                           cbfo: CanBuildFrom[CC[LambdaTerm], Option[T], CC[Option[T]]]) {
+
+  def unapply(terms: CC[LambdaTerm]): Option[CC[T]] = {
+    val unliftedElements = (cbfo() ++= (terms map unliftT.unapply _)).result()
+    sequence[CC, T](unliftedElements)(cbf)
+  }
 
 }
