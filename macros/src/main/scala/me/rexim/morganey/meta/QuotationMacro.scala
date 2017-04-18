@@ -116,7 +116,8 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
         terms.foldRight(tree) {
           case (ele, acc) =>
             liftComplexTerm(ele).wrap2(acc) {
-              case (a, b) => q"$a :: $b"
+              case (a, b) if unapply => pq"$a :: $b"
+              case (a, b)            => q"$a :: $b"
             }
         }
 
@@ -124,7 +125,8 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
         terms.foldLeft(tree) {
           case (acc, ele) =>
             acc.wrap2(liftComplexTerm(ele)) {
-              (a, b) => q"$a :+ $b"
+              case (a, b) if unapply => pq"$a :+ $b"
+              case (a, b)            => q"$a :+ $b"
             }
         }
 
@@ -133,14 +135,14 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
         case (Nil, LambdaVar(DottedHole(hole)) :: rest) =>
           val holeContent = replaceHole(hole, dotted = true)
           val app = append(holeContent, rest)
-          if (unapply) app
+          if (unapply) app.wrap(x => pq"$unliftList_($x)")
           else app.wrap(x => q"$liftList_($x)")
 
         // [_*, ..$xs]
         case (init, LambdaVar(DottedHole(hole)) :: Nil) =>
           val holeContent = replaceHole(hole, dotted = true)
           val prep = prepend(init, holeContent)
-          if (unapply) prep
+          if (unapply) prep.wrap(x => pq"$unliftList_($x)")
           else prep.wrap(x => q"$liftList_($x)")
 
         // no dotted list
@@ -209,10 +211,7 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
                   val $each: _root_.me.rexim.morganey.meta.UnapplyEach[$tpe] =
                     new _root_.me.rexim.morganey.meta.UnapplyEach[$tpe]($unliftTpe)
                 """
-            val unapplyEach  = pq"$each($x @ _)"
-            val unapplyTerms = unliftList_
-
-            Lifted(q"$unapplyTerms($unapplyEach)", List(preamble))
+            Lifted(pq"$each($x @ _)", List(preamble))
           }
         } else {
           val reason = s"Because no implicit value of type me.rexim.morganey.meta.Unliftable[$tpe] could be found!"
