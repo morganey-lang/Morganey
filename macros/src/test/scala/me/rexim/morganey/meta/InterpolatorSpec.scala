@@ -49,6 +49,12 @@ class InterpolatorSpec extends FlatSpec with Matchers with TestTerms {
     m"$numbers" should be (pair(zero, pair(one, pair(two, zero, "z"), "z"), "z"))
   }
 
+  "Matching against big strings" should "be possible with the quotation mechanism" in {
+    val string = "The quick brown fox jumps over the lazy dog"
+    // `string` is represented by 4057 applications in morganey
+    val m""" "The quick brown fox jumps over the lazy dog" """ = m"$string"
+  }
+
   "Lambda terms" should "be converted back to Scala values during unlifting" in {
     val m"${nZero: Int}" = zero
     nZero should be (0)

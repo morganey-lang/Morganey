@@ -1,9 +1,16 @@
 package me.rexim.morganey.meta
 
 import me.rexim.morganey.ast._
+import me.rexim.morganey.meta.QuotationMacro._
 
 import StringContext.treatEscapes
 import scala.reflect.macros.whitebox
+
+private[meta] object QuotationMacro {
+
+  val bigNumberThreshold = 10
+
+}
 
 private[meta] class QuotationMacro(val c: whitebox.Context) {
   import c.universe._
@@ -35,6 +42,9 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
 
   private val LambdaTermTpe = typeOf[LambdaTerm]
 
+  private lazy val morganeyNumber  = implicitly[Unlift[Int]]
+  private lazy val morganeyIntList = implicitly[Unlift[List[Int]]]
+
   private lazy val liftList    = implicitly[Lift[List[LambdaTerm]]]
   private lazy val liftList_   = c.inferImplicitValue(typeOf[Lift[List[LambdaTerm]]], silent = true)
   private lazy val unliftList  = implicitly[Unlift[List[LambdaTerm]]]
@@ -50,8 +60,8 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
   private def unliftableT(tpe: Type): Type = appliedType(UnliftableTpe, tpe)
 
   private case class Lifted(exp: Tree, preamble: List[Tree] = Nil) {
-    def define(decl: Tree): Lifted =
-      Lifted(exp, preamble :+ decl)
+    def define(decls: Tree*): Lifted =
+      Lifted(exp, preamble ++ decls.toList)
 
     def wrap(f: Tree => Tree): Lifted =
       Lifted(f(exp), preamble)
@@ -95,17 +105,40 @@ private[meta] class QuotationMacro(val c: whitebox.Context) {
   private def liftPrimitiveTerm(term: LambdaTerm): Lifted = term match {
     case LambdaVar(DottedHole(_)) =>
       c.abort(c.enclosingPosition, "Illegal usage of ..!")
+
     case LambdaVar(Hole(hole)) =>
       replaceHole(hole, dotted = false) match {
         case Left(x) => x
         case Right((x, _)) => x
       }
+
     case LambdaVar(name) =>
       Lifted(q"_root_.me.rexim.morganey.ast.LambdaVar($name)")
+
+    // generate special code for detecting int lists (also strings)
+    case morganeyIntList(xs) if isUnapply =>
+      val const = TermName(c.freshName("const"))
+      val preamble =
+        q"""
+          val $const =
+            new _root_.me.rexim.morganey.meta.UnapplyConst[_root_.scala.collection.immutable.List[Int]]($xs)
+        """
+      Lifted(pq"$const()").define(preamble)
+
+    // generate special code for detecting big constant numbers and characters
+    case morganeyNumber(n) if isUnapply && n > bigNumberThreshold =>
+      val const = TermName(c.freshName("const"))
+      val preamble =
+        q"""
+          val $const = new _root_.me.rexim.morganey.meta.UnapplyConst[Int]($n)
+        """
+      Lifted(pq"$const()").define(preamble)
+
     case LambdaFunc(param, body) =>
       liftPrimitiveTerm(param).wrap2(liftComplexTerm(body)) {
         case (paramTree, bodyTree) => q"_root_.me.rexim.morganey.ast.LambdaFunc($paramTree, $bodyTree)"
       }
+
     case LambdaApp(left, right) =>
       liftComplexTerm(left).wrap2(liftComplexTerm(right)) {
         case (leftTree, rightTree) => q"_root_.me.rexim.morganey.ast.LambdaApp($leftTree, $rightTree)"
