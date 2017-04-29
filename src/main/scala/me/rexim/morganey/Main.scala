@@ -46,6 +46,9 @@ object Main extends SignalHandler {
     }
   }
 
+  // TODO(cadb1fd3-f2ae-452d-81c7-7d027c0cfe85): Use prelude module injection mechanism for REPL mode
+  //
+  // Inject prelude on initial REPL context and each module loading
   def startRepl(context: ReplContext) = {
     Signal.handle(new Signal("INT"), this)
 
