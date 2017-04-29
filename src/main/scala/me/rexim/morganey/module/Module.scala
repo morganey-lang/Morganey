@@ -8,7 +8,11 @@ import scala.util._
 
 import java.net.{URL, URLClassLoader}
 
-class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.getClassLoader) {
+class Module(
+  modulePath: ModulePath,
+  preludeModule: Option[Module] = None,
+  classLoader: ClassLoader = Module.getClass.getClassLoader
+) {
   def canonicalPath: String =
     modulePath.asCanonicalPath.path
 
@@ -61,6 +65,6 @@ class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.
 
   private[module] def dependencies: Try[Set[Module]] =
     nodes.map(_.collect {
-      case MorganeyLoading(Some(canonicalPath)) => new Module(CanonicalPath(canonicalPath), classLoader)
-    }.toSet)
+      case MorganeyLoading(Some(canonicalPath)) => new Module(CanonicalPath(canonicalPath), preludeModule, classLoader)
+    }.toSet | preludeModule.map(Set(_)).getOrElse(Set.empty))
 }
