@@ -12,12 +12,18 @@ class Module(modulePath: ModulePath, classLoader: ClassLoader = Module.getClass.
   def canonicalPath: String =
     modulePath.asCanonicalPath.path
 
-  def loadProgram(loadedModules: Set[String] = Set.empty): Try[List[MorganeyBinding]] =
+  /** Loads all of the bindings within the module graph component this module belongs to.
+    *
+    * @param loadedModules modules that should not be loaded, because
+    * they were already loaded at some point
+    * @return bindings within the module graph component this module belongs to
+    */
+  def load(loadedModules: Set[String] = Set.empty): Try[List[MorganeyBinding]] =
     if (!loadedModules.contains(canonicalPath)) {
       for {
         interalBindings <- bindings.map(_.toList)
         externalDependencies <- dependencies.map(_.toList)
-        externalBindings <- sequence(externalDependencies.map(_.loadProgram(loadedModules + canonicalPath))).map(_.flatten)
+        externalBindings <- sequence(externalDependencies.map(_.load(loadedModules + canonicalPath))).map(_.flatten)
       } yield interalBindings ++ externalBindings
     } else {
       Success(Nil)

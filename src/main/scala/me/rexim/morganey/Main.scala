@@ -90,7 +90,7 @@ object Main extends SignalHandler {
     import me.rexim.morganey.reduction.NormalOrder._
 
     val result = new Module(ResourcePath(programFile))
-      .loadProgram()
+      .load()
       .flatMap(compileProgram(() => Source.stdin.toStream))
       .map(_.norReduce())
 

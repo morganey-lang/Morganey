@@ -65,7 +65,7 @@ class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
     val classLoader = mockClassLoaderResource(resourcePath, "def c := c")
 
     new Module(ResourcePath(resourcePath), classLoader)
-      .loadProgram(Set(ResourcePath(resourcePath).asCanonicalPath.path)) should be (Success(Nil))
+      .load(Set(ResourcePath(resourcePath).asCanonicalPath.path)) should be (Success(Nil))
   }
 
   it should "return class path URLs if the provided class loader is URLClassLoader" in {
