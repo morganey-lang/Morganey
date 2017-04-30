@@ -66,5 +66,7 @@ class Module(
   private[module] def dependencies: Try[Set[Module]] =
     nodes.map(_.collect {
       case MorganeyLoading(Some(canonicalPath)) => new Module(CanonicalPath(canonicalPath), preludeModule, classLoader)
-    }.toSet | preludeModule.map(Set(_)).getOrElse(Set.empty))
+    }.toSet | extraDependencies)
+
+  private lazy val extraDependencies = preludeModule.map(Set(_)).getOrElse(Set.empty)
 }
