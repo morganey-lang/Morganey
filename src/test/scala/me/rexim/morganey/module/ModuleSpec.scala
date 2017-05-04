@@ -25,7 +25,7 @@ class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
 
     val classLoader: ClassLoader = mockClassLoaderResource(resourcePath, moduleContent)
 
-    new Module(ResourcePath(resourcePath), classLoader).bindings should
+    new Module(ResourcePath(resourcePath), None, classLoader).bindings should
       be (Success(Set(
         MorganeyBinding(LambdaVar("a"), LambdaVar("a")),
         MorganeyBinding(LambdaVar("b"), LambdaVar("b"))
@@ -37,11 +37,20 @@ class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
                            |load bar.baz
                            |def c := c""".stripMargin
     val resourcePath = "a/b/c.mgn"
-
     val classLoader = mockClassLoaderResource(resourcePath, moduleContent)
 
-    new Module(ResourcePath(resourcePath), classLoader).dependencies.map(_.map(_.canonicalPath)) should
+    // TODO(ece83383-d5d4-490f-a5b8-7f566206685f): Fix classLoader mock bun in ModuleSpec
+    //
+    // - Replace `mockClassLoaderResource(resourcePath, moduleContent)` -> `classLoader`
+    // - Run the unit tests
+    //
+    // The unit tests should not fail
+    new Module(ResourcePath(resourcePath), None, mockClassLoaderResource(resourcePath, moduleContent)).dependencies.map(_.map(_.canonicalPath)) should
       be (Success(Set("foo", "bar.baz")))
+
+    val preludeModule = new Module(CanonicalPath("std.prelude"), None, classLoader)
+    new Module(ResourcePath(resourcePath), Some(preludeModule), classLoader).dependencies.map(_.map(_.canonicalPath)) should
+      be (Success(Set("foo", "bar.baz", "std.prelude")))
   }
 
   it should "should print list of class path URLs on ModuleNotFound error" in {
@@ -52,7 +61,7 @@ class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
     val urlClassLoader = mock[URLClassLoader]
     when(urlClassLoader.getURLs()).thenReturn(urls)
 
-    new Module(ResourcePath("a/b/c.mgn"), urlClassLoader).nodes match {
+    new Module(ResourcePath("a/b/c.mgn"), None, urlClassLoader).nodes match {
       case Failure(e) => assert(urls.forall { url =>
         e.getMessage.containsSlice(url.toString)
       }, "Not all classpaths are presented in the ModuleNotFound error message")
@@ -64,8 +73,8 @@ class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
     val resourcePath = "a/b/c.mgn"
     val classLoader = mockClassLoaderResource(resourcePath, "def c := c")
 
-    new Module(ResourcePath(resourcePath), classLoader)
-      .loadProgram(Set(ResourcePath(resourcePath).asCanonicalPath.path)) should be (Success(Nil))
+    new Module(ResourcePath(resourcePath), None, classLoader)
+      .load(Set(ResourcePath(resourcePath).asCanonicalPath.path)) should be (Success(Nil))
   }
 
   it should "return class path URLs if the provided class loader is URLClassLoader" in {
@@ -76,13 +85,13 @@ class ModuleSpec extends FlatSpec with Matchers with ClassLoaderMocking {
     val urlClassLoader = mock[URLClassLoader]
     when(urlClassLoader.getURLs()).thenReturn(urls)
 
-    val module = new Module(CanonicalPath("foo.bar"), urlClassLoader)
+    val module = new Module(CanonicalPath("foo.bar"), None, urlClassLoader)
     module.classPathUrls should be (urls)
   }
 
   it should "return empty list of URLs if the provided class loader is NOT URLClassLoader" in {
     val classLoader = mock[ClassLoader]
-    val module = new Module(CanonicalPath("foo.bar"), classLoader)
+    val module = new Module(CanonicalPath("foo.bar"), None, classLoader)
     module.classPathUrls should be (Seq())
   }
 }

@@ -46,6 +46,9 @@ object Main extends SignalHandler {
     }
   }
 
+  // TODO(cadb1fd3-f2ae-452d-81c7-7d027c0cfe85): Use prelude module injection mechanism for REPL mode
+  //
+  // Inject prelude on initial REPL context and each module loading
   def startRepl(context: ReplContext) = {
     Signal.handle(new Signal("INT"), this)
 
@@ -83,14 +86,13 @@ object Main extends SignalHandler {
   }
 
   def executeProgram(programFile: String) = {
-    // TODO(d60b7de5-11f1-4d98-a30e-3d1baa0aae3e): Implement prelude
-    // mechanism for execution mode
-
     import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
 
-    val result = new Module(ResourcePath(programFile))
-      .loadProgram()
+    val preludeModule = Some(new Module(CanonicalPath("std.prelude")))
+
+    val result = new Module(ResourcePath(programFile), preludeModule)
+      .load()
       .flatMap(compileProgram(() => Source.stdin.toStream))
       .map(_.norReduce())
 
