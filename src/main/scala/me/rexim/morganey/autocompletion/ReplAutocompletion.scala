@@ -13,8 +13,6 @@ import extractors._
 
 object ReplAutocompletion {
 
-  // TODO(#257): use classpath modules in ReplAutocompletion
-
   def complete(buffer: String, context: ReplContext): List[String] =
     complete(buffer, buffer.length, context, new ModuleIndex())
 
