@@ -1,6 +1,13 @@
 package me.rexim.morganey.interpreter
 
 import me.rexim.morganey.ast._
+import me.rexim.morganey.module._
+import scala.util._
+
+object ReplContext {
+  def fromModule(module: Module): Try[ReplContext] =
+    module.load().map(ReplContext(_))
+}
 
 case class ReplContext(bindings: List[MorganeyBinding] = Nil) {
   def addBinding(binding: MorganeyBinding): ReplContext = {
