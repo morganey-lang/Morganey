@@ -11,6 +11,9 @@ import me.rexim.morganey.syntax.Language.identifier
 
 import extractors._
 
+// TODO(c9d997f9-cd7c-4ade-830f-23c36d2d5dfc): make ReplAutocompletion a class
+//
+// Pass ModuleIndex as a constructor argument to that class
 object ReplAutocompletion {
 
   def complete(buffer: String, context: ReplContext): List[String] =
