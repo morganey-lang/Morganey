@@ -46,12 +46,11 @@ object Main extends SignalHandler {
     }
   }
 
-  def startRepl() = {
+  def startRepl(preludeModule: Module) = {
     Signal.handle(new Signal("INT"), this)
 
     windowsRedirectedInputHack()
 
-    val preludeModule = new Module(CanonicalPath("std.prelude"))
     val con = new ConsoleReader()
     var globalContext =
       ReplContext.fromModule(preludeModule) match {
@@ -81,13 +80,11 @@ object Main extends SignalHandler {
     }
   }
 
-  def executeProgram(programFile: String) = {
+  def executeProgram(programFile: String, preludeModule: Module) = {
     import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
 
-    val preludeModule = Some(new Module(CanonicalPath("std.prelude")))
-
-    val result = new Module(ResourcePath(programFile), preludeModule)
+    val result = new Module(ResourcePath(programFile), Some(preludeModule))
       .load()
       .flatMap(compileProgram(() => Source.stdin.toStream))
       .map(_.norReduce())
@@ -99,9 +96,11 @@ object Main extends SignalHandler {
   }
 
   def main(args: Array[String]) = {
+    val preludeModule = new Module(CanonicalPath("std.prelude"))
+
     args.toList match {
-      case Nil => startRepl()
-      case programFile :: _ => executeProgram(programFile)
+      case Nil => startRepl(preludeModule)
+      case programFile :: _ => executeProgram(programFile, preludeModule)
     }
   }
 
