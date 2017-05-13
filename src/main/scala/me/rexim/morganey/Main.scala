@@ -46,31 +46,27 @@ object Main extends SignalHandler {
     }
   }
 
-  // TODO(cadb1fd3-f2ae-452d-81c7-7d027c0cfe85): Use prelude module injection mechanism for REPL mode
-  //
-  // Inject prelude on initial REPL context and each module loading
-  def startRepl(context: ReplContext) = {
+  def startRepl() = {
     Signal.handle(new Signal("INT"), this)
 
     windowsRedirectedInputHack()
 
-    var globalContext = context
-
-    val running = true
+    val preludeModule = new Module(CanonicalPath("std.prelude"))
     val con = new ConsoleReader()
+    var globalContext =
+      ReplContext.fromModule(preludeModule) match {
+        case Success(context) => context
+        case Failure(e) =>
+          con.println(e.getMessage)
+          ReplContext()
+      }
+
     con.setPrompt("λ> ")
     con.addCompleter(new TerminalReplAutocompletion(() => globalContext, new ModuleIndex))
 
     def line() = Option(con.readLine()).map(_.trim)
 
-    // TODO(b6a7635e-46f3-412e-848b-f770d9d4e709): try to get rid of duplicate code
-    awaitComputationResult(MorganeyRepl.evalLine(context, "load std.prelude")) match {
-      case Success(ReplResult(newContext, _)) =>
-        globalContext = newContext
-      case Failure(e) =>
-        con.println(e.getMessage)
-    }
-
+    val running = true
     while (running) line() match {
       case None                => exitRepl() // eof
       case Some(line)          =>
@@ -103,11 +99,8 @@ object Main extends SignalHandler {
   }
 
   def main(args: Array[String]) = {
-    val context =
-      ReplContext(List[MorganeyBinding]())
-
     args.toList match {
-      case Nil => startRepl(context)
+      case Nil => startRepl()
       case programFile :: _ => executeProgram(programFile)
     }
   }
