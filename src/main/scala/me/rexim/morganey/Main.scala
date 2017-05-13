@@ -38,9 +38,9 @@ object Main extends SignalHandler {
     System.exit(0)
   }
 
-  private class TerminalReplAutocompletion(context: () => ReplContext) extends Completer {
+  private class TerminalReplAutocompletion(context: () => ReplContext, moduleIndex: ModuleIndex) extends Completer {
     override def complete(buffer: String, cursor: Int, candidates: java.util.List[CharSequence]): Int = {
-      val suggestions = ReplAutocompletion.complete(buffer, cursor, context())
+      val suggestions = ReplAutocompletion.complete(buffer, cursor, context(), moduleIndex)
       for (elem <- suggestions) candidates.add(elem)
       if (candidates.isEmpty) -1 else 0
     }
@@ -59,7 +59,7 @@ object Main extends SignalHandler {
     val running = true
     val con = new ConsoleReader()
     con.setPrompt("λ> ")
-    con.addCompleter(new TerminalReplAutocompletion(() => globalContext))
+    con.addCompleter(new TerminalReplAutocompletion(() => globalContext, new ModuleIndex))
 
     def line() = Option(con.readLine()).map(_.trim)
 
@@ -104,7 +104,7 @@ object Main extends SignalHandler {
 
   def main(args: Array[String]) = {
     val context =
-      ReplContext(List[MorganeyBinding](), new ModuleIndex())
+      ReplContext(List[MorganeyBinding]())
 
     args.toList match {
       case Nil => startRepl(context)

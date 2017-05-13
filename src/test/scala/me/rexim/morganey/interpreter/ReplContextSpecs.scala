@@ -10,13 +10,13 @@ import org.scalatest._
 class ReplContextSpecs extends FlatSpec with Matchers with TestTerms {
   "REPL context" should "allow add bindings to it" in {
     val binding = MorganeyBinding(x, I(x))
-    val context = ReplContext(List(), new ModuleIndex()).addBinding(binding)
+    val context = ReplContext().addBinding(binding)
     context.bindings should be (List(binding))
   }
 
   "REPL context" should "clear bindings on reset command" in {
     val bindings = List(MorganeyBinding(m"x", m"\\x.x"))
-    val context = ReplContext(bindings, new ModuleIndex())
+    val context = ReplContext(bindings)
     context.clear().bindings.isEmpty should be (true)
   }
 
@@ -27,10 +27,10 @@ class ReplContextSpecs extends FlatSpec with Matchers with TestTerms {
     val three = MorganeyBinding(m"three", m"3")
 
     val knownBindings = List(zero, one, two, three)
-    val context = ReplContext(knownBindings, new ModuleIndex())
+    val context = ReplContext(knownBindings)
 
     val (satisfyCtx, notSatisfy) = context.removeBindings(_.variable.name endsWith "o")
-    val ReplContext(satisfy, _) = satisfyCtx
+    val ReplContext(satisfy) = satisfyCtx
     satisfy    should be (List(zero, two))
     notSatisfy should be (List(one, three))
   }

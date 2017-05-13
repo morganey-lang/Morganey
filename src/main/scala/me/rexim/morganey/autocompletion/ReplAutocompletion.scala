@@ -16,9 +16,9 @@ object ReplAutocompletion {
   // TODO(#257): use classpath modules in ReplAutocompletion
 
   def complete(buffer: String, context: ReplContext): List[String] =
-    complete(buffer, buffer.length, context)
+    complete(buffer, buffer.length, context, new ModuleIndex())
 
-  def complete(buffer: String, cursor: Int, context: ReplContext): List[String] = {
+  def complete(buffer: String, cursor: Int, context: ReplContext, moduleIndex: ModuleIndex): List[String] = {
     val knownVariableNames = context.bindings.map(_.variable.name)
     val (beforeCursor, _) = buffer splitAt cursor
     lazy val definitions = matchingDefinitions(beforeCursor, knownVariableNames)
@@ -36,7 +36,7 @@ object ReplAutocompletion {
           .map(name => s":$name")
       // if a load statement was typed in (potential partially)
       case LoadStatement(parts, endsWithDot) =>
-        val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot, context)
+        val autocompletedModules = autocompleteLoadStatement(parts, endsWithDot, context, moduleIndex)
         autocompletedModules map (m => s"load $m")
       // if there are no names, REPL can't autocomplete
       case _ if knownVariableNames.isEmpty   => Nil
@@ -50,9 +50,9 @@ object ReplAutocompletion {
     }
   }
 
-  private[autocompletion] def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean, context: ReplContext): List[String] = {
+  private[autocompletion] def autocompleteLoadStatement(parts: List[String], endsWithDot: Boolean, context: ReplContext, moduleIndex: ModuleIndex): List[String] = {
     val moduleName = s"${parts.mkString(".")}${if (endsWithDot) "." else ""}"
-    val knownModuleNames = context.moduleIndex.modules.map(_.canonicalPath)
+    val knownModuleNames = moduleIndex.modules.map(_.canonicalPath)
     knownModuleNames.filter(_ startsWith moduleName)
   }
 
