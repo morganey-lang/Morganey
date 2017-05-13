@@ -46,19 +46,21 @@ object Main extends SignalHandler {
     }
   }
 
-  def startRepl(preludeModule: Module) = {
+  def startRepl(preludeModule: Option[Module]) = {
     Signal.handle(new Signal("INT"), this)
 
     windowsRedirectedInputHack()
 
     val con = new ConsoleReader()
+
     var globalContext =
-      ReplContext.fromModule(preludeModule) match {
+      preludeModule.map(ReplContext.fromModule).getOrElse(Success(ReplContext())) match {
         case Success(context) => context
         case Failure(e) =>
           con.println(e.getMessage)
           ReplContext()
       }
+    val repl = new MorganeyRepl(preludeModule)
 
     con.setPrompt("λ> ")
     con.addCompleter(new TerminalReplAutocompletion(() => globalContext, new ModuleIndex))
@@ -69,7 +71,7 @@ object Main extends SignalHandler {
     while (running) line() match {
       case None                => exitRepl() // eof
       case Some(line)          =>
-        val computation = MorganeyRepl.evalLine(globalContext, line)
+        val computation = repl.evalLine(globalContext, line)
         awaitComputationResult(computation) match {
           case Success(ReplResult(newContext, message)) =>
             globalContext = newContext
@@ -80,11 +82,11 @@ object Main extends SignalHandler {
     }
   }
 
-  def executeProgram(programFile: String, preludeModule: Module) = {
+  def executeProgram(programFile: String, preludeModule: Option[Module]) = {
     import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
 
-    val result = new Module(ResourcePath(programFile), Some(preludeModule))
+    val result = new Module(ResourcePath(programFile), preludeModule)
       .load()
       .flatMap(compileProgram(() => Source.stdin.toStream))
       .map(_.norReduce())
@@ -96,7 +98,7 @@ object Main extends SignalHandler {
   }
 
   def main(args: Array[String]) = {
-    val preludeModule = new Module(CanonicalPath("std.prelude"))
+    val preludeModule = Some(new Module(CanonicalPath("std.prelude")))
 
     args.toList match {
       case Nil => startRepl(preludeModule)

@@ -11,7 +11,7 @@ import me.rexim.morganey.module._
 
 import scala.util.{Failure, Success}
 
-object MorganeyRepl {
+class MorganeyRepl(preludeModule: Option[Module]) {
 
   def evalLine(context: ReplContext, line: String): Computation[ReplResult[String]] =
     line.trim match {
@@ -35,7 +35,7 @@ object MorganeyRepl {
   def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
     node match {
       case MorganeyLoading(Some(modulePath)) => {
-        new Module(CanonicalPath(modulePath)).load() match {
+        new Module(CanonicalPath(modulePath), preludeModule).load() match {
           case Success(bindings) => Computation(ReplResult(context.addBindings(bindings), None))
           case Failure(e) => Computation.failed(e)
         }
