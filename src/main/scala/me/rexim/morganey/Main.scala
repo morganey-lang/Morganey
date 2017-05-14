@@ -38,6 +38,7 @@ object Main extends SignalHandler {
     System.exit(0)
   }
 
+  // TODO(c5758357-67d6-4ca9-9325-9bd6d6b3556c): Move TerminalReplAutocompletion to me.rexim.morganey.autocompletion package
   private class TerminalReplAutocompletion(context: () => ReplContext, moduleIndex: ModuleIndex) extends Completer {
     override def complete(buffer: String, cursor: Int, candidates: java.util.List[CharSequence]): Int = {
       val suggestions = ReplAutocompletion.complete(buffer, cursor, context(), moduleIndex)
@@ -53,6 +54,7 @@ object Main extends SignalHandler {
 
     val con = new ConsoleReader()
 
+    // TODO(616c876e-29c3-4119-b472-c922dc917b13): make global REPL context a part of MorganeyRepl
     var globalContext =
       preludeModule.map(ReplContext.fromModule).getOrElse(Success(ReplContext())) match {
         case Success(context) => context
