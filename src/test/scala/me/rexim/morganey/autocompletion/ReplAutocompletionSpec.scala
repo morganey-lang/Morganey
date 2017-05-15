@@ -66,12 +66,9 @@ class ReplAutocompletionSpec extends FlatSpec with Matchers with MockitoSugar {
       "a/b.mgn"
     ).map(path => new Module(ResourcePath(path))))
 
-    val context = ReplContext(
-      bindings = Nil,
-      moduleIndex = moduleIndexMock
-    )
+    val context = ReplContext()
 
-    ReplAutocompletion.autocompleteLoadStatement(Nil, false, context).sorted should be (List("foo", "bar", "a.b").sorted)
-    ReplAutocompletion.autocompleteLoadStatement(List("a"), true, context).sorted should be (List("a.b"))
+    ReplAutocompletion.autocompleteLoadStatement(Nil, false, context, moduleIndexMock).sorted should be (List("foo", "bar", "a.b").sorted)
+    ReplAutocompletion.autocompleteLoadStatement(List("a"), true, context, moduleIndexMock).sorted should be (List("a.b"))
   }
 }

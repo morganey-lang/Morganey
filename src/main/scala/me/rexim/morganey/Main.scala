@@ -38,43 +38,42 @@ object Main extends SignalHandler {
     System.exit(0)
   }
 
-  private class TerminalReplAutocompletion(context: () => ReplContext) extends Completer {
+  // TODO(c5758357-67d6-4ca9-9325-9bd6d6b3556c): Move TerminalReplAutocompletion to me.rexim.morganey.autocompletion package
+  private class TerminalReplAutocompletion(context: () => ReplContext, moduleIndex: ModuleIndex) extends Completer {
     override def complete(buffer: String, cursor: Int, candidates: java.util.List[CharSequence]): Int = {
-      val suggestions = ReplAutocompletion.complete(buffer, cursor, context())
+      val suggestions = ReplAutocompletion.complete(buffer, cursor, context(), moduleIndex)
       for (elem <- suggestions) candidates.add(elem)
       if (candidates.isEmpty) -1 else 0
     }
   }
 
-  // TODO(cadb1fd3-f2ae-452d-81c7-7d027c0cfe85): Use prelude module injection mechanism for REPL mode
-  //
-  // Inject prelude on initial REPL context and each module loading
-  def startRepl(context: ReplContext) = {
+  def startRepl(preludeModule: Option[Module]) = {
     Signal.handle(new Signal("INT"), this)
 
     windowsRedirectedInputHack()
 
-    var globalContext = context
-
-    val running = true
     val con = new ConsoleReader()
+
+    // TODO(616c876e-29c3-4119-b472-c922dc917b13): make global REPL context a part of MorganeyRepl
+    var globalContext =
+      preludeModule.map(ReplContext.fromModule).getOrElse(Success(ReplContext())) match {
+        case Success(context) => context
+        case Failure(e) =>
+          con.println(e.getMessage)
+          ReplContext()
+      }
+    val repl = new MorganeyRepl(preludeModule)
+
     con.setPrompt("λ> ")
-    con.addCompleter(new TerminalReplAutocompletion(() => globalContext))
+    con.addCompleter(new TerminalReplAutocompletion(() => globalContext, new ModuleIndex))
 
     def line() = Option(con.readLine()).map(_.trim)
 
-    // TODO(b6a7635e-46f3-412e-848b-f770d9d4e709): try to get rid of duplicate code
-    awaitComputationResult(MorganeyRepl.evalLine(context, "load std.prelude")) match {
-      case Success(ReplResult(newContext, _)) =>
-        globalContext = newContext
-      case Failure(e) =>
-        con.println(e.getMessage)
-    }
-
+    val running = true
     while (running) line() match {
       case None                => exitRepl() // eof
       case Some(line)          =>
-        val computation = MorganeyRepl.evalLine(globalContext, line)
+        val computation = repl.evalLine(globalContext, line)
         awaitComputationResult(computation) match {
           case Success(ReplResult(newContext, message)) =>
             globalContext = newContext
@@ -85,11 +84,9 @@ object Main extends SignalHandler {
     }
   }
 
-  def executeProgram(programFile: String) = {
+  def executeProgram(programFile: String, preludeModule: Option[Module]) = {
     import MorganeyCompiler._
     import me.rexim.morganey.reduction.NormalOrder._
-
-    val preludeModule = Some(new Module(CanonicalPath("std.prelude")))
 
     val result = new Module(ResourcePath(programFile), preludeModule)
       .load()
@@ -103,12 +100,11 @@ object Main extends SignalHandler {
   }
 
   def main(args: Array[String]) = {
-    val context =
-      ReplContext(List[MorganeyBinding](), new ModuleIndex())
+    val preludeModule = Some(new Module(CanonicalPath("std.prelude")))
 
     args.toList match {
-      case Nil => startRepl(context)
-      case programFile :: _ => executeProgram(programFile)
+      case Nil => startRepl(preludeModule)
+      case programFile :: _ => executeProgram(programFile, preludeModule)
     }
   }
 

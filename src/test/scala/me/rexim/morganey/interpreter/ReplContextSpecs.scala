@@ -1,22 +1,30 @@
 package me.rexim.morganey.interpreter
 
 import me.rexim.morganey.ast._
-import me.rexim.morganey.module.ModuleIndex
+import me.rexim.morganey.module._
 import me.rexim.morganey.helpers.TestTerms
 import me.rexim.morganey.meta._
 
 import org.scalatest._
+import org.scalatest.mockito.MockitoSugar
 
-class ReplContextSpecs extends FlatSpec with Matchers with TestTerms {
-  "REPL context" should "allow add bindings to it" in {
+import org.mockito.Mockito._
+import org.mockito.Matchers._
+
+import scala.util._
+
+class ReplContextSpecs extends FlatSpec with Matchers with TestTerms with MockitoSugar {
+  behavior of "REPL context"
+
+  it should "allow add bindings to it" in {
     val binding = MorganeyBinding(x, I(x))
-    val context = ReplContext(List(), new ModuleIndex()).addBinding(binding)
+    val context = ReplContext().addBinding(binding)
     context.bindings should be (List(binding))
   }
 
-  "REPL context" should "clear bindings on reset command" in {
+  it should "clear bindings on reset command" in {
     val bindings = List(MorganeyBinding(m"x", m"\\x.x"))
-    val context = ReplContext(bindings, new ModuleIndex())
+    val context = ReplContext(bindings)
     context.clear().bindings.isEmpty should be (true)
   }
 
@@ -27,11 +35,27 @@ class ReplContextSpecs extends FlatSpec with Matchers with TestTerms {
     val three = MorganeyBinding(m"three", m"3")
 
     val knownBindings = List(zero, one, two, three)
-    val context = ReplContext(knownBindings, new ModuleIndex())
+    val context = ReplContext(knownBindings)
 
     val (satisfyCtx, notSatisfy) = context.removeBindings(_.variable.name endsWith "o")
-    val ReplContext(satisfy, _) = satisfyCtx
+    val ReplContext(satisfy) = satisfyCtx
     satisfy    should be (List(zero, two))
     notSatisfy should be (List(one, three))
+  }
+
+  it should "be constructed from a module" in {
+    val successModule = mock[Module]
+    val failureModule = mock[Module]
+    val bindings = List(
+      MorganeyBinding(LambdaVar("a"), LambdaVar("a")),
+      MorganeyBinding(LambdaVar("a"), LambdaVar("a"))
+    )
+    val failure = Failure(new IllegalArgumentException("blah"))
+
+    when(successModule.load()).thenReturn(Success(bindings))
+    when(failureModule.load()).thenReturn(failure)
+
+    ReplContext.fromModule(successModule) should be (Success(ReplContext(bindings)))
+    ReplContext.fromModule(failureModule) should be (failure)
   }
 }

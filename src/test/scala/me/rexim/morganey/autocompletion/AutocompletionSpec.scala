@@ -35,8 +35,8 @@ class AutocompletionSpec extends FlatSpec with Matchers with TestTerms with Mock
                            moduleIndex: ModuleIndex = mockModuleIndex): Set[String] = {
     val id = I(lvar("x"))
     val fakeBindings = knownNames.map(name => MorganeyBinding(lvar(name), id))
-    val context = ReplContext(fakeBindings, moduleIndex)
-    ReplAutocompletion.complete(line, cursor, context).toSet
+    val context = ReplContext(fakeBindings)
+    ReplAutocompletion.complete(line, cursor, context, moduleIndex).toSet
   }
 
   "The repl" should "not autocomplete, if no bindings are known" in {
