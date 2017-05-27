@@ -1,5 +1,3 @@
-load std.prelude
-
 def stringAsNumber := \xs.
   (Y (\rec.xs. (isnil xs)
                0

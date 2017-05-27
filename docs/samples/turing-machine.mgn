@@ -1,5 +1,3 @@
-load std.prelude
-
 /**
  * Format of the Turing Machine:
  * [tape, head, state, program]
