@@ -11,12 +11,11 @@ object ReplContext {
 
 case class ReplContext(bindings: List[MorganeyBinding] = Nil) {
   def addBinding(binding: MorganeyBinding): ReplContext = {
-    // TODO(#198): Binding redefinition mechanism for REPL context
-    ReplContext(binding :: bindings)
+    ReplContext(binding :: bindings.filter(_.variable != binding.variable))
   }
 
   def addBindings(newBindings: List[MorganeyBinding]): ReplContext =
-    ReplContext(bindings ++ newBindings)
+    newBindings.foldLeft(this)(_.addBinding(_))
 
   def clear(): ReplContext = ReplContext(List())
 

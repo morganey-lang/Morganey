@@ -22,6 +22,18 @@ class ReplContextSpecs extends FlatSpec with Matchers with TestTerms with Mockit
     context.bindings should be (List(binding))
   }
 
+  it should "keep the last unique binding" in {
+    def binding(v1: LambdaVar, v2: LambdaVar): MorganeyBinding =
+      MorganeyBinding(v1, I(v2))
+
+    val context = ReplContext(List(binding(z, z)))
+
+    context.addBinding(binding(x, x)).bindings should be (List(binding(x, x), binding(z, z)))
+    context.addBinding(binding(x, x)).addBinding(binding(x, y)).bindings should be (List(binding(x, y), binding(z, z)))
+    context.addBindings(List(binding(x, x), binding(x, y), binding(x, z))).bindings should
+      be (List(binding(x, z), binding(z, z)))
+  }
+
   it should "clear bindings on reset command" in {
     val bindings = List(MorganeyBinding(m"x", m"\\x.x"))
     val context = ReplContext(bindings)

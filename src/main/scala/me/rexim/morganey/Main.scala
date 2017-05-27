@@ -78,6 +78,7 @@ object Main extends SignalHandler {
           case Success(ReplResult(newContext, message)) =>
             globalContext = newContext
             message.foreach(con.println)
+            con.println(newContext.bindings.map(_.variable.name).toString)
           case Failure(e)                               =>
             con.println(e.getMessage)
         }
