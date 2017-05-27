@@ -9,3 +9,5 @@ def compose := \f.g.x. f (g x)
 /* Applies `f` `n` times to `x`
  */
 def applyN := \f.n.x. foldl (\acc.ele. ele acc) x (replicate n f)
+
+def Y := \f. (\x. f (x x)) (\x. f (x x))

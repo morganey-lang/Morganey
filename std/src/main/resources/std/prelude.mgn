@@ -1,4 +1,3 @@
-load std.common
 load std.functions
 load std.math.arithmetic
 load std.list
