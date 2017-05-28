@@ -10,7 +10,7 @@ object ReplContext {
 }
 
 case class ReplContext(bindings: List[MorganeyBinding] = Nil) {
-  // TODO: Improve time asymptotic of add binding to REPL context
+  // TODO(#360): Improve time asymptotic of add binding to REPL context
   //
   // Right now it's O(N), but it can be imporved
   def addBinding(binding: MorganeyBinding): ReplContext = {
