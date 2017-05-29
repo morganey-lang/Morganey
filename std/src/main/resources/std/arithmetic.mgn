@@ -14,4 +14,3 @@ def minus := \m.n. n pred m
 
 def mult := \m.n.f. m (n f)
 
-def iszero := \n.n (\x.a.b.b) (\a.b.a)

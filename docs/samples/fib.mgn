@@ -1,7 +1,3 @@
-// TODO(95e7de5b-e804-4b78-966a-268a0463ba01): update samples with
-// respect to autoloading of std.prelude module
-load std.prelude
-
 def main := Y (\fib.n.a.b.
   (iszero n)
   0

@@ -1,3 +1,1 @@
-load std.prelude
-
 def main := reverse input

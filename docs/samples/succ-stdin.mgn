@@ -1,5 +1,3 @@
-load std.prelude
-
 def main := Y (\map.xs.
   (isnil xs)
   0
