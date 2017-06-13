@@ -10,13 +10,15 @@ object ReplContext {
 }
 
 case class ReplContext(bindings: List[MorganeyBinding] = Nil) {
+  // TODO(#360): Improve time asymptotic of the add binding to REPL context operation
+  //
+  // Right now it's O(N), but it can be improved
   def addBinding(binding: MorganeyBinding): ReplContext = {
-    // TODO(#198): Binding redefinition mechanism for REPL context
-    ReplContext(binding :: bindings)
+    ReplContext(binding :: bindings.filter(_.variable != binding.variable))
   }
 
   def addBindings(newBindings: List[MorganeyBinding]): ReplContext =
-    ReplContext(bindings ++ newBindings)
+    newBindings.foldLeft(this)(_.addBinding(_))
 
   def clear(): ReplContext = ReplContext(List())
 
