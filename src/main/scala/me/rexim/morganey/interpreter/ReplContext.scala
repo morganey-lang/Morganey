@@ -23,8 +23,6 @@ case class ReplContext(bindings: List[MorganeyBinding] = Nil) {
   def addBindings(newBindings: List[MorganeyBinding]): ReplContext =
     newBindings.foldLeft(this)(_.addBinding(_))
 
-  def clear(): ReplContext = ReplContext(List())
-
   def removeBindings(predicate: MorganeyBinding => Boolean): (ReplContext, List[MorganeyBinding])= {
     val (satisfyF, notSatisfyF) = bindings.partition(predicate)
     (ReplContext(satisfyF), notSatisfyF)

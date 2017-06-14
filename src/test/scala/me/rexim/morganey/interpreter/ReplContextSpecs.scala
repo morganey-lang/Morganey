@@ -43,12 +43,6 @@ class ReplContextSpecs extends FlatSpec with Matchers with TestTerms with Mockit
       be (List(binding(x, z), binding(z, z)))
   }
 
-  it should "clear bindings on reset command" in {
-    val bindings = List(MorganeyBinding(m"x", m"\\x.x"))
-    val context = ReplContext(bindings)
-    context.clear().bindings.isEmpty should be (true)
-  }
-
   it should "partition all known bindings" in {
     val zero  = MorganeyBinding(m"zero",  m"0")
     val one   = MorganeyBinding(m"one",   m"1")
