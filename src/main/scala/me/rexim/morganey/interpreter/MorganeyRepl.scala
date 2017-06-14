@@ -39,8 +39,7 @@ class MorganeyRepl(preludeModule: Option[Module]) {
           if (!context.contains(binding)) {
             None
           } else {
-            // TODO: don't make assumptions about bindings structure
-            Some(s"${binding.variable.name} was redefined")
+            Some(s"${binding.variable} was redefined")
           }
         ))
       }
