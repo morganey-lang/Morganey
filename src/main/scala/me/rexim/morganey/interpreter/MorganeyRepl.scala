@@ -20,15 +20,27 @@ class MorganeyRepl(preludeModule: Option[Module]) {
       case input         => parseAndEval(context, line)
     }
 
+  // TODO: don't return any
   private def parseAndEval(context: ReplContext, line: String): Computation[ReplResult[String]] = {
     val parseResult = Computation(LambdaParser.parseAll(LambdaParser.replCommand, line).toTry)
 
-    val evaluation = parseResult flatMap {
-      case Success(node) => evalNode(context, node)
+    parseResult flatMap {
+      case Success(binding: MorganeyBinding) => {
+        Computation(ReplResult(
+          // TODO: don't make assumption that adding already existing
+          // binding redefines it
+          context.addBinding(binding),
+          if (!context.contains(binding)) {
+            None
+          } else {
+            // TODO: don't make assumptions about bindings structure
+            Some(s"${binding.variable.name} was redefined")
+          }
+        ))
+      }
+      case Success(node) => evalNode(context, node) map (_ map smartShowTerm)
       case Failure(e)    => Computation.failed(e)
     }
-
-    evaluation map (_ map smartShowTerm)
   }
 
   private def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
@@ -42,10 +54,6 @@ class MorganeyRepl(preludeModule: Option[Module]) {
 
       case MorganeyLoading(None) =>
         Computation.failed(new IllegalArgumentException("Module path was not specified!"))
-
-      case binding: MorganeyBinding => {
-        Computation(ReplResult(context.addBinding(binding), None))
-      }
 
       case term: LambdaTerm =>
         term.addBindings(context.bindings).right.map { t =>
