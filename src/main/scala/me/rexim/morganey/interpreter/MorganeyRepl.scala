@@ -35,8 +35,6 @@ class MorganeyRepl(preludeModule: Option[Module]) {
     parseResult flatMap {
       case Success(binding: MorganeyBinding) => {
         Computation(ReplResult(
-          // TODO: don't make assumption that adding already existing
-          // binding redefines it
           context.addBinding(binding),
           if (!context.contains(binding)) {
             None

@@ -16,10 +16,20 @@ case class ReplContext(bindings: List[MorganeyBinding] = Nil) {
   // TODO(#360): Improve time asymptotic of the add binding to REPL context operation
   //
   // Right now it's O(N), but it can be improved
+  /** Adds a binding to the context.
+    *
+    * If a binding for a given variable already exists in the context,
+    * the binding is replaced with the new one.
+    */
   def addBinding(binding: MorganeyBinding): ReplContext = {
     ReplContext(binding :: bindings.filter(_.variable != binding.variable))
   }
 
+  /** Adds several bindings to the context.
+    *
+    * If a binding for a given variable already exists in the context,
+    * the binding is replaced with the new one.
+    */
   def addBindings(newBindings: List[MorganeyBinding]): ReplContext =
     newBindings.foldLeft(this)(_.addBinding(_))
 
