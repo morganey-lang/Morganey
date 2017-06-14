@@ -20,7 +20,15 @@ class MorganeyRepl(preludeModule: Option[Module]) {
       case input         => parseAndEval(context, line)
     }
 
-  // TODO: don't return any
+  // TODO: Separate REPL side effects from ReplResult
+  //
+  // Right now ReplResult.result has two meanings:
+  // 1. Result of the term reduction
+  // 2. REPL message for the user
+  //
+  // We need to separate those meanings. The proposed idea is to
+  // attach some kind of side effect to ReplContext and use
+  // ReplResult.result ONLY for term reduction results.
   private def parseAndEval(context: ReplContext, line: String): Computation[ReplResult[String]] = {
     val parseResult = Computation(LambdaParser.parseAll(LambdaParser.replCommand, line).toTry)
 
