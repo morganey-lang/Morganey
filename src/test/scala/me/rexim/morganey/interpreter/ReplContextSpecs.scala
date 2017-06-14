@@ -16,6 +16,16 @@ import scala.util._
 class ReplContextSpecs extends FlatSpec with Matchers with TestTerms with MockitoSugar {
   behavior of "REPL context"
 
+  it should "answer if it contains a specific binding" in {
+    val context = ReplContext(List(
+      binding(x, x),
+      binding(y, y)
+    ))
+
+    context.contains(MorganeyBinding(y, x)) should be (true)
+    context.contains(MorganeyBinding(z, x)) should be (false)
+  }
+
   it should "allow add bindings to it" in {
     val binding = MorganeyBinding(x, I(x))
     val context = ReplContext().addBinding(binding)
@@ -23,9 +33,6 @@ class ReplContextSpecs extends FlatSpec with Matchers with TestTerms with Mockit
   }
 
   it should "keep the last unique binding" in {
-    def binding(v1: LambdaVar, v2: LambdaVar): MorganeyBinding =
-      MorganeyBinding(v1, I(v2))
-
     val context = ReplContext(List(binding(z, z)))
 
     context.addBinding(binding(x, x)).bindings should

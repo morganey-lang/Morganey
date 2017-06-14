@@ -23,7 +23,6 @@ class MorganeyRepl(preludeModule: Option[Module]) {
   private def parseAndEval(context: ReplContext, line: String): Computation[ReplResult[String]] = {
     val parseResult = Computation(LambdaParser.parseAll(LambdaParser.replCommand, line).toTry)
 
-    // TODO(#197): discriminate bindings from the rest of the nodes here and inform the user if the binding was redefined
     val evaluation = parseResult flatMap {
       case Success(node) => evalNode(context, node)
       case Failure(e)    => Computation.failed(e)
@@ -32,7 +31,7 @@ class MorganeyRepl(preludeModule: Option[Module]) {
     evaluation map (_ map smartShowTerm)
   }
 
-  def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
+  private def evalNode(context: ReplContext, node: MorganeyNode): Computation[ReplResult[LambdaTerm]] = {
     node match {
       case MorganeyLoading(Some(modulePath)) => {
         new Module(CanonicalPath(modulePath), preludeModule).load() match {
@@ -44,7 +43,6 @@ class MorganeyRepl(preludeModule: Option[Module]) {
       case MorganeyLoading(None) =>
         Computation.failed(new IllegalArgumentException("Module path was not specified!"))
 
-      // TODO(#197): separate bindings evaluation from MorganeyRepl.evalNode
       case binding: MorganeyBinding => {
         Computation(ReplResult(context.addBinding(binding), None))
       }

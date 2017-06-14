@@ -10,6 +10,9 @@ object ReplContext {
 }
 
 case class ReplContext(bindings: List[MorganeyBinding] = Nil) {
+  def contains(binding: MorganeyBinding): Boolean =
+    bindings.find(_.variable.name == binding.variable.name).isDefined
+
   // TODO(#360): Improve time asymptotic of the add binding to REPL context operation
   //
   // Right now it's O(N), but it can be improved
