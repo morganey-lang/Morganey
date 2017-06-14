@@ -32,6 +32,7 @@ object Commands {
   val commands: Map[String, Command] =
     Seq[Command](
       StringCommand("exit",   exitREPL),
+      StringCommand("quit",   exitREPL),
       StringCommand("raw",    rawPrintTerm),
       TermCommand  ("unbind", unbindBindings)
     )
